@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Enhancer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 1024px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background-color: #2563eb;
+            color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: #e5e7eb;
+            color: #1f2937;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .btn-secondary:hover {
+            background-color: #d1d5db;
+            transform: translateY(-2px);
+        }
+
+        .message-box {
+            background-color: #d1fae5;
+            color: #065f46;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .message-box.show {
+            opacity: 1;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Styles for the loading spinner */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #ffffff;
+            animation: spin 1s ease infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* New and updated styles for the images to prevent distortion and cropping */
+        .image-preview {
+            width: 100%;
+            height: auto;
+            max-width: 100%;
+            object-fit: contain; /* This is the key change to fix the issue */
+            display: block; /* Ensures images behave predictably */
+        }
+    </style>
+</head>
+<body class="p-8">
+    <div class="container">
+        <div class="card">
+            <h1 class="text-3xl sm:text-4xl font-extrabold mb-4 text-gray-800">AI Image Enhancer</h1>
+            <p class="text-gray-600 mb-6">Upload an image to enhance its quality and resolution using AI.</p>
+
+            <div id="message-box" class="message-box hidden"></div>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-8">
+                <label for="image-upload" class="cursor-pointer w-full sm:w-auto">
+                    <div class="btn btn-primary w-full">
+                        Select Image
+                    </div>
+                    <input type="file" id="image-upload" accept="image/*" class="hidden">
+                </label>
+                <button id="enhance-btn" class="btn btn-primary w-full sm:w-auto flex items-center justify-center hidden">
+                    <span id="enhance-btn-text">Enhance Image</span>
+                    <div id="enhance-btn-spinner" class="spinner ml-2 hidden"></div>
+                </button>
+                <button id="download-btn" class="btn btn-secondary w-full sm:w-auto hidden">Download Enhanced</button>
+            </div>
+
+            <div id="image-display-container" class="mt-8 flex flex-col md:flex-row items-start justify-center space-y-8 md:space-y-0 md:space-x-8 hidden">
+                <div class="w-full">
+                    <h2 class="text-lg font-semibold text-gray-700 mb-2">Original Image</h2>
+                    <img id="original-image" src="" alt="Original Image" class="rounded-lg shadow-md image-preview">
+                </div>
+                <div class="w-full">
+                    <h2 class="text-lg font-semibold text-gray-700 mb-2">Enhanced Image</h2>
+                    <img id="enhanced-image" src="" alt="Enhanced Image" class="rounded-lg shadow-md image-preview">
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer class="mt-8 text-center text-gray-500 text-sm">
+        Made by uzair 2025 uzair b2b services
+    </footer>
+
+    <script>
+        // Get DOM elements
+        const imageUpload = document.getElementById('image-upload');
+        const enhanceBtn = document.getElementById('enhance-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        const originalImageEl = document.getElementById('original-image');
+        const enhancedImageEl = document.getElementById('enhanced-image');
+        const imageDisplayContainer = document.getElementById('image-display-container');
+        const enhanceBtnText = document.getElementById('enhance-btn-text');
+        const enhanceBtnSpinner = document.getElementById('enhance-btn-spinner');
+        const messageBox = document.getElementById('message-box');
+
+        let originalImageDataURL = null;
+
+        /**
+         * Displays a message in the message box.
+         * @param {string} message - The message to display.
+         * @param {string} type - The type of message ('success' or 'error').
+         */
+        const showMessage = (message, type) => {
+            messageBox.textContent = message;
+            messageBox.className = `message-box show`;
+            if (type === 'success') {
+                messageBox.style.backgroundColor = '#d1fae5';
+                messageBox.style.color = '#065f46';
+            } else if (type === 'error') {
+                messageBox.style.backgroundColor = '#fee2e2';
+                messageBox.style.color = '#991b1b';
+            } else if (type === 'info') {
+                 messageBox.style.backgroundColor = '#dbeafe';
+                 messageBox.style.color = '#1e40af';
+            }
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 5000);
+        };
+
+        /**
+         * Converts a blob or file to a base64 data URL.
+         * @param {Blob} blob - The blob or file to convert.
+         * @returns {Promise<string>} A promise that resolves with the base64 data URL.
+         */
+        const blobToBase64 = (blob) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        };
+
+        /**
+         * Handles the image enhancement process using the Gemini API.
+         * This is a client-side simulation.
+         */
+        const enhanceImage = async (base64Image) => {
+             // In a real application, you'd send the image to a backend
+             // that runs a complex AI model (e.g., Stable Diffusion, Waifu2x).
+             // Here, we use the Gemini API to generate a new image based on a prompt
+             // to simulate the "enhancement" effect.
+
+            const prompt = `Enhance and increase the resolution of this image. The style should be realistic and sharp, with improved detail and clarity.`;
+
+            // Prepare the payload for the Gemini API call
+            const payload = {
+                contents: [
+                    {
+                        parts: [
+                            { text: prompt },
+                            { inlineData: { mimeType: 'image/png', data: base64Image.split(',')[1] } }
+                        ]
+                    }
+                ],
+                generationConfig: {
+                    responseModalities: ['TEXT', 'IMAGE']
+                },
+            };
+
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${apiKey}`;
+
+            // Show a loading message and spinner
+            enhanceBtn.disabled = true;
+            enhanceBtnText.textContent = 'Enhancing...';
+            enhanceBtnSpinner.classList.remove('hidden');
+            showMessage('Enhancing image with AI. This may take a moment...', 'info');
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(`API Error: ${error.error.message}`);
+                }
+
+                const result = await response.json();
+                const base64Data = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+
+                if (!base64Data) {
+                    throw new Error('No enhanced image data received from the API.');
+                }
+
+                const enhancedDataURL = `data:image/png;base64,${base64Data}`;
+                enhancedImageEl.src = enhancedDataURL;
+                enhancedImageEl.classList.remove('hidden');
+                downloadBtn.classList.remove('hidden');
+                showMessage('Image enhancement complete!', 'success');
+
+            } catch (error) {
+                console.error("Enhancement failed:", error);
+                showMessage('Image enhancement failed. Please try again.', 'error');
+            } finally {
+                // Hide loading state
+                enhanceBtn.disabled = false;
+                enhanceBtnText.textContent = 'Enhance Image';
+                enhanceBtnSpinner.classList.add('hidden');
+            }
+        };
+
+
+        // Handle image upload
+        imageUpload.addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Display the container and buttons
+            imageDisplayContainer.classList.remove('hidden');
+            enhanceBtn.classList.remove('hidden');
+            downloadBtn.classList.add('hidden');
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                originalImageDataURL = e.target.result;
+                originalImageEl.src = originalImageDataURL;
+                enhancedImageEl.src = ""; // Clear the enhanced image
+                showMessage('Image selected. Click "Enhance Image" to begin.', 'success');
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Handle enhance button click
+        enhanceBtn.addEventListener('click', () => {
+            if (originalImageDataURL) {
+                enhanceImage(originalImageDataURL);
+            } else {
+                showMessage('Please select an image first.', 'error');
+            }
+        });
+
+        // Handle download button click
+        downloadBtn.addEventListener('click', () => {
+            if (enhancedImageEl.src) {
+                const link = document.createElement('a');
+                link.href = enhancedImageEl.src;
+                link.download = 'enhanced_image.png';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showMessage('Enhanced image downloaded!', 'success');
+            }
+        });
+    </script>
+</body>
+</html>
