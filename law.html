@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Law Guide</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            min-height: 80vh;
+        }
+        .input-field, .textarea-field {
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            border: 1px solid #d1d5db;
+            transition: all 0.2s ease-in-out;
+            width: 100%;
+        }
+        .input-field:focus, .textarea-field:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+            white-space: nowrap;
+        }
+        .btn-primary {
+            background-color: #2563eb;
+            color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .btn-primary:hover:not(:disabled) {
+            background-color: #1d4ed8;
+            transform: translateY(-2px);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        #output-area {
+            background-color: #fafafa;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            flex-grow: 1;
+            white-space: pre-wrap;
+            min-height: 200px;
+            line-height: 1.6;
+        }
+        .message-box {
+            background-color: #dbeafe;
+            color: #1e40af;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+            margin-top: 1rem;
+        }
+        .form-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        label {
+            font-weight: 600;
+        }
+        pre {
+            background-color: #f1f5f9;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+            overflow-x: auto;
+        }
+        .disclaimer {
+            font-style: italic;
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+    <div class="container">
+        <h1 class="text-3xl sm:text-4xl font-extrabold mb-2 text-center text-gray-800">Indian Law Guide</h1>
+        <p class="text-gray-600 mb-6 text-center">Ask a question about Indian law and get general guidance. (This is not legal advice).</p>
+        
+        <div class="form-section">
+            <div>
+                <label for="user-input" class="block mb-2">Your Query:</label>
+                <textarea id="user-input" class="textarea-field h-24" placeholder="e.g., What are the rights of tenants in India?"></textarea>
+            </div>
+        </div>
+        
+        <div class="flex justify-center mb-6">
+            <button id="generate-btn" class="btn btn-primary flex items-center justify-center">
+                <span id="btn-text">Get Guidance</span>
+                <div id="loading-spinner" class="loading-spinner ml-2 hidden"></div>
+            </button>
+        </div>
+        
+        <div id="message-box" class="message-box hidden"></div>
+
+        <div id="output-area" class="text-gray-700">
+            Your legal guidance will appear here.
+            <p class="disclaimer mt-4">Disclaimer: This information is for general guidance only and is not a substitute for professional legal advice. Consult with a qualified lawyer for specific legal matters.</p>
+        </div>
+    </div>
+    
+    <footer class="mt-8 text-center text-gray-500 text-sm">
+        Made with love by uzair b2b services
+    </footer>
+
+    <script>
+        const userInput = document.getElementById('user-input');
+        const generateBtn = document.getElementById('generate-btn');
+        const btnText = document.getElementById('btn-text');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const outputArea = document.getElementById('output-area');
+        const messageBox = document.getElementById('message-box');
+
+        const apiKey = "";
+        const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+        // Helper function to show messages
+        function showMessage(message, type = 'info') {
+            messageBox.textContent = message;
+            messageBox.classList.remove('hidden');
+            if (type === 'error') {
+                messageBox.style.backgroundColor = '#fecaca';
+                messageBox.style.color = '#7f1d1d';
+            } else {
+                messageBox.style.backgroundColor = '#dbeafe';
+                messageBox.style.color = '#1e40af';
+            }
+        }
+
+        // Fetch API with exponential backoff
+        async function fetchWithBackoff(url, payload, retries = 5, delay = 1000) {
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    if (response.status === 429 && retries > 0) {
+                        await new Promise(res => setTimeout(res, delay));
+                        return fetchWithBackoff(url, payload, retries - 1, delay * 2);
+                    } else {
+                        throw new Error(`API error: ${response.statusText}`);
+                    }
+                }
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                console.error("API call failed:", error);
+                throw error;
+            }
+        }
+        
+        async function getGuidance() {
+            const query = userInput.value.trim();
+
+            if (!query) {
+                showMessage("Please enter your query.", 'error');
+                return;
+            }
+
+            // Set button to loading state
+            generateBtn.disabled = true;
+            btnText.classList.add('hidden');
+            loadingSpinner.classList.remove('hidden');
+            outputArea.innerHTML = "Thinking... Please wait.";
+            messageBox.classList.add('hidden');
+
+            try {
+                let prompt = `You are an AI assistant specialized in providing general, non-binding guidance on Indian laws. Your task is to provide a comprehensive, clear, and easy-to-understand response to a user's query. Do not provide specific legal advice or endorse any action. Always include a clear disclaimer at the end stating that the information is for general purposes only and that the user should consult with a qualified lawyer for legal matters.`;
+                prompt += `\n\n**User Query:** ${query}\n\n`;
+                prompt += `\n\nProvide the following:\n`;
+                prompt += `1. A brief, informative title for the topic.\n`;
+                prompt += `2. An explanation of the relevant legal principles.\n`;
+                prompt += `3. A clear, non-binding overview of the user's rights, responsibilities, or the legal process related to the query.\n`;
+                prompt += `4. The mandatory disclaimer at the end.`;
+
+                const chatHistory = [{
+                    role: "user",
+                    parts: [{ text: prompt }]
+                }];
+                const payload = { contents: chatHistory };
+
+                const result = await fetchWithBackoff(geminiApiUrl, payload);
+                const aiResponse = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (aiResponse) {
+                    outputArea.innerHTML = `<pre>${aiResponse}</pre><p class="disclaimer mt-4">Disclaimer: This information is for general guidance only and is not a substitute for professional legal advice. Consult with a qualified lawyer for specific legal matters.</p>`;
+                    showMessage("Guidance generated successfully!");
+                } else {
+                    outputArea.textContent = "I'm sorry, I was unable to provide guidance. Please try again with a different query.";
+                }
+            } catch (error) {
+                console.error(error);
+                outputArea.innerHTML = "An error occurred. Please try again.";
+            } finally {
+                // Reset button state
+                generateBtn.disabled = false;
+                btnText.classList.remove('hidden');
+                loadingSpinner.classList.add('hidden');
+            }
+        }
+
+        generateBtn.addEventListener('click', getGuidance);
+        
+        // Add event listeners for Enter key on the textarea
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                getGuidance();
+            }
+        });
+    </script>
+</body>
+</html>
