@@ -4,357 +4,333 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Book Summary Assistant</title>
+    <!-- Font link for Inter font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- CDN for Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- CDN for Vue.js to handle reactivity and logic -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Font Awesome for copy and home icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
-            color: #1f2937;
-        }
-        .container {
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background-color: #ffffff;
-            border-radius: 1.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            display: flex;
-            flex-direction: column;
-            min-height: 80vh;
-        }
-        .input-container {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        .input-field, .language-select {
-            padding: 0.75rem;
-            border-radius: 0.75rem;
-            border: 1px solid #d1d5db;
-            transition: all 0.2s ease-in-out;
-            width: 100%;
-        }
-        .input-field:focus, .language-select:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
-        }
-        .btn-group {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-        }
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 9999px;
-            font-weight: 600;
-            transition: all 0.2s ease-in-out;
-            white-space: nowrap;
-        }
-        .btn-primary {
-            background-color: #2563eb;
-            color: #ffffff;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        .btn-primary:hover:not(:disabled) {
-            background-color: #1d4ed8;
-            transform: translateY(-2px);
-        }
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .loading-spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-top-color: #3b82f6;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        #summary-output {
-            background-color: #fafafa;
-            border: 1px solid #e5e7eb;
-            border-radius: 0.75rem;
-            padding: 1.5rem;
-            flex-grow: 1;
-            white-space: pre-wrap;
-            min-height: 200px;
-        }
-        .footer {
-            margin-top: auto;
-            text-align: center;
-        }
-        .message-box {
-            background-color: #dbeafe;
-            color: #1e40af;
-            border-radius: 0.75rem;
-            padding: 1rem;
-            text-align: center;
-            margin-top: 1rem;
         }
     </style>
 </head>
-<body class="p-8">
-    <div class="container">
-        <h1 class="text-3xl sm:text-4xl font-extrabold mb-4 text-center text-gray-800">BOOK SUMMERY AI</h1>
-        <p class="text-gray-600 mb-6 text-center">Enter a book title to get a detailed summary.</p>
-        
-        <div class="input-container">
-            <select id="language-select" class="language-select">
-                <option value="en">English</option>
-                <option value="hi">हिन्दी (Hindi)</option>
-            </select>
-            <input type="text" id="book-title" class="input-field" placeholder="Enter book title (e.g., The Lord of the Rings)">
-            <input type="text" id="book-author" class="input-field" placeholder="Enter author (optional)">
-            
-            <div class="btn-group">
-                <button id="generate-btn" class="btn btn-primary flex items-center justify-center flex-grow">
-                    <span id="btn-text-generate">Generate Summary</span>
-                    <div id="loading-spinner-generate" class="loading-spinner ml-2 hidden"></div>
+<body class="bg-gray-100 font-sans antialiased min-h-screen flex flex-col items-center justify-center">
+
+    <!-- Vue.js app container -->
+    <div id="app" class="flex flex-col flex-grow w-full max-w-4xl mx-auto rounded-xl shadow-lg overflow-hidden bg-white mt-6 mb-6 md:mt-12 md:mb-6">
+
+        <!-- Header with responsive spacing and alignment -->
+        <div class="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 flex-wrap">
+            <h1 class="text-xl sm:text-3xl font-extrabold text-gray-900 mb-2 sm:mb-0">BOOK SUMMARY AI</h1>
+            <div class="flex items-center space-x-2">
+                <!-- Home Button with responsive padding -->
+                <a href="index.html" class="px-3 py-1 sm:px-4 sm:py-2 bg-gray-200 text-gray-700 rounded-full text-sm font-semibold shadow-md hover:bg-gray-300 transition-colors duration-200 flex items-center">
+                    <i class="fas fa-home mr-2"></i>
+                    Home
+                </a>
+                <p class="text-xs sm:text-sm text-gray-500">
+                    Made by
+                    <span class="text-blue-600">uzair b2b services</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Main Content Section -->
+        <div class="p-6 flex flex-col flex-grow w-full">
+            <p class="text-gray-600 mb-6 text-center">Enter a book title to get a detailed summary.</p>
+
+            <div class="flex flex-col md:flex-row gap-4 mb-4 items-center">
+                <select v-model="selectedLanguage" class="flex-shrink-0 w-full md:w-auto px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out">
+                    <option value="en">English</option>
+                    <option value="hi">हिन्दी (Hindi)</option>
+                </select>
+                <input
+                    v-model="bookTitle"
+                    type="text"
+                    :placeholder="placeholders.title"
+                    class="flex-grow w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out"
+                    @keyup.enter="generateSummary"
+                    :disabled="isLoading"
+                />
+            </div>
+            <input
+                v-model="bookAuthor"
+                type="text"
+                :placeholder="placeholders.author"
+                class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out mb-4"
+                @keyup.enter="generateSummary"
+                :disabled="isLoading"
+            />
+
+            <!-- Generate Button and Loading Spinner -->
+            <div class="flex items-center justify-center mb-6">
+                <button
+                    @click="generateSummary"
+                    class="w-full md:w-1/2 px-6 py-3 rounded-full bg-blue-600 text-white font-semibold shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                    :disabled="isLoading || !bookTitle.trim()"
+                >
+                    <span v-if="!isLoading">{{ buttonText }}</span>
+                    <svg v-else class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
                 </button>
             </div>
             
-            <div id="message-box" class="message-box hidden"></div>
-        </div>
-
-        <!-- New interactive refinement section -->
-        <div id="refinement-options" class="hidden text-center mb-4">
-            <p class="text-gray-600 mb-2">Would you like to refine the summary?</p>
-            <div class="flex justify-center gap-4">
-                <button id="longer-btn" class="btn btn-primary px-4">Longer</button>
-                <button id="shorter-btn" class="btn btn-primary px-4">Shorter</button>
-                <button id="simpler-btn" class="btn btn-primary px-4">Simpler</button>
+            <!-- Message Box -->
+            <div v-if="message" :class="['rounded-xl px-4 py-2 text-center text-sm font-medium mb-4', message.type === 'error' ? 'bg-red-200 text-red-800' : 'bg-blue-200 text-blue-800']">
+                {{ message.text }}
             </div>
-        </div>
 
-        <div id="summary-output" class="text-gray-700">
-            Your summary will appear here.
+            <!-- Summary Output and Refinement Options -->
+            <div class="flex flex-col flex-grow bg-gray-50 rounded-xl border border-gray-200 p-4 sm:p-6 shadow-inner relative">
+                <div v-if="!summaryOutput" class="text-gray-500 text-center py-10">
+                    {{ placeholders.summary }}
+                </div>
+                <div v-else class="text-gray-700 whitespace-pre-wrap">
+                    {{ summaryOutput }}
+                </div>
+                
+                <!-- Copy button for summary output -->
+                <button v-if="summaryOutput" @click="copyToClipboard(summaryOutput)" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                    <i class="fas fa-copy"></i>
+                </button>
+
+                <!-- Refinement Options -->
+                <div v-if="showRefinementOptions" class="mt-4 flex flex-wrap justify-center gap-2">
+                    <button @click="refineSummary('longer')" class="px-4 py-2 rounded-full bg-gray-200 text-gray-700 text-sm font-semibold shadow-md hover:bg-gray-300 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed" :disabled="isLoading">
+                        {{ refinementButtons.longer }}
+                    </button>
+                    <button @click="refineSummary('shorter')" class="px-4 py-2 rounded-full bg-gray-200 text-gray-700 text-sm font-semibold shadow-md hover:bg-gray-300 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed" :disabled="isLoading">
+                        {{ refinementButtons.shorter }}
+                    </button>
+                    <button @click="refineSummary('simpler')" class="px-4 py-2 rounded-full bg-gray-200 text-gray-700 text-sm font-semibold shadow-md hover:bg-gray-300 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed" :disabled="isLoading">
+                        {{ refinementButtons.simpler }}
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
     
-    <footer class="mt-8 text-center text-gray-500 text-sm">
+    <!-- Footer -->
+    <footer class="mt-auto text-center text-gray-500 text-sm py-4">
         Made by uzair b2b services
     </footer>
 
     <script>
-        const languageSelect = document.getElementById('language-select');
-        const bookTitleInput = document.getElementById('book-title');
-        const bookAuthorInput = document.getElementById('book-author');
-        const generateBtn = document.getElementById('generate-btn');
-        const btnTextGenerate = document.getElementById('btn-text-generate');
-        const loadingSpinnerGenerate = document.getElementById('loading-spinner-generate');
-        const summaryOutput = document.getElementById('summary-output');
-        const messageBox = document.getElementById('message-box');
-        
-        // New elements for refinement
-        const refinementOptions = document.getElementById('refinement-options');
-        const longerBtn = document.getElementById('longer-btn');
-        const shorterBtn = document.getElementById('shorter-btn');
-        const simplerBtn = document.getElementById('simpler-btn');
+        // Vue application
+        const { createApp, ref, computed, watch } = Vue;
 
-        const apiKey = "AIzaSyD4gY8l-7NBjPuNxDGmr2tKwrDPhDTSyeQ";
-        const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        createApp({
+            setup() {
+                // Reactive state variables
+                const bookTitle = ref('');
+                const bookAuthor = ref('');
+                const selectedLanguage = ref('en');
+                const summaryOutput = ref('');
+                const isLoading = ref(false);
+                const message = ref(null);
+                const showRefinementOptions = ref(false);
+                let originalPrompt = '';
 
-        let currentLanguage = "en";
-        let originalPrompt = "";
+                // API key will be provided by the runtime
+                const apiKey = "AIzaSyD4gY8l-7NBjPuNxDGmr2tKwrDPhDTSyeQ";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
-        // Helper function to show messages
-        function showMessage(message, type = 'info') {
-            messageBox.textContent = message;
-            messageBox.classList.remove('hidden');
-            if (type === 'error') {
-                messageBox.style.backgroundColor = '#fecaca';
-                messageBox.style.color = '#7f1d1d';
-            } else {
-                messageBox.style.backgroundColor = '#dbeafe';
-                messageBox.style.color = '#1e40af';
-            }
-        }
-
-        // Fetch API with exponential backoff
-        async function fetchWithBackoff(url, payload, retries = 5, delay = 1000) {
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                // Computed properties for language-specific text
+                const placeholders = computed(() => {
+                    return {
+                        title: selectedLanguage.value === 'en' ? 'Enter book title (e.g., The Lord of the Rings)' : 'पुस्तक का शीर्षक दर्ज करें (उदा. द लॉर्ड ऑफ द रिंग्स)',
+                        author: selectedLanguage.value === 'en' ? 'Enter author (optional)' : 'लेखक दर्ज करें (वैकल्पिक)',
+                        summary: selectedLanguage.value === 'en' ? 'Your summary will appear here.' : 'आपका सारांश यहाँ दिखाई देगा।'
+                    };
                 });
 
-                if (!response.ok) {
-                    if (response.status === 429 && retries > 0) {
-                        await new Promise(res => setTimeout(res, delay));
-                        return fetchWithBackoff(url, payload, retries - 1, delay * 2);
+                const buttonText = computed(() => {
+                    return selectedLanguage.value === 'en' ? 'Generate Summary' : 'सारांश तैयार करें';
+                });
+
+                const refinementButtons = computed(() => {
+                    return {
+                        longer: selectedLanguage.value === 'en' ? 'Longer' : 'और लंबा',
+                        shorter: selectedLanguage.value === 'en' ? 'Shorter' : 'छोटा करें',
+                        simpler: selectedLanguage.value === 'en' ? 'Simpler' : 'सरल करें'
+                    };
+                });
+                
+                // Watcher to reset UI when language changes
+                watch(selectedLanguage, () => {
+                    summaryOutput.value = '';
+                    message.value = null;
+                    showRefinementOptions.value = false;
+                });
+
+                /**
+                 * Helper function to show messages to the user.
+                 */
+                const showMessage = (text, type = 'info') => {
+                    message.value = { text, type };
+                };
+
+                /**
+                 * Handles fetching a response from the API with exponential backoff.
+                 */
+                const fetchWithBackoff = async (payload, retries = 5, delay = 1000) => {
+                    try {
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            if (response.status === 429 && retries > 0) {
+                                await new Promise(res => setTimeout(res, delay));
+                                return fetchWithBackoff(payload, retries - 1, delay * 2);
+                            } else {
+                                throw new Error(`API error: ${response.statusText}`);
+                            }
+                        }
+
+                        const result = await response.json();
+                        return result;
+                    } catch (error) {
+                        throw error;
+                    }
+                };
+
+                /**
+                 * Generates a new book summary.
+                 */
+                const generateSummary = async () => {
+                    const title = bookTitle.value.trim();
+                    if (!title) {
+                        showMessage(selectedLanguage.value === 'en' ? "Please enter a book title to get a summary." : "कृपया सारांश प्राप्त करने के लिए एक पुस्तक का शीर्षक दर्ज करें।", 'error');
+                        return;
+                    }
+
+                    isLoading.value = true;
+                    summaryOutput.value = selectedLanguage.value === 'en' ? "Generating a detailed summary..." : "विस्तृत सारांश तैयार किया जा रहा है...";
+                    showRefinementOptions.value = false;
+                    message.value = null;
+
+                    try {
+                        if (selectedLanguage.value === 'en') {
+                            originalPrompt = `You are a helpful AI assistant that specializes in providing very detailed book summaries. Please provide a comprehensive summary of the book "${title}". The summary should cover the main plot points, all key characters, and major themes in great detail.`;
+                            if (bookAuthor.value) {
+                                originalPrompt += ` The author is ${bookAuthor.value}.`;
+                            }
+                        } else {
+                            originalPrompt = `आप एक सहायक एआई सहायक हैं जो बहुत विस्तृत पुस्तक सारांश प्रदान करने में माहिर हैं। कृपया पुस्तक "${title}" का एक विस्तृत सारांश प्रदान करें। सारांश में मुख्य कथानक, सभी प्रमुख पात्र और प्रमुख विषयों को विस्तार से शामिल करना चाहिए।`;
+                            if (bookAuthor.value) {
+                                originalPrompt += ` लेखक ${bookAuthor.value} हैं।`;
+                            }
+                        }
+
+                        const chatHistory = [{ role: "user", parts: [{ text: originalPrompt }] }];
+                        const payload = { contents: chatHistory };
+
+                        const result = await fetchWithBackoff(payload);
+                        const aiResponse = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                        if (aiResponse) {
+                            summaryOutput.value = aiResponse;
+                            showRefinementOptions.value = true;
+                            showMessage(selectedLanguage.value === 'en' ? "Summary generated successfully. Use the options below to refine the content." : "सारांश सफलतापूर्वक तैयार हो गया है। सामग्री को परिष्कृत करने के लिए नीचे दिए गए विकल्पों का उपयोग करें।", 'info');
+                        } else {
+                            summaryOutput.value = selectedLanguage.value === 'en' ? "I'm sorry, I was unable to generate a summary for that book. Please try again with a different title." : "क्षमा करें, मैं उस पुस्तक के लिए सारांश तैयार करने में असमर्थ था। कृपया एक अलग शीर्षक के साथ पुनः प्रयास करें।";
+                        }
+                    } catch (error) {
+                        console.error(error);
+                        summaryOutput.value = selectedLanguage.value === 'en' ? "An error occurred. Please try again." : "एक त्रुटि हुई। कृपया पुन: प्रयास करें।";
+                    } finally {
+                        isLoading.value = false;
+                    }
+                };
+
+                /**
+                 * Refines the current summary based on user selection.
+                 */
+                const refineSummary = async (refinementType) => {
+                    if (!summaryOutput.value || summaryOutput.value.startsWith("Generating")) {
+                        showMessage(selectedLanguage.value === 'en' ? "Please wait for the current summary to finish generating." : "कृपया वर्तमान सारांश के तैयार होने की प्रतीक्षा करें।", 'error');
+                        return;
+                    }
+
+                    isLoading.value = true;
+                    summaryOutput.value = selectedLanguage.value === 'en' ? `Refining summary to be ${refinementType}...` : `सारांश को ${refinementType} के लिए परिष्कृत किया जा रहा है...`;
+                    message.value = null;
+
+                    let refinementPrompt;
+                    if (selectedLanguage.value === 'en') {
+                        refinementPrompt = `Based on the following summary, please rewrite it to be ${refinementType}. Summary: ${summaryOutput.value}`;
                     } else {
-                        throw new Error(`API error: ${response.statusText}`);
+                        let hindiRefinement;
+                        switch(refinementType) {
+                            case 'longer': hindiRefinement = 'और लंबा'; break;
+                            case 'shorter': hindiRefinement = 'छोटा'; break;
+                            case 'simpler': hindiRefinement = 'अधिक सरल'; break;
+                        }
+                        refinementPrompt = `निम्नलिखित सारांश के आधार पर, कृपया इसे ${hindiRefinement} करने के लिए फिर से लिखें। सारांश: ${summaryOutput.value}`;
                     }
-                }
-                const result = await response.json();
-                return result;
-            } catch (error) {
-                console.error("API call failed:", error);
-                throw error;
-            }
-        }
-        
-        async function generateSummary() {
-            const title = bookTitleInput.value.trim();
-            const author = bookAuthorInput.value.trim();
-            currentLanguage = languageSelect.value;
-            
-            if (!title) {
-                summaryOutput.textContent = currentLanguage === 'en' ? "Please enter a book title to get a summary." : "कृपया सारांश प्राप्त करने के लिए एक पुस्तक का शीर्षक दर्ज करें।";
-                return;
-            }
 
-            // Hide refinement options before generating a new summary
-            refinementOptions.classList.add('hidden');
+                    const chatHistory = [{ role: "user", parts: [{ text: refinementPrompt }] }];
+                    const payload = { contents: chatHistory };
 
-            // Set button to loading state
-            generateBtn.disabled = true;
-            btnTextGenerate.classList.add('hidden');
-            loadingSpinnerGenerate.classList.remove('hidden');
-            summaryOutput.textContent = currentLanguage === 'en' ? "Generating a detailed summary..." : "विस्तृत सारांश तैयार किया जा रहा है...";
-            messageBox.classList.add('hidden');
+                    try {
+                        const result = await fetchWithBackoff(payload);
+                        const aiResponse = result?.candidates?.[0]?.content?.parts?.[0]?.text;
 
-            try {
-                if (currentLanguage === 'en') {
-                    originalPrompt = `You are a helpful AI assistant that specializes in providing very detailed book summaries. Please provide a comprehensive summary of the book "${title}". The summary should cover the main plot points, all key characters, and major themes in great detail.`;
-                    if (author) {
-                        originalPrompt += ` The author is ${author}.`;
+                        if (aiResponse) {
+                            summaryOutput.value = aiResponse;
+                            showMessage(selectedLanguage.value === 'en' ? "Summary refined successfully." : "सारांश सफलतापूर्वक परिष्कृत हो गया है।", 'info');
+                        } else {
+                            summaryOutput.value = selectedLanguage.value === 'en' ? "I'm sorry, I was unable to refine the summary. Please try again." : "क्षमा करें, मैं सारांश को परिष्कृत करने में असमर्थ था। कृपया पुनः प्रयास करें।";
+                        }
+                    } catch (error) {
+                        console.error(error);
+                        summaryOutput.value = selectedLanguage.value === 'en' ? "An error occurred during refinement. Please try again." : "परिष्करण के दौरान एक त्रुटि हुई। कृपया पुन: प्रयास करें।";
+                    } finally {
+                        isLoading.value = false;
                     }
-                } else {
-                    originalPrompt = `आप एक सहायक एआई सहायक हैं जो बहुत विस्तृत पुस्तक सारांश प्रदान करने में माहिर हैं। कृपया पुस्तक "${title}" का एक विस्तृत सारांश प्रदान करें। सारांश में मुख्य कथानक, सभी प्रमुख पात्र और प्रमुख विषयों को विस्तार से शामिल करना चाहिए।`;
-                    if (author) {
-                        originalPrompt += ` लेखक ${author} हैं।`;
-                    }
-                }
+                };
 
-                const chatHistory = [{
-                    role: "user",
-                    parts: [{ text: originalPrompt }]
-                }];
-                const payload = { contents: chatHistory };
+                /**
+                 * Copies the given text to the clipboard.
+                 */
+                const copyToClipboard = (text) => {
+                    const el = document.createElement('textarea');
+                    el.value = text;
+                    document.body.appendChild(el);
+                    el.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(el);
+                    showMessage(selectedLanguage.value === 'en' ? "Summary copied to clipboard!" : "सारांश क्लिपबोर्ड पर कॉपी हो गया है!", 'info');
+                };
 
-                const result = await fetchWithBackoff(geminiApiUrl, payload);
-                const aiResponse = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-                if (aiResponse) {
-                    summaryOutput.textContent = aiResponse;
-                    refinementOptions.classList.remove('hidden');
-                    showMessage(currentLanguage === 'en' ? "Summary generated successfully. Use the options below to refine the content." : "सारांश सफलतापूर्वक तैयार हो गया है। सामग्री को परिष्कृत करने के लिए नीचे दिए गए विकल्पों का उपयोग करें।", 'info');
-                } else {
-                    summaryOutput.textContent = currentLanguage === 'en' ? "I'm sorry, I was unable to generate a summary for that book. Please try again with a different title." : "क्षमा करें, मैं उस पुस्तक के लिए सारांश तैयार करने में असमर्थ था। कृपया एक अलग शीर्षक के साथ पुनः प्रयास करें।";
-                }
-            } catch (error) {
-                console.error(error);
-                summaryOutput.textContent = currentLanguage === 'en' ? "An error occurred. Please try again." : "एक त्रुटि हुई। कृपया पुन: प्रयास करें।";
-            } finally {
-                // Reset button state
-                generateBtn.disabled = false;
-                btnTextGenerate.classList.remove('hidden');
-                loadingSpinnerGenerate.classList.add('hidden');
+                return {
+                    bookTitle,
+                    bookAuthor,
+                    selectedLanguage,
+                    summaryOutput,
+                    isLoading,
+                    message,
+                    showRefinementOptions,
+                    placeholders,
+                    buttonText,
+                    refinementButtons,
+                    generateSummary,
+                    refineSummary,
+                    copyToClipboard
+                };
             }
-        }
-
-        async function refineSummary(refinementType) {
-            const currentSummary = summaryOutput.textContent;
-            if (!currentSummary || currentSummary.startsWith("Generating")) {
-                showMessage(currentLanguage === 'en' ? "Please wait for the current summary to finish generating." : "कृपया वर्तमान सारांश के तैयार होने की प्रतीक्षा करें।", 'error');
-                return;
-            }
-
-            generateBtn.disabled = true;
-            refinementOptions.querySelectorAll('button').forEach(btn => btn.disabled = true);
-            summaryOutput.textContent = currentLanguage === 'en' ? `Refining summary to be ${refinementType}...` : `सारांश को ${refinementType} के लिए परिष्कृत किया जा रहा है...`;
-            messageBox.classList.add('hidden');
-            
-            let refinementPrompt;
-            if (currentLanguage === 'en') {
-                refinementPrompt = `Based on the following summary, please rewrite it to be ${refinementType}. Summary: ${currentSummary}`;
-            } else {
-                let hindiRefinement;
-                switch(refinementType) {
-                    case 'longer': hindiRefinement = 'और लंबा'; break;
-                    case 'shorter': hindiRefinement = 'छोटा'; break;
-                    case 'simpler': hindiRefinement = 'अधिक सरल'; break;
-                }
-                refinementPrompt = `निम्नलिखित सारांश के आधार पर, कृपया इसे ${hindiRefinement} करने के लिए फिर से लिखें। सारांश: ${currentSummary}`;
-            }
-
-            const chatHistory = [{
-                role: "user",
-                parts: [{ text: refinementPrompt }]
-            }];
-            const payload = { contents: chatHistory };
-            
-            try {
-                const result = await fetchWithBackoff(geminiApiUrl, payload);
-                const aiResponse = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-                if (aiResponse) {
-                    summaryOutput.textContent = aiResponse;
-                    showMessage(currentLanguage === 'en' ? "Summary refined successfully." : "सारांश सफलतापूर्वक परिष्कृत हो गया है।", 'info');
-                } else {
-                    summaryOutput.textContent = currentLanguage === 'en' ? "I'm sorry, I was unable to refine the summary. Please try again." : "क्षमा करें, मैं सारांश को परिष्कृत करने में असमर्थ था। कृपया पुनः प्रयास करें।";
-                }
-            } catch (error) {
-                console.error(error);
-                summaryOutput.textContent = currentLanguage === 'en' ? "An error occurred during refinement. Please try again." : "परिष्करण के दौरान एक त्रुटि हुई। कृपया पुन: प्रयास करें।";
-            } finally {
-                generateBtn.disabled = false;
-                refinementOptions.querySelectorAll('button').forEach(btn => btn.disabled = false);
-            }
-        }
-
-        // Event Listeners
-        generateBtn.addEventListener('click', generateSummary);
-        longerBtn.addEventListener('click', () => refineSummary('longer'));
-        shorterBtn.addEventListener('click', () => refineSummary('shorter'));
-        simplerBtn.addEventListener('click', () => refineSummary('simpler'));
-
-        bookTitleInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                generateSummary();
-            }
-        });
-        bookAuthorInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                generateSummary();
-            }
-        });
-
-        languageSelect.addEventListener('change', () => {
-            const lang = languageSelect.value;
-            // Update placeholders and button text based on language
-            if (lang === 'hi') {
-                bookTitleInput.placeholder = "पुस्तक का शीर्षक दर्ज करें (उदा. द लॉर्ड ऑफ द रिंग्स)";
-                bookAuthorInput.placeholder = "लेखक दर्ज करें (वैकल्पिक)";
-                btnTextGenerate.textContent = "सारांश तैयार करें";
-                summaryOutput.textContent = "आपका सारांश यहाँ दिखाई देगा।";
-                longerBtn.textContent = "और लंबा";
-                shorterBtn.textContent = "छोटा करें";
-                simplerBtn.textContent = "सरल करें";
-            } else {
-                bookTitleInput.placeholder = "Enter book title (e.g., The Lord of the Rings)";
-                bookAuthorInput.placeholder = "Enter author (optional)";
-                btnTextGenerate.textContent = "Generate Summary";
-                summaryOutput.textContent = "Your summary will appear here.";
-                longerBtn.textContent = "Longer";
-                shorterBtn.textContent = "Shorter";
-                simplerBtn.textContent = "Simpler";
-            }
-            messageBox.classList.add('hidden');
-            refinementOptions.classList.add('hidden');
-        });
+        }).mount('#app');
     </script>
 </body>
 </html>
