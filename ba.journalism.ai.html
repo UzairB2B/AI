@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journalism.ai</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .select-field, .btn, .text-area {
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            border: 1px solid #d1d5db;
+            transition: all 0.2s ease-in-out;
+            width: 100%;
+        }
+        .select-field:focus, .text-area:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+        .btn {
+            font-weight: 600;
+        }
+        .btn-primary {
+            background-color: #2563eb;
+            color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .btn-primary:hover:not(:disabled) {
+            background-color: #1d4ed8;
+            transform: translateY(-2px);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .notes-area-container {
+            position: relative;
+        }
+        .notes-area {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            min-height: 200px;
+            max-height: 600px;
+            overflow-y: auto;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        .copy-btn, .sources-btn {
+            position: absolute;
+            top: 0.75rem;
+            background-color: #e5e7eb;
+            color: #4b5563;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .copy-btn {
+            right: 0.75rem;
+        }
+        .sources-btn {
+            right: 3.5rem;
+            display: flex;
+            align-items: center;
+        }
+        .copy-btn:hover, .sources-btn:hover {
+            background-color: #d1d5db;
+            color: #1f2937;
+        }
+        .message-box {
+            background-color: #dbeafe;
+            color: #1e40af;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+        }
+        .notes-area h1, .notes-area h2, .notes-area h3 {
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .notes-area h1 { font-size: 1.5rem; }
+        .notes-area h2 { font-size: 1.25rem; }
+        .notes-area h3 { font-size: 1.125rem; }
+        .notes-area p { margin-bottom: 1rem; }
+        .home-btn {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            color: #1f2937;
+            text-decoration: none;
+            transition: color 0.2s ease-in-out;
+        }
+        .home-btn:hover {
+            color: #2563eb;
+        }
+        .footer {
+            margin-top: 2rem;
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        .sources-list {
+            background-color: #eef2ff;
+            border: 1px solid #c7d2fe;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8 relative">
+    <a href="index.html" class="home-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+        </svg>
+        Home
+    </a>
+    <div class="container">
+        <h1 class="text-4xl font-extrabold text-center text-gray-800 mb-4">Journalism.ai</h1>
+        <p class="text-gray-600 text-center mb-6">Your academic AI companion for Mass Communication studies.</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+            <div class="space-y-2">
+                <label for="year-select" class="block text-sm font-medium text-gray-700">Year</label>
+                <select id="year-select" class="select-field">
+                    <option value="first_year">First Year</option>
+                    <option value="second_year">Second Year</option>
+                    <option value="third_year" selected>Third Year</option>
+                </select>
+            </div>
+            <div class="space-y-2">
+                <label for="language-select" class="block text-sm font-medium text-gray-700">Language</label>
+                <select id="language-select" class="select-field">
+                    <option value="english" selected>English</option>
+                    <option value="hindi">Hindi</option>
+                </select>
+            </div>
+            <div class="space-y-2">
+                <label for="subject-select" class="block text-sm font-medium text-gray-700">Subject</label>
+                <select id="subject-select" class="select-field">
+                    <option value="" disabled selected>Select Subject</option>
+                </select>
+            </div>
+            <div class="space-y-2">
+                <label for="unit-select" class="block text-sm font-medium text-gray-700">Unit</label>
+                <select id="unit-select" class="select-field" disabled>
+                    <option value="" disabled selected>Select Unit</option>
+                </select>
+            </div>
+            <div class="space-y-2">
+                <label for="topic-select" class="block text-sm font-medium text-gray-700">Topic</label>
+                <select id="topic-select" class="select-field" disabled>
+                    <option value="" disabled selected>Select Topic</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            <div class="space-y-2">
+                <label for="notes-type-select" class="block text-sm font-medium text-gray-700">Notes Content Type</label>
+                <select id="notes-type-select" class="select-field">
+                    <option value="detailed">Detailed Notes (500+ Words)</option>
+                    <option value="case_study">Case Study / Examples</option>
+                    <option value="simpler">Simpler Explanation</option>
+                    <option value="in_depth">In-Depth Analysis</option>
+                    <option value="short_notes">Short bullet notes for last min revision</option>
+                </select>
+            </div>
+            <div class="space-y-2">
+                <label for="questions-type-select" class="block text-sm font-medium text-gray-700">Question Answer Type</label>
+                <select id="questions-type-select" class="select-field">
+                    <option value="short">Short Answers (200 Words)</option>
+                    <option value="long">Long Answers (500 Words)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="space-y-2 mb-6">
+            <label for="additional-topics" class="block text-sm font-medium text-gray-700">Additional Questions or Topics</label>
+            <textarea id="additional-topics" class="text-area" rows="3" placeholder="Type your custom question or topic here..."></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            <button id="generate-notes-btn" class="btn btn-primary flex items-center justify-center space-x-2" disabled>
+                <span id="notes-btn-text">Generate Notes</span>
+                <div id="notes-spinner" class="loading-spinner hidden"></div>
+            </button>
+            <button id="generate-questions-btn" class="btn btn-primary flex items-center justify-center space-x-2">
+                <span id="questions-btn-text">Generate Questions</span>
+                <div id="questions-spinner" class="loading-spinner hidden"></div>
+            </button>
+        </div>
+
+        <div id="message-box" class="message-box hidden mb-6"></div>
+
+        <div class="notes-area-container">
+            <button id="copy-btn" class="copy-btn hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M8 2a2 2 0 00-2 2v2H4a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-2h2a2 2 0 002-2V4a2 2 0 00-2-2H8zm0 2h4a2 2 0 012 2v6h2V8a2 2 0 00-2-2h-2V4a2 2 0 00-2-2z" />
+                </svg>
+            </button>
+            <button id="show-sources-btn" class="sources-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M3.293 9.707a1 1 0 010-1.414L6.586 5.586a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L9 9.414V16a1 1 0 11-2 0V9.414l-1.293 1.293a1 1 0 01-1.414-1.414z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd" d="M12.707 2.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L14.586 7H9a1 1 0 010-2h5.586l-1.293-1.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+                <span>Show/Hide Sources</span>
+            </button>
+            <div id="notes-area" class="notes-area">
+                <p id="notes-placeholder" class="text-gray-400 text-center italic">Select a subject, unit, and topic to get started.</p>
+            </div>
+            <div id="sources-container" class="sources-list hidden">
+                <h3 class="font-semibold text-gray-800 mb-2">Web Sources Used:</h3>
+                <ul id="web-sources-list" class="list-disc list-inside space-y-1 mb-4"></ul>
+                <h3 class="font-semibold text-gray-800 mb-2">Relevant Reference Books:</h3>
+                <ul id="book-sources-list" class="list-disc list-inside space-y-1"></ul>
+            </div>
+        </div>
+    </div>
+    <footer class="footer">
+        <p>Made by Uzair B2B Services</p>
+    </footer>
+
+    <script>
+        const syllabusData = {
+            "first_year": {
+                "Theory of Journalism and Mass Communication": {
+                    "Unit 1: Journalism": [
+                        "Journalism: Meaning, Definition, Objective",
+                        "Journalism and Social Responsibility",
+                        "Journalism and Government",
+                        "Journalism and Public Opinion",
+                        "Journalism and Society"
+                    ],
+                    "Unit 2: Communication": [
+                        "Communication: Meaning, Definition, Objective",
+                        "Types of Communication",
+                        "Communication Process: One-way Communication, Two-way Communication, Feedback"
+                    ],
+                    "Unit 3: Mass Communication": [
+                        "Mass Communication: Meaning, Concept, Definition, Process, Step, Feedback",
+                        "Models: Berlo’s SMCR, Osgood, Harold Dwight Lasswell, Shannon-Weaver, Schramm",
+                        "Normative Theory: Four Theories of the Press"
+                    ],
+                    "Unit 4: Emerging Trends in Journalism": [
+                        "Interdisciplinary Relationship with Mass Communication and Journalism",
+                        "Mass Media and Modern Society",
+                        "Mass Media and Democracy",
+                        "Role and Importance of Mass Media",
+                        "Past Exam Questions + Extra"
+                    ]
+                },
+                "History of Journalism in India": {
+                    "Unit 1: Print Media in India": [
+                        "Print Media in India: Printing, Newspapers and their Types, Magazines and their Types",
+                        "Early Communication System in India",
+                        "First Indian Newspaper",
+                        "Print Media in the 18th Century",
+                        "Indian Press and the Indian Freedom Movement",
+                        "Brief History of Major English and Indian Language Newspapers and Magazines"
+                    ],
+                    "Unit 2: Rise and Growth of Hindi Journalism in India": [
+                        "Rise of Modern Journalism",
+                        "Journalism in the 19th Century",
+                        "Journalism and the Renaissance",
+                        "Freedom Movement and Journalism",
+                        "Hindi Journalism of Uttar Pradesh",
+                        "Hindi Journalism of Kashi",
+                        "Literary Journalism"
+                    ],
+                    "Unit 3: Development of Hindi Journalism after Independence": [
+                        "Modern Trends & Development",
+                        "Indian Journalism in the 21st Century",
+                        "News Agencies"
+                    ],
+                    "Unit 4: Famous Newspapers and Journalists": [
+                        "Famous Newspapers and Magazines: Aaj, Udant Martanda, Hindustan, Sarswati, Pratap, Hans",
+                        "Famous Journalists: Babu Rao Vishnu Paradkar, Makhan Lal Chaturvedi, Bharatendu Harishchandra, Ganesh Shankar Vidyarthi, Madan Mohan Malaviya, Mahatma Gandhi",
+                        "Past Exam Questions + Extra"
+                    ]
+                },
+                "News Reporting and Writing": {
+                    "Unit 1: News": [
+                        "News: Meaning, Definition, Elements, Types and their Sources",
+                        "Structure: Elements of Structure, Lead, Types of Lead"
+                    ],
+                    "Unit 2: News Reporting": [
+                        "News Reporting: Meaning, Types, Elements and Precautions",
+                        "Reporter: Qualities of a Good Reporter, Types of Reporters (Stringer, City Reporter, Special Correspondent)"
+                    ],
+                    "Unit 3: Specialized Reporting": [
+                        "Types of Reporting: Investigative and Interpretative",
+                        "Specialized Fields: Crime, Sports, Science, Economic, Rural and Agriculture, Health, War and Conflict, Cinema",
+                        "Covering Events: Political Meetings, Seminars, Festival Ceremony"
+                    ],
+                    "Unit 4: Writing for Newspaper": [
+                        "Writing for Newspaper: Feature and Article, Use of Facts, Figures, Data and Diagram, Interview, Press Conference",
+                        "Past Exam Questions + Extra"
+                    ]
+                },
+                "Indian Government, Politics and International Relations": {
+                    "Unit 1: Government and Politics": [
+                        "Government Making",
+                        "Working of Federalism",
+                        "Issues in Governance at State and Central Level of State Autonomy in India",
+                        "Politics at the District Level: Panchayati Raj",
+                        "Election and Governance",
+                        "Government and Media Relations"
+                    ],
+                    "Unit 2: Party System and Elections": [
+                        "Nature of the Party System",
+                        "Study of Major Parties and important Regional Parties and their social bases",
+                        "Effect of Fragmentation of Parties on the Formation and Working of Governments at the Centre and the State"
+                    ],
+                    "Unit 3: Electoral System and Center-State Relations": [
+                        "The Electoral System",
+                        "Secularism and Communalism Trends",
+                        "Centre-State Relations and report on Centre-State Relation"
+                    ],
+                    "Unit 4: International Relations": [
+                        "Brief Study of International Relations",
+                        "Foreign Policy of India",
+                        "Bilateral Relations: UK, USA, Russia, China, Pakistan, South Asian Countries, Africa, Europe, America",
+                        "Regional Organizations: ASEAN, SAARC, OIC, OAC",
+                        "UN and Its Agencies and their Function",
+                        "Past Exam Questions + Extra"
+                    ]
+                },
+                "Environmental Communication": {
+                    "Unit 1: Environment and Communication": [
+                        "Environment: Meaning, Concept, Definition, Scope, Component, Importance",
+                        "Various Dimensions of Environment",
+                        "Environment and Man",
+                        "Indian Culture and Environment",
+                        "Environment and Communication"
+                    ],
+                    "Unit 2: Ecology and Biodiversity": [
+                        "Ecology: Concept, Definition",
+                        "Biodiversity: Biodiversity in India, Various Projects for the Protection of Wildlife",
+                        "Ecology and Human Communication System"
+                    ],
+                    "Unit 3: Environmental Pollution": [
+                        "Environmental Pollution: Definition, Types, Pollutant and its types, Sources of Pollution",
+                        "Types of Pollution: Air Pollution, Water Pollution, Soil Pollution, Noise Pollution, Radioactive Pollution, Bio Pollution",
+                        "Environmental Pollution and Mass Media"
+                    ],
+                    "Unit 4: Disaster and Sustainable Development": [
+                        "Disaster: Meaning, Definition, Types",
+                        "Disaster Management",
+                        "Population and Environment",
+                        "Environmental Management and Conservation",
+                        "Sustainable Development",
+                        "Role of Mass Media in Awareness of Environment",
+                        "Past Exam Questions + Extra"
+                    ]
+                },
+                "Computer, Internet and Information Technology": {
+                    "Unit 1: Introduction to Computer and Microsoft Office": [
+                        "Introduction to Computer: History and Generation of Computers, Types of Computers",
+                        "Hardware and Software",
+                        "Digital Technology",
+                        "Keyboard Functions",
+                        "Microsoft Office: M.S. Word, M.S. Excel, M.S. PowerPoint, M.S. Access, M.S. Outlook, M.S. OneNote, M.S. Publisher",
+                        "Microsoft Windows",
+                        "Page Maker: Page Setup, Drawing"
+                    ],
+                    "Unit 2: Multimedia and Video Editing": [
+                        "Coral Draw",
+                        "Principles of Animation",
+                        "Use of Video Broadcast",
+                        "Multimedia: C.D. Rom, Multimedia Business Application",
+                        "Integration of Computers and Television",
+                        "Video Editing Introduction"
+                    ],
+                    "Unit 3: Internet and Web Technology": [
+                        "Internet: Introduction",
+                        "Web Technology",
+                        "Web vs. Print",
+                        "Advertising Copy Creation",
+                        "Feedback on the Net"
+                    ],
+                    "Unit 4: Website and Digital Issues": [
+                        "Website Elements",
+                        "Visual Design",
+                        "Sale Promotion and Services on the Website",
+                        "Technical Issues",
+                        "Socio-Political and Economic Issues",
+                        "Copyright Issues",
+                        "Past Exam Questions + Extra"
+                    ]
+                }
+            },
+            "second_year": {
+                "ELECTRONIC MEDIA": {
+                    "Unit-1. Radio": [
+                        "Radio as a Medium of Mass Communication, Characteristics of Radio",
+                        "Historical perspective of Radio in India",
+                        "Types of ownership, Audience, Commercial Radio, Educational Radio, FM, franchising, Community Radio",
+                        "Language of Radio, Different formats of radio programmes"
+                    ],
+                    "Unit-2. Television": [
+                        "Television as Medium of Mass Communication, Characteristics, Ownership",
+                        "Organizational structure of Doordarshan, Satellite Television channels, Cable Television",
+                        "Educational Television, Commercial Television",
+                        "Television Script Writing, Basic of Television Production",
+                        "Television Reporting, News Bulletins"
+                    ],
+                    "Unit-3. FILM": [
+                        "Nature, historical background, technical aspects of film production",
+                        "Film Industry in India, Status issues Problems, Regional Cinema, Future aspects",
+                        "Film language and grammar, FTII"
+                    ],
+                    "Unit-4. Television News writing": [
+                        "Television News writing, Television interviews",
+                        "Documentaries, short talk",
+                        "Impact of new technology in Media Language",
+                        "Features, Talks"
+                    ]
+                },
+                "NEWS EDITING": {
+                    "UNIT-1: Editing": [
+                        "Editing: Meaning, object, Nature & need of editing",
+                        "Set up Editorial department",
+                        "Function & qualification of Chief editor, News editor and Sub-editor"
+                    ],
+                    "UNIT-2: Editing-symbols": [
+                        "Editing-symbols, Proof reading symbols, Technique of proof reading",
+                        "Desk copy editing, Agency copy editing, Editing of press releases",
+                        "Dummy, page make up, lay out",
+                        "Photo editing, Magazine editing"
+                    ],
+                    "UNIT-3: Headlines": [
+                        "Headlines: Technique, style & types",
+                        "Editorial writing, Leader",
+                        "Column writing, Letter to the editor"
+                    ],
+                    "Unit-4: Books & Magazines review": [
+                        "Books & Magazines review",
+                        "Review of arts & Culture",
+                        "Film review, Music, Dance and drama programme review"
+                    ]
+                },
+                "PHOTO JOURNALISM": {
+                    "Unit-1. Photography- Elements and Principles": [
+                        "Photography- Elements and Principles",
+                        "Beginning of Photography",
+                        "Photography- Subject and Light"
+                    ],
+                    "Unit-2. Photography Equipment": [
+                        "Photography Equipment- Cameras, types, Formats",
+                        "Lens and their types and Function",
+                        "Film- Types and Functions"
+                    ],
+                    "Unit-3. Shots, focus, Shutters": [
+                        "Shots, focus, Shutters, Speed",
+                        "Selection of Subject",
+                        "Deference types of Photographs",
+                        "Photo Editing: Procedure, Pictures for Newspapers and Magazines"
+                    ],
+                    "Unit-4. Photography for Advertising": [
+                        "Photography for Advertising",
+                        "Qualities of a Photographer",
+                        "News Value for Pictures",
+                        "Photo Features, Picture Magazines",
+                        "Impact of Technology",
+                        "Photography- necessity and significance"
+                    ]
+                },
+                "PUBLIC RELATIONS AND CORPORATE COMMUNICATION": {
+                    "Unit-1. Public Relations": [
+                        "Public Relations: Definitions",
+                        "PR as a Communicating function, History of PR, Growth of PR in India",
+                        "PR & Publicity, Propaganda of Public opinion",
+                        "PR as a Management function, Stages of PR Planning, Implementation, research, evaluation",
+                        "PR Practitioners and Media relations, Press Conference, Press release, other PR tools"
+                    ],
+                    "Unit-2: Communication with Publics": [
+                        "Communication with Publics- Internal and external",
+                        "Community relations, Employee relations",
+                        "PR in India, Public and Private Sector",
+                        "PR Counseling, PR agencies",
+                        "PR and advertising, PR for Media Institutions"
+                    ],
+                    "Unit-3: Shareholder relations": [
+                        "Shareholder relations- dealer relations",
+                        "PR for hospital, PR for Charitable Institutions",
+                        "Defense PR, PR for NGOs, PR for Political Parties",
+                        "Crisis Management, Case Study"
+                    ],
+                    "Unit-4: PR research": [
+                        "PR research: techniques",
+                        "PR and Law, PR and New Technology",
+                        "Code of Ethics for PR International",
+                        "PR professional organizations of PR",
+                        "Emerging Tends"
+                    ]
+                },
+                "MEDIA MANAGEMENT": {
+                    "Unit-1. Management Meaning": [
+                        "Management Meaning, Principles, Managerial Functions",
+                        "Media Owenership in India Nature, Types and its Significance",
+                        "Sole Proprietorship, Partnership, Private Limited Companies, Trusts, Co-Operatives, religious institutions (Societies) and franchises"
+                    ],
+                    "Unit-2. Policy Formulation": [
+                        "Policy Formulation Planning and Control",
+                        "Process and Problems of Lounching Media Venhires",
+                        "Organization theory",
+                        "Functions and Organizational structure of deffirent deparments- General management, Finance, Circulation (sales Promotion- Including Pricing and Price war aspects), Advertising (Marketing), Personnel Management"
+                    ],
+                    "Unit-3. Editorial Management": [
+                        "Editorial Management- Significance",
+                        "Editorial department of Print Media, Structure of editorial department of Print Media",
+                        "DAVP, INS, ABC",
+                        "Changing role of editorial staff and other Media Persons"
+                    ],
+                    "Unit-4. Economics of Print and Electronic Media": [
+                        "Economics of Print and Electronic Media- Various aspects",
+                        "Administration and Progamme Management in India",
+                        "Scheduling, Transmitting, record keeping, Quality control and Cost effective techniques",
+                        "Employee and Customer relationship",
+                        "Brand Promotion",
+                        "Foreign equity in Indian Media and Press Commissions ans Indian Newspapers Management structure"
+                    ]
+                },
+                "ECONOMIC DEVELOPMENT AND PLANNING IN INDIA": {
+                    "Unit-1. Economic Development": [
+                        "Economic Development: concept and general perspective",
+                        "Common characteristics of Underdevelopment",
+                        "India as a developing economy and its international standing",
+                        "Strategies of development balanced vs, unbalanced growth strategy, wage goods strategy, basic-needs strategy"
+                    ],
+                    "Unit-2. Capital accumulation as a factor in economic growth": [
+                        "Capital accumulation as a factor in economic growth",
+                        "Role of education in economic development",
+                        "Population and economic development (the two-way relationship)",
+                        "Aspect of human development: education",
+                        "Poverty and inequality of income distribution (With special reference to India)",
+                        "Changes in the sectoral distribution of national income, per capita income and labour force since independence"
+                    ],
+                    "Unit-3. Agriculture role of agriculture in India's economic development": [
+                        "Agriculture role of agriculture in India's economic development",
+                        "Factors influencing productivity in agriculture- Institutional factors, technological factors",
+                        "Prices and availability of finance",
+                        "Industry: the role and pattern of industrial growth, trends since 1950",
+                        "Industrial policy with special emphasis of on new industrial Policy 1991"
+                    ],
+                    "Unit-4. Public sector in India and its role in the small scale and cottage industries": [
+                        "Public sector in India and its role in the small scale and cottage industries and government's policy with respect to these",
+                        "Problem of industrial sickness",
+                        "External sector role of foreign aid",
+                        "Impact of liberalization, particularly since 1991 on Indian economy"
+                    ]
+                }
+            },
+            "third_year": {
+                "INDIAN CONSTITUTION AND MEDIA LAW": {
+                    "Unit-1": [
+                        "Indian Constitution: General Introduction, characteristics, Preamble, Directive Principles of State Policy, Fundamental right, Fundamental Duties, Citizenship."
+                    ],
+                    "Unit-2": [
+                        "The Legislature, The Executive, the Cabinet, the Judiciary- Powers and Functions, the President, Union list, State list, Concurrent list, Emergency declaration, Sepration of Powers, Chief Constitutional Commission and Committees."
+                    ],
+                    "Unit-3": [
+                        "A Brief history of press laws in India.",
+                        "Indian Constitution and Freedom of Mass Media.",
+                        "Reasonable restrictions.",
+                        "Parliamentary Privileges.",
+                        "Contempt of Court, Defamation.",
+                        "Press and Registration of Books Act-1867."
+                    ],
+                    "Unit-4": [
+                        "Official Secrets, Sedition.",
+                        "Drug and Magic Remedies (Objectionable) Advertisement Act-1954.",
+                        "Obscenity, Copyright, Press Council.",
+                        "Right to Information Act.",
+                        "Press Commission, Code of Ethics, Confidentiality of Sources of Information.",
+                        "Working Journalist and Newspapers employees Act-1955."
+                    ]
+                },
+                "ADVERTISING": {
+                    "Unit-1": [
+                        "Advertising : Definition, Historical Development.",
+                        "Social and Economic benefits of advertising, Mass Media and advertising, Criticisms.",
+                        "Types of Advertising, Consumer Advertising- Corporate, Industrial, Retail, National, Trade, Professional & Social."
+                    ],
+                    "Unit-2": [
+                        "Product advertising- Target Audience, brand Image, Positioning, Advertising Strategies.",
+                        "Appeals, Advertising Spiral, Market and its segmentation, Sales promotion."
+                    ],
+                    "Unit-3": [
+                        "Advertising Agency : Structure and functions, creativity.",
+                        "Media Selection, NewsPaper, Magazines, Radio, Television, Outdoor, Strategy, Planning, Media Budget.",
+                        "Campaign Planning, Copy writing and advertising Production techniques, Print, Radio,Television, film, Outdoor, Ideation, Visualization, Use of Computers, Copy Preparations."
+                    ],
+                    "Unit-4": [
+                        "Research in Advertising, Planning. Execution.",
+                        "Copy research, Market research.",
+                        "Ethical aspects of advertising, advertising and Pressure groups, Emerging trends."
+                    ]
+                },
+                "WRITING OFF MASS MEDIA": {
+                    "Unit-1": [
+                        "Historical background of writing, Elements of language.",
+                        "Writing and Coding of contents, Language and Communication."
+                    ],
+                    "Unit-2": [
+                        "Principles and Method of effective Writing & Basic rules of Grammars.",
+                        "Sentences Construction, Paragraphing, Narration.",
+                        "Adjective and Adverbs, Tenses, Sequence & Logic."
+                    ],
+                    "Unit-3": [
+                        "Creativity in Writing- feature, Articles.",
+                        "Interview Stories, Business Writing ,Technical Writing , Letter Writing.",
+                        "News Writing, Script Writing for serials."
+                    ],
+                    "Unit-4": [
+                        "Writing For target groups, Special interest audience.",
+                        "Translation techniques, Media Reviews of arts, Performing arts and Cinema."
+                    ]
+                },
+                "MASS MEDIA AND SOCIETY": {
+                    "Unit-1": [
+                        "Concept of Society.",
+                        "Inter-relation between person and Society, Language and Human Society.",
+                        "Socialization- Concept and Theory, Mass Media as a means & Vehicle of Socialization.",
+                        "Mass Media as a means of Social Control and change."
+                    ],
+                    "Unit-2": [
+                        "Concept of Family, Impact of Mass Media on Family Structure.",
+                        "Relations between family members and Impact of Mass Media an their changing relation, Attraction of Television in Youth."
+                    ],
+                    "Unit-3": [
+                        "Indian Social Structure- Varna Ashram, Purusartha, culture and its changing nature.",
+                        "Caste system and its Changing nature, Changing nature in Caste system and role of Mass Media.",
+                        "Social disorganization, Impact of Mass Media on Social disorganization.",
+                        "Social Deviance, Impact of Mass Media on Deviant tendency in Youth.",
+                        "Social Integration and Mass Media, National Social Problems and Mass Media."
+                    ],
+                    "Unit-4": [
+                        "Crime: Concept and Theory, Crime and Mass Communication.",
+                        "Growth and Crime and role of mass Media, Cyber Crime.",
+                        "Mass Media and Social Awareness, Role of Mass Media in Contentment of Crime.",
+                        "Cultural Dynamics and Mass Media, Impact of Mass Media on Culturalization, Westernization, Modernization and Globalization."
+                    ]
+                },
+                "SPORTS JOURNALISM": {
+                    "Unit-1": [
+                        "Sports : Beginning and Development",
+                        "Sports in Ancient India, Rural Sports, Regional Sports, National-International Sports",
+                        "Sports and Sports Competition, National- International, Technical/Jorgen Words of Sports"
+                    ],
+                    "Unit-2": [
+                        "Sports Journalism in India : Origin and Development, Sports in Print Media",
+                        "Sports page make-up, Writing and Editing of Sports News, Sports Reviews, Sports Feature",
+                        "Sports editorial Writing, Sports Magazines, Editing of Sports Magazines",
+                        "Sports news and Photograph Composition"
+                    ],
+                    "Unit-3": [
+                        "Radio and Sports Programmes, Radio Commentary of Sports",
+                        "Sports news writing for Radio, Chief Sports Radio Commentator",
+                        "Television and Sports, Chief Sports channels, Television Commentary",
+                        "Impact of television- Radio Commentary on Sports person"
+                    ],
+                    "Unit-4": [
+                        "Sports and Internet, Sports and Interactive Media",
+                        "Technical aspects of Sports reporting",
+                        "Role of Sports Journalism in the Development of Sports",
+                        "Contribution of Sports in national development",
+                        "Chief Personality in Sports World, chief Sports records",
+                        "Chief Sports Organization, Sports and Advertisement"
+                    ]
+                },
+                "DEVELOPMENT COMMUNICATION": {
+                    "Unit-1": [
+                        "Development: Meaning, Concept, Indicators of development.",
+                        "Models of development , Classification of world on the basis of development.",
+                        "Characteristics of Developed and Developing World."
+                    ],
+                    "Unit-2": [
+                        "Development communication: Meaning, Concept, Definition, Need of development communication, Theories of development communication."
+                    ],
+                    "Unit-3": [
+                        "Development and environment.",
+                        "Rural Development and Electronic Media.",
+                        "Development and traditional media.",
+                        "Development Journalism and Government, Development Journalism and Social Change."
+                    ],
+                    "Unit-4": [
+                        "Democratic Decentralization, Agriculture Communication and Rural Development.",
+                        "Diffusion of Innovation, Development Communication and Health.",
+                        "Family Welfare, Population, Women and Child Development.",
+                        "Writing for Development Information and Message, NGO's and development.",
+                        "Development and United Nations."
+                    ]
+                }
+            }
+        };
+
+        const referenceBooksData = {
+            "first_year": {
+                "Theory of Journalism and Mass Communication": [
+                    "डेनिस मैक्विल: मास कम्युनिकेशन थियरी एन इण्ट्रोडक्शन",
+                    "डॉ० अनिल कुमार उपाध्याय: पत्रकारिता और जनसंचार सिद्धान्त और विकास संचार",
+                    "डेनिस मैक्विल: टुवर्ड्स ए सोसियोलॉजी आफ मास कम्यूनिकेसन",
+                    "कॉवली, मिचेल: कम्युनिकेशन थियरी टुडे",
+                    "केवल जे० कुमार: मास कम्यूनिकेशन इन इण्डिया"
+                ],
+                "History of Journalism in India": [
+                    "अम्बिका प्रसाद वाजपेयी: समाचार पत्रों का इतिहास",
+                    "डॉ० अनिल कुमार उपाध्याय: पत्रकारिता और जनसंचार सिद्धान्त और विकास संचार",
+                    "जे०नटराजन: भारतीय पत्रकारिता का इतिहास",
+                    "कृष्ण बिहारी मिश्र: हिन्दी पत्रकारिता",
+                    "पं०कमलापति त्रिपाठी: पत्र एवं पत्रकार",
+                    "वेद प्रकाश वैदिक: हिन्दी पत्रकारिता विविध आयाम",
+                    "रामरतन भटनागर: राइज एण्ड ग्रोथ आफ हिन्दी जर्नलिज्म"
+                ],
+                "News Reporting and Writing": [
+                    "काशीनाथगोविन्द जोगलेकर: समाचार और संवाददाता",
+                    "नन्दकिशोर त्रिखा: समचार संकलन और लेखन",
+                    "होहेन्सवर्ग: प्रोफेशनल जर्नलिज्म",
+                    "डॉ० रमेश जैन: समाचार संकलन एवं संपादन",
+                    "जे० हैरिस: ए कम्प्लीट रिपोर्ट",
+                    "मेल्विनमेंचर: बेसिक न्यूज राइटिंग"
+                ],
+                "Indian Government, Politics and International Relations": [],
+                "Environmental Communication": [],
+                "Computer, Internet and Information Technology": []
+            },
+            "second_year": {
+                "ELECTRONIC MEDIA": [],
+                "NEWS EDITING": [
+                    "ब्रूम वेस्टले: द मास मीडिया",
+                    "विलियम एल०राइवर्स: न्यूज रिपोर्टिंग एण्ड एडिटिंग",
+                    "के०एम०श्रीवास्तव: सम्पादन के सिद्धान्त",
+                    "रामचन्द्र तिवारी: समाचार संपादन",
+                    "डॉ० रमेश जैन: सम्पादन कला",
+                    "के०पी० नारायण"
+                ],
+                "PHOTO JOURNALISM": [],
+                "PUBLIC RELATIONS AND CORPORATE COMMUNICATION": [],
+                "MEDIA MANAGEMENT": [],
+                "ECONOMIC DEVELOPMENT AND PLANNING IN INDIA": [
+                    "NCERT on Economy from Class 9 to 12"
+                ]
+            },
+            "third_year": {
+                "INDIAN CONSTITUTION AND MEDIA LAW": [],
+                "ADVERTISING": [],
+                "WRITING OFF MASS MEDIA": [],
+                "MASS MEDIA AND SOCIETY": [],
+                "SPORTS JOURNALISM": [],
+                "DEVELOPMENT COMMUNICATION": [
+                    "डॉ० अनिल कुमार उपाध्याय: पत्रकारिता एवं विकास संचार",
+                    "डॉ० अनिल कुमार उपाध्यय: गांधी, विकास और पत्रकारिता।",
+                    "डॉ० अनिल कुमार उपाध्याय: मास मीडिया एवं विकास के आयाम",
+                    "उमा नरूला: डेवलपमेंट कम्यूनिकेशन",
+                    "बी०आर० गुप्ता: मास कम्यूनिकेशन एण्ड डेवलपमेंट",
+                    "डॉ० अनिल कुमार उपाध्याय: आर्थिक नीति एवं समताः गांधी चिन्तन।"
+                ]
+            }
+        };
+
+        const yearSelect = document.getElementById('year-select');
+        const subjectSelect = document.getElementById('subject-select');
+        const unitSelect = document.getElementById('unit-select');
+        const topicSelect = document.getElementById('topic-select');
+        const notesTypeSelect = document.getElementById('notes-type-select');
+        const questionsTypeSelect = document.getElementById('questions-type-select');
+        const languageSelect = document.getElementById('language-select');
+        const generateNotesBtn = document.getElementById('generate-notes-btn');
+        const generateQuestionsBtn = document.getElementById('generate-questions-btn');
+        const additionalTopicsTextarea = document.getElementById('additional-topics');
+        const notesArea = document.getElementById('notes-area');
+        const notesPlaceholder = document.getElementById('notes-placeholder');
+        const notesBtnText = document.getElementById('notes-btn-text');
+        const questionsBtnText = document.getElementById('questions-btn-text');
+        const notesSpinner = document.getElementById('notes-spinner');
+        const questionsSpinner = document.getElementById('questions-spinner');
+        const messageBox = document.getElementById('message-box');
+        const copyBtn = document.getElementById('copy-btn');
+        const showSourcesBtn = document.getElementById('show-sources-btn');
+        const sourcesContainer = document.getElementById('sources-container');
+        const webSourcesList = document.getElementById('web-sources-list');
+        const bookSourcesList = document.getElementById('book-sources-list');
+
+        const apiKey = "AIzaSyCFMvMotXhS3pnUdftrT4EOF-iGqbq9fIQ";
+        const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+        // Populate subjects based on selected year
+        function updateSubjects() {
+            const selectedYear = yearSelect.value;
+            const subjects = syllabusData[selectedYear];
+            subjectSelect.innerHTML = '<option value="" disabled selected>Select Subject</option>';
+            unitSelect.innerHTML = '<option value="" disabled selected>Select Unit</option>';
+            topicSelect.innerHTML = '<option value="" disabled selected>Select Topic</option>';
+            unitSelect.disabled = true;
+            topicSelect.disabled = true;
+            generateNotesBtn.disabled = true;
+
+            if (subjects) {
+                Object.keys(subjects).forEach(subject => {
+                    const option = document.createElement('option');
+                    option.value = subject;
+                    option.textContent = subject;
+                    subjectSelect.appendChild(option);
+                });
+            }
+        }
+
+        function showMessage(message, type = 'info') {
+            messageBox.textContent = message;
+            messageBox.classList.remove('hidden');
+            if (type === 'error') {
+                messageBox.style.backgroundColor = '#fecaca';
+                messageBox.style.color = '#7f1d1d';
+            } else {
+                messageBox.style.backgroundColor = '#dbeafe';
+                messageBox.style.color = '#1e40af';
+            }
+        }
+
+        async function fetchWithBackoff(url, payload, retries = 5, delay = 1000) {
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) {
+                    if (response.status === 429 && retries > 0) {
+                        await new Promise(res => setTimeout(res, delay));
+                        return fetchWithBackoff(url, payload, retries - 1, delay * 2);
+                    } else {
+                        throw new Error(`API error: ${response.statusText}`);
+                    }
+                }
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                console.error("API call failed:", error);
+                throw error;
+            }
+        }
+
+        function updateUnits() {
+            const selectedYear = yearSelect.value;
+            const selectedSubject = subjectSelect.value;
+            unitSelect.innerHTML = '<option value="" disabled selected>Select Unit</option>';
+            unitSelect.disabled = true;
+            topicSelect.innerHTML = '<option value="" disabled selected>Select Topic</option>';
+            topicSelect.disabled = true;
+            generateNotesBtn.disabled = true;
+
+            if (selectedYear && selectedSubject) {
+                const units = Object.keys(syllabusData[selectedYear][selectedSubject]);
+                units.forEach(unit => {
+                    const option = document.createElement('option');
+                    option.value = unit;
+                    option.textContent = unit;
+                    unitSelect.appendChild(option);
+                });
+                unitSelect.disabled = false;
+            }
+        }
+
+        function updateTopics() {
+            const selectedYear = yearSelect.value;
+            const selectedSubject = subjectSelect.value;
+            const selectedUnit = unitSelect.value;
+            topicSelect.innerHTML = '<option value="" disabled selected>Select Topic</option>';
+            topicSelect.disabled = true;
+            generateNotesBtn.disabled = true;
+
+            if (selectedYear && selectedSubject && selectedUnit) {
+                const topics = syllabusData[selectedYear][selectedSubject][selectedUnit];
+                topics.forEach(topic => {
+                    const option = document.createElement('option');
+                    option.value = topic;
+                    option.textContent = topic;
+                    topicSelect.appendChild(option);
+                });
+                topicSelect.disabled = false;
+            }
+        }
+
+        function checkEnableNotesButton() {
+            const customTopic = additionalTopicsTextarea.value.trim();
+            const selectedTopic = topicSelect.value;
+            generateNotesBtn.disabled = !(selectedTopic || customTopic);
+        }
+
+        yearSelect.addEventListener('change', updateSubjects);
+        subjectSelect.addEventListener('change', updateUnits);
+        unitSelect.addEventListener('change', updateTopics);
+        topicSelect.addEventListener('change', checkEnableNotesButton);
+        additionalTopicsTextarea.addEventListener('input', checkEnableNotesButton);
+
+        copyBtn.addEventListener('click', () => {
+            const textToCopy = notesArea.innerText;
+            if (textToCopy && textToCopy !== notesPlaceholder.textContent) {
+                try {
+                    const tempInput = document.createElement('textarea');
+                    tempInput.value = textToCopy;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+                    showMessage('Content copied to clipboard!', 'success');
+                } catch (err) {
+                    showMessage('Failed to copy content.', 'error');
+                    console.error('Copy to clipboard failed:', err);
+                }
+            }
+        });
+
+        showSourcesBtn.addEventListener('click', () => {
+            sourcesContainer.classList.toggle('hidden');
+        });
+
+        async function fetchAndDisplayContent(requestType) {
+            const selectedYear = yearSelect.value;
+            const selectedLanguage = languageSelect.value;
+            const selectedSubject = subjectSelect.value;
+            const selectedUnit = unitSelect.value;
+            const selectedTopic = topicSelect.value;
+            const customTopic = additionalTopicsTextarea.value.trim();
+
+            const hasTopic = selectedTopic || customTopic;
+
+            const referenceBooks = referenceBooksData[selectedYear]?.[selectedSubject] || [];
+            const referenceBooksPrompt = referenceBooks.length > 0 ?
+                ` Additionally, please refer to the following texts: ${referenceBooks.join(', ')}.` : '';
+
+            generateNotesBtn.disabled = true;
+            generateQuestionsBtn.disabled = true;
+            sourcesContainer.classList.add('hidden');
+            copyBtn.classList.add('hidden');
+            webSourcesList.innerHTML = '';
+
+            if (referenceBooks.length > 0) {
+                bookSourcesList.innerHTML = referenceBooks.map(book => `<li>${book}</li>`).join('');
+            } else {
+                bookSourcesList.innerHTML = '<li>No specific reference books listed for this subject.</li>';
+            }
+
+            let userQuery = "";
+            let btnTextElement, spinnerElement;
+
+            if (requestType === 'notes') {
+                if (!hasTopic) {
+                    showMessage('Please select a topic or type in a custom topic to generate notes.', 'error');
+                    generateNotesBtn.disabled = false;
+                    generateQuestionsBtn.disabled = false;
+                    return;
+                }
+                btnTextElement = notesBtnText;
+                spinnerElement = notesSpinner;
+                const notesType = notesTypeSelect.value;
+                const topicToGenerate = customTopic || selectedTopic;
+
+                switch(notesType) {
+                    case 'detailed':
+                        userQuery = `Provide comprehensive, detailed academic notes on '${topicToGenerate}' for a BA Mass Communication student. The notes should be a minimum of 500 words. Include key concepts and relevant theories. Ensure the content is up-to-date by using Google Search.${referenceBooksPrompt} The language should be ${selectedLanguage}.`;
+                        break;
+                    case 'case_study':
+                        userQuery = `Provide a detailed case study or a set of practical, real-world examples to illustrate the topic of '${topicToGenerate}' for a BA Mass Communication student. The examples should be relevant to modern mass communication and journalism. Ensure the content is up-to-date by using Google Search.${referenceBooksPrompt} The language should be ${selectedLanguage}.`;
+                        break;
+                    case 'simpler':
+                        userQuery = `Explain the topic of '${topicToGenerate}' in simple, easy-to-understand language for a BA Mass Communication student. Use simple examples and analogies to clarify complex ideas.${referenceBooksPrompt} The language should be ${selectedLanguage}.`;
+                        break;
+                    case 'in_depth':
+                        userQuery = `Provide an in-depth, analytical note on '${topicToGenerate}' for a BA Mass Communication student. The notes should be a minimum of 500 words. Dive deep into the nuances and provide a critical analysis. Ensure the content is up-to-date by using Google Search.${referenceBooksPrompt} The language should be ${selectedLanguage}.`;
+                        break;
+                    case 'short_notes':
+                        userQuery = `Provide a brief, concise summary of '${topicToGenerate}' in bullet points for a BA Mass Communication student's last-minute revision. Focus on key terms, essential concepts, and main takeaways. The language should be ${selectedLanguage}.`;
+                        break;
+                }
+            } else if (requestType === 'questions') {
+                btnTextElement = questionsBtnText;
+                spinnerElement = questionsSpinner;
+                const questionsType = questionsTypeSelect.value;
+                const topicToGenerate = customTopic || selectedTopic;
+                const wordCount = questionsType === 'short' ? 200 : 500;
+
+                if (topicToGenerate) {
+                    userQuery = `Generate a single academic question and a ${wordCount}-word answer for a BA Mass Communication student on the topic '${topicToGenerate}'. The answer should be structured for a university-level exam.${referenceBooksPrompt} The language should be ${selectedLanguage}.`;
+                } else {
+                    userQuery = `Generate five long-form academic practice questions for a BA Mass Communication student based on the subject '${selectedSubject}' and the unit '${selectedUnit}'. The questions should test their understanding of the key concepts and topics within this unit. The questions should be suitable for a university-level exam.${referenceBooksPrompt} The language should be ${selectedLanguage}.`;
+                }
+            }
+
+            btnTextElement.classList.add('hidden');
+            spinnerElement.classList.remove('hidden');
+            notesArea.innerHTML = '';
+            notesPlaceholder.textContent = `Generating ${requestType === 'notes' ? 'notes' : 'practice questions'}... Please wait.`;
+            notesPlaceholder.classList.remove('hidden');
+            messageBox.classList.add('hidden');
+            
+            try {
+                const systemInstruction = "You are an expert tutor for a BA (Hons) Mass Communication course. Your goal is to provide detailed, accurate, and up-to-date academic content. You will use Google Search to find and process the latest information.";
+                
+                const payload = {
+                    contents: [{ parts: [{ text: userQuery }] }],
+                    tools: [{ "google_search": {} }],
+                    systemInstruction: { parts: [{ text: systemInstruction }] },
+                };
+
+                const result = await fetchWithBackoff(geminiApiUrl, payload);
+                const content = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                const groundingMetadata = result?.candidates?.[0]?.groundingMetadata;
+
+                if (content) {
+                    notesArea.innerHTML = content;
+                    notesPlaceholder.classList.add('hidden');
+                    copyBtn.classList.remove('hidden');
+
+                    if (groundingMetadata && groundingMetadata.groundingAttributions) {
+                        const sources = groundingMetadata.groundingAttributions.map(attr => ({
+                            uri: attr.web?.uri,
+                            title: attr.web?.title
+                        }));
+                        const validSources = sources.filter(source => source.uri && source.title);
+                        if (validSources.length > 0) {
+                            webSourcesList.innerHTML = validSources.map(source => `<li><a href="${source.uri}" target="_blank" class="text-blue-600 hover:underline">${source.title}</a></li>`).join('');
+                        } else {
+                            webSourcesList.innerHTML = '<li>No specific web pages were cited for this response.</li>';
+                        }
+                    } else {
+                        webSourcesList.innerHTML = '<li>No specific web pages were cited for this response.</li>';
+                    }
+                } else {
+                    notesArea.innerHTML = `<p class="text-gray-500 text-center">I'm sorry, I couldn't generate the content. Please try again.</p>`;
+                    notesPlaceholder.classList.add('hidden');
+                }
+            } catch (error) {
+                console.error(error);
+                notesArea.innerHTML = `<p class="text-gray-500 text-center">An error occurred. Please ensure your API key is correct and try again.</p>`;
+                notesPlaceholder.classList.add('hidden');
+            } finally {
+                btnTextElement.classList.remove('hidden');
+                spinnerElement.classList.add('hidden');
+                checkEnableNotesButton();
+                generateQuestionsBtn.disabled = false;
+            }
+        }
+
+        generateNotesBtn.addEventListener('click', () => fetchAndDisplayContent('notes'));
+        generateQuestionsBtn.addEventListener('click', () => fetchAndDisplayContent('questions'));
+
+        // Initial setup
+        updateSubjects();
+    </script>
+</body>
+</html>
