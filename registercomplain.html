@@ -95,12 +95,6 @@
                         <option v-for="(lang, key) in languages" :key="key" :value="key">{{ lang.name }}</option>
                     </select>
                 </div>
-                <div class="flex-1">
-                    <label for="report-language-select" class="block text-sm font-semibold text-gray-700 mb-1">{{ translate('report_language') }}</label>
-                    <select id="report-language-select" v-model="reportLanguage" class="p-3 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full transition-all duration-200">
-                        <option v-for="(lang, key) in languages" :key="key" :value="key">{{ lang.name }}</option>
-                    </select>
-                </div>
             </div>
         </div>
 
@@ -189,258 +183,263 @@
                 </div>
             </div>
         </div>
-    </div>
-    
-    <!-- Footer -->
-    <footer class="mt-auto text-center text-gray-500 text-sm py-4">
-        Made by uzair b2b services
-    </footer>
+        
+        <!-- Footer -->
+        <footer class="mt-auto text-center text-gray-500 text-sm py-4">
+            Made by uzair b2b services
+        </footer>
 
-    <script>
-        const { createApp, ref, computed, nextTick } = Vue;
+        <script>
+            const { createApp, ref, computed, nextTick } = Vue;
 
-        const languages = {
-            en: { name: 'English', questions: ["What is your full name?", "What is your contact information and address? ", "What is the full name and address of the person you are complaining against? If you don't know their name, please provide a description.", "What is the date and time of the incident?", "Where did the incident take place?", "Were there any witnesses? If so, please provide their names and contact information.", "Please describe the incident in detail, including what happened and what specific crime you believe was committed (e.g., theft, harassment, assault, fraud).", "Is there any other information you would like to include?"],
-                app_title: 'Legal Complaint AI', tagline: 'Use this AI to draft a formal complaint for police. We will ask you a few questions to gather details.', disclaimer: 'Disclaimer: This is a drafting tool and does not constitute legal advice. Please use this document as a template and consult with legal authorities.',
-                chat_language: 'Chat Language', report_language: 'Report Language', initial_message: 'Hello. I am here to help you. What is your full name?', generating_report: 'Generating report...', generated_report_title: 'Generated Complaint Report:', input_placeholder: 'Type your message...', send: 'Send', download_pdf: 'Download PDF', report_ready: 'Your information has been collected. You can now generate the report.', generate_report: 'Generate Report', start_over: 'Start Over', report_error: 'I am sorry, I could not generate the report. Please try again.', api_error: 'An error occurred. Please try again.', download_success: 'Complaint report downloaded as PDF!'
-            },
-            hi: { name: 'हिन्दी', questions: ["आपका पूरा नाम क्या है?", "आपकी संपर्क जानकारी और पता क्या है?", "जिस व्यक्ति के खिलाफ आप शिकायत कर रहे हैं उसका पूरा नाम और पता क्या है? यदि आप उनका नाम नहीं जानते हैं, तो कृपया एक विवरण प्रदान करें।", "घटना की तारीख और समय क्या है?", "घटना कहाँ हुई?", "क्या कोई गवाह थे? यदि हाँ, तो कृपया उनके नाम और संपर्क जानकारी प्रदान करें।", "कृपया घटना का विस्तार से वर्णन करें, जिसमें क्या हुआ और आपके अनुसार कौन सा विशिष्ट अपराध किया गया (जैसे, चोरी, उत्पीड़न, हमला, धोखाधड़ी)।", "क्या आप कोई अन्य जानकारी शामिल करना चाहेंगे?"],
-                app_title: 'कानूनी शिकायत AI', tagline: 'पुलिस के लिए एक औपचारिक शिकायत का मसौदा तैयार करने के लिए इस AI का उपयोग करें। हम आपसे कुछ विवरण इकट्ठा करने के लिए कुछ प्रश्न पूछेंगे।', disclaimer: 'अस्वीकरण: यह एक मसौदा तैयार करने का उपकरण है और कानूनी सलाह नहीं है। कृपया इस दस्तावेज़ को एक टेम्पलेट के रूप में उपयोग करें और कानूनी अधिकारियों से परामर्श करें।',
-                chat_language: 'चैट भाषा', report_language: 'रिपोर्ट भाषा', initial_message: 'नमस्ते। मैं आपकी मदद करने के लिए यहाँ हूँ। आपका पूरा नाम क्या है?', generating_report: 'रिपोर्ट तैयार हो रही है...', generated_report_title: 'तैयार की गई शिकायत রিপোর্ট:', input_placeholder: 'अपना संदेश टाइप करें...', send: 'भेजें', download_pdf: 'पीडीएफ डाउनलोड करें', report_ready: 'आपकी जानकारी एकत्र कर ली गई है। अब आप रिपोर्ट बना सकते हैं।', generate_report: 'रिपोर्ट बनाएं', start_over: 'नए सिरे से शुरू करें', report_error: 'क्षमा करें, मैं रिपोर्ट तैयार नहीं कर सका। कृपया पुनः प्रयास करें।', api_error: 'एक त्रुटि हुई। कृपया पुनः प्रयास करें।', download_success: 'शिकायत रिपोर्ट पीडीएफ के रूप में डाउनलोड की गई!'
-            },
-            bn: { name: 'বাংলা', questions: ["আপনার পুরো নাম কি?", "আপনার যোগাযোগের তথ্য এবং ঠিকানা কি?", "আপনি যার বিরুদ্ধে অভিযোগ করছেন তার পুরো নাম এবং ঠিকানা কি? যদি আপনি তাদের নাম না জানেন, তাহলে একটি বিবরণ দিন।", "ঘটনার তারিখ এবং সময় কি ছিল?", "ঘটনাটি কোথায় ঘটেছিল?", "কোনো সাক্ষী ছিল কি? যদি থাকে, তাহলে তাদের নাম এবং যোগাযোগের তথ্য দিন।", "দয়া করে ঘটনার বিস্তারিত বিবরণ দিন, কী ঘটেছিল এবং আপনি কী নির্দিষ্ট অপরাধ হয়েছে বলে মনে করেন (যেমন, চুরি, হয়রানি, হামলা, জালিয়াতি)।", "আপনি অন্য কোনো তথ্য যোগ করতে চান?"],
-                app_title: 'আইনি অভিযোগ এআই', tagline: 'পুলিশের জন্য একটি আনুষ্ঠানিক অভিযোগের খসড়া তৈরি করতে এই এআই ব্যবহার করুন। আমরা আপনাকে কিছু প্রশ্ন করব বিস্তারিত তথ্য সংগ্রহের জন্য।', disclaimer: 'অস্বীকৃতি: এটি একটি খসড়া তৈরির সরঞ্জাম এবং আইনি পরামর্শ নয়। দয়া করে এই নথিটিকে একটি টেমপ্লেট হিসাবে ব্যবহার করুন এবং আইনি কর্তৃপক্ষের সাথে পরামর্শ করুন।',
-                chat_language: 'চ্যাট ভাষা', report_language: 'রিপোর্ট ভাষা', initial_message: 'নমস্কার। আমি আপনাকে সাহায্য করতে এখানে আছি। আপনার পুরো নাম কি?', generating_report: 'রিপোর্ট তৈরি হচ্ছে...', generated_report_title: 'তৈরি করা অভিযোগ প্রতিবেদন:', input_placeholder: 'আপনার বার্তা টাইপ করুন...', send: 'পাঠান', download_pdf: 'পিডিএফ ডাউনলোড করুন', report_ready: 'আপনার তথ্য সংগ্রহ করা হয়েছে। আপনি এখন রিপোর্ট তৈরি করতে পারেন।', generate_report: 'রিপোর্ট তৈরি করুন', start_over: 'নতুন করে শুরু করুন', report_error: 'দুঃখিত, আমি প্রতিবেদন তৈরি করতে পারিনি। দয়া করে আবার চেষ্টা করুন।', api_error: 'একটি ত্রুটি ঘটেছে। দয়া করে আবার চেষ্টা করুন।', download_success: 'অভিযোগ প্রতিবেদন পিডিএফ হিসেবে ডাউনলোড হয়েছে!'
-            },
-            te: { name: 'తెలుగు', questions: ["మీ పూర్తి పేరు ఏమిటి?", "మీ సంప్రదింపు సమాచారం మరియు చిరునామా ఏమిటి?", "మీరు ఎవరిపై ఫిర్యాదు చేస్తున్నారో వారి పూర్తి పేరు మరియు చిరునామా ఏమిటి? వారి పేరు మీకు తెలియకపోతే, దయచేసి ఒక వివరణను అందించండి.", "సంఘటన జరిగిన తేదీ మరియు సమయం ఏమిటి?", "సంఘటన ఎక్కడ జరిగింది?", "ఏమైనా సాక్షులు ఉన్నారా? ఉంటే, దయచేసి వారి పేర్లు మరియు సంప్రదింపు సమాచారాన్ని అందించండి.", "దయచేసి సంఘటన గురించి వివరంగా వివరించండి, ఏమి జరిగింది మరియు మీరు ఏ నిర్దిష్ట నేరం జరిగిందని నమ్ముతున్నారు (ఉదాహరణకు, దొంగతనం, వేధింపులు, దాడి, మోసం).", "మీరు చేర్చాలనుకుంటున్న ఇతర సమాచారం ఏదైనా ఉందా?"],
-                app_title: 'చట్టపరమైన ఫిర్యాదు AI', tagline: 'పోలీసుల కోసం ఒక అధికారిక ఫిర్యాదును రూపొందించడానికి ఈ AIని ఉపయోగించండి. మేము వివరాలను సేకరించడానికి మీకు కొన్ని ప్రశ్నలు అడుగుతాము.', disclaimer: 'నిరాకరణ: ఇది ఒక ముసాయిదా సాధనం మరియు చట్టపరమైన సలహా కాదు. దయచేసి ఈ పత్రాన్ని ఒక టెంప్లేట్‌గా ఉపయోగించి చట్టపరమైన అధికారులతో సంప్రదించండి.',
-                chat_language: 'చాట్ భాష', report_language: 'రిపోర్ట్ భాష', initial_message: 'నమస్కారం. మీకు సహాయం చేయడానికి నేను ఇక్కడ ఉన్నాను. మీ పూర్తి పేరు ఏమిటి?', generating_report: 'రిపోర్ట్ రూపొందించబడుతోంది...', generated_report_title: 'రచించిన ఫిర్యాదు నివేదిక:', input_placeholder: 'మీ సందేశాన్ని టైప్ చేయండి...', send: 'పంపండి', download_pdf: 'పీడీఎఫ్ డౌన్లోడ్ చేయండి', report_ready: 'మీ సమాచారం సేకరించబడింది. ఇప్పుడు మీరు నివేదికను రూపొందించవచ్చు.', generate_report: 'నివేదిక రూపొందించండి', start_over: 'మళ్లీ ప్రారంభించండి', report_error: 'క్షమించండి, నేను నివేదికను రూపొందించలేకపోయాను. దయచేసి మళ్ళీ ప్రయత్నించండి.', api_error: 'ఒక లోపం సంభవించింది. దయచేసి మళ్లీ ప్రయత్నించండి.', download_success: 'ఫిర్యాదు నివేదిక PDF గా డౌన్‌లోడ్ చేయబడింది!'
-            },
-            mr: { name: 'मराठी', questions: ["तुमचे पूर्ण नाव काय आहे?", "तुमची संपर्क माहिती आणि पत्ता काय आहे?", "ज्या व्यक्तीविरुद्ध तुम्ही तक्रार करत आहात त्याचे पूर्ण नाव आणि पत्ता काय आहे? जर तुम्हाला त्यांचे नाव माहित नसेल, तर कृपया एक वर्णन द्या.", "घटनेची तारीख आणि वेळ काय आहे?", "घटना कोठे घडली?", "घटनेचे साक्षीदार होते का? असल्यास, कृपया त्यांचे नाव आणि संपर्क माहिती द्या.", "कृपया घटनेचे सविस्तर वर्णन करा, काय घडले आणि तुमच्या मते कोणता विशिष्ट गुन्हा घडला (उदा. चोरी, छळ, हल्ला, फसवणूक).", "तुम्ही आणखी काही माहिती समाविष्ट करू इच्छिता?"],
-                app_title: 'कायदेशीर तक्रार AI', tagline: 'पोलिसांसाठी एक औपचारिक तक्रार तयार करण्यासाठी या AI चा वापर करा. आम्ही तुम्हाला तपशील गोळा करण्यासाठी काही प्रश्न विचारू.', disclaimer: 'अस्वीकरण: हे एक मसुदा साधन आहे आणि कायदेशीर सल्ला नाही. कृपया या दस्तऐवजाचा एक टेम्पलेट म्हणून वापर करा आणि कायदेशीर अधिकाऱ्यांशी सल्लामसलत करा.',
-                chat_language: 'चॅट भाषा', report_language: 'रिपोर्ट भाषा', initial_message: 'नमस्कार. मी तुमची मदत करण्यासाठी येथे आहे. तुमचे पूर्ण नाव काय आहे?', generating_report: 'अहवाल तयार होत आहे...', generated_report_title: 'तयार केलेला तक्रार अहवाल:', input_placeholder: 'तुमचा संदेश टाइप करा...', send: 'पाठवा', download_pdf: 'पीडीएफ डाउनलोड करा', report_ready: 'तुमची माहिती गोळा झाली आहे. आता तुम्ही अहवाल तयार करू शकता.', generate_report: 'अहवाल तयार करा', start_over: 'पुन्हा सुरू करा', report_error: 'माफ करा, मी अहवाल तयार करू शकलो नाही. कृपया पुन्हा प्रयत्न करा.', api_error: 'एक त्रुटी आली. कृपया पुन्हा प्रयत्न करा.', download_success: 'तक्रार अहवाल पीडीएफ म्हणून डाउनलोड झाला आहे!'
-            },
-            ta: { name: 'தமிழ்', questions: ["உங்கள் முழுப் பெயர் என்ன?", "உங்கள் தொடர்புத் தகவல் மற்றும் முகவரி என்ன?", "நீங்கள் யாருக்கு எதிராகப் புகார் அளிக்கிறீர்களோ, அவர்களின் முழுப் பெயர் மற்றும் முகவரி என்ன? அவர்களின் பெயர் உங்களுக்குத் தெரியாவிட்டால், தயவுசெய்து ஒரு விளக்கத்தை வழங்கவும்.", "சம்பவத்தின் தேதி மற்றும் நேரம் என்ன?", "சம்பவம் எங்கு நடந்தது?", "ஏதேனும் சாட்சிகள் இருந்தார்களா? அப்படியானால், தயவுசெய்து அவர்களின் பெயர்கள் மற்றும் தொடர்புத் தகவலை வழங்கவும்.", "சம்பவம் பற்றிய விரிவான விளக்கத்தை வழங்கவும், என்ன நடந்தது மற்றும் நீங்கள் என்ன குறிப்பிட்ட குற்றம் நடந்ததாக நம்புகிறீர்கள் (உதாரணமாக, திருட்டு, துன்புறுத்தல், தாக்குதல், மோசடி).", "நீங்கள் வேறு ஏதேனும் தகவலைச் சேர்க்க விரும்புகிறீர்களா?"],
-                app_title: 'சட்டப் புகார் AI', tagline: 'காவல்துறைக்கு ஒரு முறையான புகாரை உருவாக்க இந்த AI-ஐப் பயன்படுத்தவும். விவரங்களைச் சேகரிக்க நாங்கள் உங்களிடம் சில கேள்விகளைக் கேட்போம்.', disclaimer: 'பொறுப்புத் துறப்பு: இது ஒரு வரைவு கருவி மற்றும் சட்ட ஆலோசனை அல்ல. தயவுசெய்து இந்த ஆவணத்தை ஒரு டெம்ப்ளேட்டாகப் பயன்படுத்தவும் மற்றும் சட்ட அதிகாரிகளுடன் கலந்தாலோசிக்கவும்.',
-                chat_language: 'பேச்சு மொழி', report_language: 'அறிக்கை மொழி', initial_message: 'வணக்கம். நான் உங்களுக்கு உதவ இங்குள்ளேன். உங்கள் முழுப் பெயர் என்ன?', generating_report: 'அறிக்கை உருவாக்கப்படுகிறது...', generated_report_title: 'உருவாக்கப்பட்ட புகார் அறிக்கை:', input_placeholder: 'உங்கள் செய்தியை உள்ளிடவும்...', send: 'அனுப்பு', download_pdf: 'PDF பதிவிறக்கு', report_ready: 'உங்கள் தகவல் சேகரிக்கப்பட்டது. இப்போது நீங்கள் அறிக்கையை உருவாக்கலாம்.', generate_report: 'அறிக்கை உருவாக்கு', start_over: 'புதியதாக தொடங்கு', report_error: 'மன்னிக்கவும், நான் அறிக்கையை உருவாக்க முடியவில்லை. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.', api_error: 'ஒரு பிழை ஏற்பட்டது. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.', download_success: 'புகார் அறிக்கை PDF ஆக பதிவிறக்கப்பட்டது!'
-            }
-        };
+            const languages = {
+                en: { name: 'English', questions: ["What is your full name?", "What is your contact information and address? ", "What is the full name and address of the person you are complaining against? If you don't know their name, please provide a description.", "What is the date and time of the incident?", "Where did the incident take place?", "Were there any witnesses? If so, please provide their names and contact information.", "Please describe the incident in detail, including what happened and what specific crime you believe was committed (e.g., theft, harassment, assault, fraud).", "Is there any other information you would like to include?"],
+                    app_title: 'Legal Complaint AI', tagline: 'Use this AI to draft a formal complaint for police. We will ask you a few questions to gather details.', disclaimer: 'Disclaimer: This is a drafting tool and does not constitute legal advice. Please use this document as a template and consult with legal authorities.',
+                    chat_language: 'Chat Language', report_language: 'Report Language', initial_message: 'Hello. I am here to help you. What is your full name?', generating_report: 'Generating report...', generated_report_title: 'Generated Complaint Report:', input_placeholder: 'Type your message...', send: 'Send', download_pdf: 'Download PDF', report_ready: 'Your information has been collected. You can now generate the report.', generate_report: 'Generate Report', start_over: 'Start Over', report_error: 'I am sorry, I could not generate the report. Please try again.', api_error: 'An error occurred. Please try again.', download_success: 'Complaint report downloaded as PDF!'
+                },
+                hi: { name: 'हिन्दी', questions: ["आपका पूरा नाम क्या है?", "आपकी संपर्क जानकारी और पता क्या है?", "जिस व्यक्ति के खिलाफ आप शिकायत कर रहे हैं उसका पूरा नाम और पता क्या है? यदि आप उनका नाम नहीं जानते हैं, तो कृपया एक विवरण प्रदान करें।", "घटना की तारीख और समय क्या है?", "घटना कहाँ हुई?", "क्या कोई गवाह थे? यदि हाँ, तो कृपया उनके नाम और संपर्क जानकारी प्रदान करें।", "कृपया घटना का विस्तार से वर्णन करें, जिसमें क्या हुआ और आपके अनुसार कौन सा विशिष्ट अपराध किया गया (जैसे, चोरी, उत्पीड़न, हमला, धोखाधड़ी)।", "क्या आप कोई अन्य जानकारी शामिल करना चाहेंगे?"],
+                    app_title: 'कानूनी शिकायत AI', tagline: 'पुलिस के लिए एक औपचारिक शिकायत का मसौदा तैयार करने के लिए इस AI का उपयोग करें। हम आपसे कुछ विवरण इकट्ठा करने के लिए कुछ प्रश्न पूछेंगे।', disclaimer: 'अस्वीकरण: यह एक मसौदा तैयार करने का उपकरण है और कानूनी सलाह नहीं है। कृपया इस दस्तावेज़ को एक टेम्पलेट के रूप में उपयोग करें और कानूनी अधिकारियों से परामर्श करें।',
+                    chat_language: 'चैट भाषा', report_language: 'रिपोर्ट भाषा', initial_message: 'नमस्ते। मैं आपकी मदद करने के लिए यहाँ हूँ। आपका पूरा नाम क्या है?', generating_report: 'रिपोर्ट तैयार हो रही है...', generated_report_title: 'तैयार की गई शिकायत रिपोर्ट:', input_placeholder: 'अपना संदेश टाइप करें...', send: 'भेजें', download_pdf: 'पीडीएफ डाउनलोड करें', report_ready: 'आपकी जानकारी एकत्र कर ली गई है। अब आप रिपोर्ट बना सकते हैं।', generate_report: 'रिपोर्ट बनाएं', start_over: 'नए सिरे से शुरू करें', report_error: 'क्षमा करें, मैं रिपोर्ट तैयार नहीं कर सका। कृपया पुनः प्रयास करें।', api_error: 'एक त्रुटि हुई। कृपया पुनः प्रयास करें।', download_success: 'शिकायत रिपोर्ट पीडीएफ के रूप में डाउनलोड की गई!'
+                },
+                bn: { name: 'বাংলা', questions: ["আপনার পুরো নাম কি?", "আপনার যোগাযোগের তথ্য এবং ঠিকানা কি?", "আপনি যার বিরুদ্ধে অভিযোগ করছেন তার পুরো নাম এবং ঠিকানা কি? যদি আপনি তাদের নাম না জানেন, তাহলে একটি বিবরণ দিন।", "ঘটনার তারিখ এবং সময় কি ছিল?", "ঘটনাটি কোথায় ঘটেছিল?", "কোনো সাক্ষী ছিল কি? যদি থাকে, তাহলে তাদের নাম এবং যোগাযোগের তথ্য দিন।", "দয়া করে ঘটনার বিস্তারিত বিবরণ দিন, কী ঘটেছিল এবং আপনি কী নির্দিষ্ট অপরাধ হয়েছে বলে মনে করেন (যেমন, চুরি, হয়রানি, হামলা, জালিয়াতি)।", "আপনি অন্য কোনো তথ্য যোগ করতে চান?"],
+                    app_title: 'আইনি অভিযোগ এআই', tagline: 'পুলিশের জন্য একটি আনুষ্ঠানিক অভিযোগের খসড়া তৈরি করতে এই এআই ব্যবহার করুন। আমরা আপনাকে কিছু প্রশ্ন করব বিস্তারিত তথ্য সংগ্রহের জন্য।', disclaimer: 'অস্বীকৃতি: এটি একটি খসড়া তৈরির সরঞ্জাম এবং আইনি পরামর্শ নয়। দয়া করে এই নথিটিকে একটি টেমপ্লেট হিসাবে ব্যবহার করুন এবং আইনি কর্তৃপক্ষের সাথে পরামর্শ করুন।',
+                    chat_language: 'চ্যাট ভাষা', report_language: 'রিপোর্ট ভাষা', initial_message: 'নমস্কার। আমি আপনাকে সাহায্য করতে এখানে আছি। আপনার পুরো নাম কি?', generating_report: 'রিপোর্ট তৈরি হচ্ছে...', generated_report_title: 'তৈরি করা অভিযোগ প্রতিবেদন:', input_placeholder: 'আপনার বার্তা টাইপ করুন...', send: 'পাঠান', download_pdf: 'পিডিএফ ডাউনলোড করুন', report_ready: 'আপনার তথ্য সংগ্রহ করা হয়েছে। আপনি এখন রিপোর্ট তৈরি করতে পারেন।', generate_report: 'রিপোর্ট তৈরি করুন', start_over: 'নতুন করে শুরু করুন', report_error: 'দুঃখিত, আমি প্রতিবেদন তৈরি করতে পারিনি। দয়া করে আবার চেষ্টা করুন।', api_error: 'একটি ত্রুটি ঘটেছে। দয়া করে আবার চেষ্টা করুন।', download_success: 'অভিযোগ প্রতিবেদন পিডিএফ হিসেবে ডাউনলোড হয়েছে!'
+                },
+                te: { name: 'తెలుగు', questions: ["మీ పూర్తి పేరు ఏమిటి?", "మీ సంప్రదింపు సమాచారం మరియు చిరునామా ఏమిటి?", "మీరు ఎవరిపై ఫిర్యాదు చేస్తున్నారో వారి పూర్తి పేరు మరియు చిరునామా ఏమిటి? వారి పేరు మీకు తెలియకపోతే, దయచేసి ఒక వివరణను అందించండి.", "సంఘటన జరిగిన తేదీ మరియు సమయం ఏమిటి?", "సంఘటన ఎక్కడ జరిగింది?", "ఏమైనా సాక్షులు ఉన్నారా? ఉంటే, దయచేసి వారి పేర్లు మరియు సంప్రదింపు సమాచారాన్ని అందించండి.", "దయచేసి సంఘటన గురించి వివరంగా వివరించండి, ఏమి జరిగింది మరియు మీరు ఏ నిర్దిష్ట నేరం జరిగిందని నమ్ముతున్నారు (ఉదాహరణకు, దొంగతనం, వేధింపులు, దాడి, మోసం).", "మీరు చేర్చాలనుకుంటున్న ఇతర సమాచారం ఏదైనా ఉందా?"],
+                    app_title: 'చట్టపరమైన ఫిర్యాదు AI', tagline: 'పోలీసుల కోసం ఒక అధికారిక ఫిర్యాదును రూపొందించడానికి ఈ AIని ఉపయోగించండి. మేము వివరాలను సేకరించడానికి మీకు కొన్ని ప్రశ్నలు అడుగుతాము.', disclaimer: 'నిరాకరణ: ఇది ఒక ముసాయిదా సాధనం మరియు చట్టపరమైన సలహా కాదు. దయచేసి ఈ పత్రాన్ని ఒక టెంప్లేట్‌గా ఉపయోగించి చట్టపరమైన అధికారులతో సంప్రదించండి.',
+                    chat_language: 'చాట్ భాష', report_language: 'రిపోర్ట్ భాష', initial_message: 'నమస్కారం. మీకు సహాయం చేయడానికి నేను ఇక్కడ ఉన్నాను. మీ పూర్తి పేరు ఏమిటి?', generating_report: 'రిపోర్ట్ రూపొందించబడుతోంది...', generated_report_title: 'రచించిన ఫిర్యాదు నివేదిక:', input_placeholder: 'మీ సందేశాన్ని టైప్ చేయండి...', send: 'పంపండి', download_pdf: 'పీడీఎఫ్ డౌన్లోడ్ చేయండి', report_ready: 'మీ సమాచారం సేకరించబడింది. ఇప్పుడు మీరు నివేదికను రూపొందించవచ్చు.', generate_report: 'నివేదిక రూపొందించండి', start_over: 'మళ్లీ ప్రారంభించండి', report_error: 'క్షమించండి, నేను నివేదికను రూపొందించలేకపోయాను. దయచేసి మళ్ళీ ప్రయత్నించండి.', api_error: 'ఒక లోపం సంభవించింది. దయచేసి మళ్లీ ప్రయత్నించండి.', download_success: 'ఫిర్యాదు నివేదిక PDF గా డౌన్‌లోడ్ చేయబడింది!'
+                },
+                mr: { name: 'मराठी', questions: ["तुमचे पूर्ण नाव काय आहे?", "तुमची संपर्क माहिती आणि पत्ता काय आहे?", "ज्या व्यक्तीविरुद्ध तुम्ही तक्रार करत आहात त्याचे पूर्ण नाव आणि पत्ता काय आहे? जर तुम्हाला त्यांचे नाव माहित नसेल, तर कृपया एक वर्णन द्या.", "घटनेची तारीख आणि वेळ काय आहे?", "घटना कोठे घडली?", "घटनेचे साक्षीदार होते का? असल्यास, कृपया त्यांचे नाव आणि संपर्क माहिती द्या.", "कृपया घटनेचे सविस्तर वर्णन करा, काय घडले आणि तुमच्या मते कोणता विशिष्ट गुन्हा घडला (उदा. चोरी, छळ, हल्ला, फसवणूक).", "तुम्ही आणखी काही माहिती समाविष्ट करू इच्छिता?"],
+                    app_title: 'कायदेशीर तक्रार AI', tagline: 'पोलिसांसाठी एक औपचारिक तक्रार तयार करण्यासाठी या AI चा वापर करा. आम्ही तुम्हाला तपशील गोळा करण्यासाठी काही प्रश्न विचारू.', disclaimer: 'अस्वीकरण: हे एक मसुदा साधन आहे आणि कायदेशीर सल्ला नाही. कृपया या दस्तऐवजाचा एक टेम्पलेट म्हणून वापर करा आणि कायदेशीर अधिकाऱ्यांशी सल्लामसलत करा.',
+                    chat_language: 'चॅट भाषा', report_language: 'रिपोर्ट भाषा', initial_message: 'नमस्कार. मी तुमची मदत करण्यासाठी येथे आहे. तुमचे पूर्ण नाव काय आहे?', generating_report: 'अहवाल तयार होत आहे...', generated_report_title: 'तयार केलेला तक्रार अहवाल:', input_placeholder: 'तुमचा संदेश टाइप करा...', send: 'पाठवा', download_pdf: 'पीडीएफ डाउनलोड करा', report_ready: 'तुमची माहिती गोळा झाली आहे. आता तुम्ही अहवाल तयार करू शकता.', generate_report: 'अहवाल तयार करा', start_over: 'पुन्हा सुरू करा', report_error: 'माफ करा, मी अहवाल तयार करू शकलो नाही. कृपया पुन्हा प्रयत्न करा.', api_error: 'एक त्रुटी आली. कृपया पुन्हा प्रयत्न करा.', download_success: 'तक्रार अहवाल पीडीएफ म्हणून डाउनलोड झाला आहे!'
+                },
+                ta: { name: 'தமிழ்', questions: ["உங்கள் முழுப் பெயர் என்ன?", "உங்கள் தொடர்புத் தகவல் மற்றும் முகவரி என்ன?", "நீங்கள் யாருக்கு எதிராகப் புகார் அளிக்கிறீர்களோ, அவர்களின் முழுப் பெயர் மற்றும் முகவரி என்ன? அவர்களின் பெயர் உங்களுக்குத் தெரியாவிட்டால், தயவுசெய்து ஒரு விளக்கத்தை வழங்கவும்.", "சம்பவத்தின் தேதி மற்றும் நேரம் என்ன?", "சம்பவம் எங்கு நடந்தது?", "ஏதேனும் சாட்சிகள் இருந்தார்களா? அப்படியானால், தயவுசெய்து அவர்களின் பெயர்கள் மற்றும் தொடர்புத் தகவலை வழங்கவும்.", "சம்பவம் பற்றிய விரிவான விளக்கத்தை வழங்கவும், என்ன நடந்தது மற்றும் நீங்கள் என்ன குறிப்பிட்ட குற்றம் நடந்ததாக நம்புகிறீர்கள் (உதாரணமாக, திருட்டு, துன்புறுத்தல், தாக்குதல், மோசடி).", "நீங்கள் வேறு ஏதேனும் தகவலைச் சேர்க்க விரும்புகிறீர்களா?"],
+                    app_title: 'சட்டப் புகார் AI', tagline: 'காவல்துறைக்கு ஒரு முறையான புகாரை உருவாக்க இந்த AI-ஐப் பயன்படுத்தவும். விவரங்களைச் சேகரிக்க நாங்கள் உங்களிடம் சில கேள்விகளைக் கேட்போம்.', disclaimer: 'பொறுப்புத் துறப்பு: இது ஒரு வரைவு கருவி மற்றும் சட்ட ஆலோசனை அல்ல. தயவுசெய்து இந்த ஆவணத்தை ஒரு டெம்ப்ளேட்டாகப் பயன்படுத்தவும் மற்றும் சட்ட அதிகாரிகளுடன் கலந்தாலோசிக்கவும்.',
+                    chat_language: 'பேச்சு மொழி', report_language: 'அறிக்கை மொழி', initial_message: 'வணக்கம். நான் உங்களுக்கு உதவ இங்குள்ளேன். உங்கள் முழுப் பெயர் என்ன?', generating_report: 'அறிக்கை உருவாக்கப்படுகிறது...', generated_report_title: 'உருவாக்கப்பட்ட புகார் அறிக்கை:', input_placeholder: 'உங்கள் செய்தியை உள்ளிடவும்...', send: 'அனுப்பு', download_pdf: 'PDF பதிவிறக்கு', report_ready: 'உங்கள் தகவல் சேகரிக்கப்பட்டது. இப்போது நீங்கள் அறிக்கையை உருவாக்கலாம்.', generate_report: 'அறிக்கை உருவாக்கு', start_over: 'புதியதாக தொடங்கு', report_error: 'மன்னிக்கவும், நான் அறிக்கையை உருவாக்க முடியவில்லை. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.', api_error: 'ஒரு பிழை ஏற்பட்டது. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.', download_success: 'புகார் அறிக்கை PDF ஆக பதிவிறக்கப்பட்டது!'
+                }
+            };
 
-        createApp({
-            setup() {
-                const userMessage = ref('');
-                const chatHistory = ref([]);
-                const isLoading = ref(false);
-                const isGenerating = ref(false);
-                const message = ref(null);
-                const chatWindow = ref(null);
-                const generatedReport = ref('');
-                const chatLanguage = ref('en');
-                const reportLanguage = ref('en');
-                const isInfoCollected = ref(false);
+            const { jsPDF } = window.jspdf;
 
-                // State to track conversation flow
-                const conversationState = ref(0);
-                const complaintData = ref({});
-                
-                const questions = computed(() => languages[chatLanguage.value]?.questions || languages['en'].questions);
-                
-                // API keys and URLs
-                const apiKey = "AIzaSyAnNvD7X0VglyIvT9rvwQKXmth0s1I0ZLM";
-                const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-                
-                const addMessage = (text, sender) => {
-                    chatHistory.value.push({ text, sender });
-                    nextTick(() => {
-                        chatWindow.value.scrollTop = chatWindow.value.scrollHeight;
-                    });
-                };
+            createApp({
+                setup() {
+                    const userMessage = ref('');
+                    const chatHistory = ref([]);
+                    const isLoading = ref(false);
+                    const isGenerating = ref(false);
+                    const message = ref(null);
+                    const chatWindow = ref(null);
+                    const generatedReport = ref('');
+                    const chatLanguage = ref('en');
+                    const isInfoCollected = ref(false);
 
-                const translate = (key) => {
-                    return languages[chatLanguage.value]?.[key] || languages['en'][key];
-                };
+                    // State to track conversation flow
+                    const conversationState = ref(0);
+                    const complaintData = ref({});
+                    
+                    const questions = computed(() => languages[chatLanguage.value]?.questions || languages['en'].questions);
+                    
+                    // API keys and URLs
+                    const apiKey = "AIzaSyAnNvD7X0VglyIvT9rvwQKXmth0s1I0ZLM";
+                    const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                    
+                    const addMessage = (text, sender) => {
+                        chatHistory.value.push({ text, sender });
+                        nextTick(() => {
+                            chatWindow.value.scrollTop = chatWindow.value.scrollHeight;
+                        });
+                    };
 
-                const showMessage = (text, type = 'info') => {
-                    message.value = { text, type };
-                    setTimeout(() => {
-                        message.value = null;
-                    }, 3000);
-                };
+                    const translate = (key) => {
+                        return languages[chatLanguage.value]?.[key] || languages['en'][key];
+                    };
 
-                const fetchWithBackoff = async (url, payload, retries = 5, delay = 1000) => {
-                    try {
-                        const response = await fetch(url, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload)
+                    const showMessage = (text, type = 'info') => {
+                        message.value = { text, type };
+                        setTimeout(() => {
+                            message.value = null;
+                        }, 3000);
+                    };
+
+                    const fetchWithBackoff = async (url, payload, retries = 5, delay = 1000) => {
+                        try {
+                            const response = await fetch(url, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                            });
+
+                            if (!response.ok) {
+                                if (response.status === 429 && retries > 0) {
+                                    await new Promise(res => setTimeout(res, delay));
+                                    return fetchWithBackoff(url, payload, retries - 1, delay * 2);
+                                } else {
+                                    throw new Error(`API error: ${response.statusText}`);
+                                }
+                            }
+
+                            return await response.json();
+                        } catch (error) {
+                            throw error;
+                        }
+                    };
+
+                    const handleInput = async () => {
+                        const userText = userMessage.value.trim();
+                        if (!userText || isLoading.value || isGenerating.value || isInfoCollected.value) return;
+
+                        addMessage(userText, 'user');
+                        userMessage.value = '';
+                        
+                        if (conversationState.value < questions.value.length) {
+                            collectInfo(userText);
+                        }
+                    };
+
+                    const collectInfo = (text) => {
+                        const step = conversationState.value;
+                        
+                        switch(step) {
+                            case 0:
+                                complaintData.value.name = text;
+                                break;
+                            case 1:
+                                complaintData.value.contact = text;
+                                break;
+                            case 2:
+                                complaintData.value.accused = text;
+                                break;
+                            case 3:
+                                complaintData.value.date = text;
+                                break;
+                            case 4:
+                                complaintData.value.place = text;
+                                break;
+                            case 5:
+                                complaintData.value.witnesses = text;
+                                break;
+                            case 6:
+                                complaintData.value.details = text;
+                                break;
+                            case 7:
+                                complaintData.value.additionalInfo = text;
+                                break;
+                        }
+                        
+                        conversationState.value++;
+                        if (conversationState.value < questions.value.length) {
+                            addMessage(questions.value[conversationState.value], 'ai');
+                        } else {
+                            isInfoCollected.value = true;
+                            addMessage(translate('report_ready'), 'ai');
+                        }
+                    };
+
+                    const generateReport = async () => {
+                        isGenerating.value = true;
+                        
+                        const prompt = `Based on the following information, draft a formal and respectful complaint letter for a police station in English, following the format of an Indian police complaint (FIR) as shown in the provided visual example.
+
+Ensure the report includes the following sections, using clear and professional language:
+1.  **To:** Start with "To," followed by "The Police Station" and the full address.
+2.  **Subject:** A concise, bolded subject line that states the purpose of the complaint.
+3.  **Salutation:** "Respected Sir/Madam,"
+4.  **Body:**
+    * **Introduction:** State your name and purpose for writing the letter.
+    * **Incident Details:** A detailed, chronological description of the incident, including date, time, location, and the individuals involved.
+    * **Constitutional Violation:** A single paragraph that explains how the incident violates a fundamental right guaranteed by the Constitution of India, referencing a relevant article such as Article 21 (Right to Life and Personal Liberty) or others as appropriate.
+    * **Legal Framework:** Based on the incident description, identify and mention the relevant sections of the Indian Penal Code (IPC) or other applicable Indian laws. Mention that these are potential sections and the police will determine the final charges.
+    * **Witnesses & Additional Information:** Include details about witnesses and any other information provided by the complainant.
+5.  **Request for Action:** A formal request to the police to register the complaint as an First Information Report (FIR) and take necessary action.
+6.  **Closing:** "Thanking You," followed by "Yours faithfully,".
+7.  **Complainant Details:** The complainant's name, contact, and address.
+8.  **Disclaimer:** A final sentence stating: "This document is for drafting purposes and does not constitute legal advice."
+
+Incorporate all the details provided below. Do not include any placeholder text.
+
+**Complainant's Name:** ${complaintData.value.name}
+**Contact & Address:** ${complaintData.value.contact}
+**Accused:** ${complaintData.value.accused}
+**Date & Time of Incident:** ${complaintData.value.date}
+**Place of Incident:** ${complaintData.value.place}
+**Witnesses:** ${complaintData.value.witnesses}
+**Incident Details:** ${complaintData.value.details}
+**Additional Information:** ${complaintData.value.additionalInfo || 'None'}
+
+Ensure the response is a single block of text suitable for a formal document, with appropriate line breaks and spacing to make it readable. Do not format it as JSON or any other structured data format.`;
+                        
+                        try {
+                            const payload = { contents: [{ parts: [{ text: prompt }] }] };
+                            const result = await fetchWithBackoff(geminiApiUrl, payload);
+                            const aiResponse = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                            
+                            if (aiResponse) {
+                                generatedReport.value = aiResponse.trim();
+                            } else {
+                                addMessage(translate('report_error'), 'ai');
+                            }
+                        } catch (error) {
+                            console.error(error);
+                            addMessage(translate('api_error'), 'ai');
+                        } finally {
+                            isGenerating.value = false;
+                        }
+                    };
+                    
+                    const downloadPDF = () => {
+                        const doc = new jsPDF();
+                        const text = generatedReport.value;
+                        const lines = doc.splitTextToSize(text, 180);
+                        
+                        doc.setFont("helvetica", "normal");
+                        doc.setFontSize(12);
+                        
+                        let y = 20;
+                        
+                        lines.forEach(line => {
+                            if (y > 280) {
+                                doc.addPage();
+                                y = 20;
+                            }
+                            doc.text(line, 15, y);
+                            y += 7;
                         });
 
-                        if (!response.ok) {
-                            if (response.status === 429 && retries > 0) {
-                                await new Promise(res => setTimeout(res, delay));
-                                return fetchWithBackoff(url, payload, retries - 1, delay * 2);
-                            } else {
-                                throw new Error(`API error: ${response.statusText}`);
-                            }
-                        }
+                        doc.save("police_complaint_report.pdf");
+                        showMessage(translate('download_success'), 'info');
+                    };
 
-                        return await response.json();
-                    } catch (error) {
-                        throw error;
-                    }
-                };
-
-                const handleInput = async () => {
-                    const userText = userMessage.value.trim();
-                    if (!userText || isLoading.value || isGenerating.value || isInfoCollected.value) return;
-
-                    addMessage(userText, 'user');
-                    userMessage.value = '';
+                    const resetChat = () => {
+                        chatHistory.value = [];
+                        userMessage.value = '';
+                        conversationState.value = 0;
+                        complaintData.value = {};
+                        isInfoCollected.value = false;
+                        generatedReport.value = '';
+                        addMessage(questions.value[0], 'ai');
+                    };
                     
-                    if (conversationState.value < questions.value.length) {
-                        collectInfo(userText);
-                    }
-                };
-
-                const collectInfo = (text) => {
-                    const step = conversationState.value;
-                    
-                    switch(step) {
-                        case 0:
-                            complaintData.value.name = text;
-                            break;
-                        case 1:
-                            complaintData.value.contact = text;
-                            break;
-                        case 2:
-                            complaintData.value.accused = text;
-                            break;
-                        case 3:
-                            complaintData.value.date = text;
-                            break;
-                        case 4:
-                            complaintData.value.place = text;
-                            break;
-                        case 5:
-                            complaintData.value.witnesses = text;
-                            break;
-                        case 6:
-                            complaintData.value.details = text;
-                            break;
-                        case 7:
-                            complaintData.value.additionalInfo = text;
-                            break;
-                    }
-                    
-                    conversationState.value++;
-                    if (conversationState.value < questions.value.length) {
-                        addMessage(questions.value[conversationState.value], 'ai');
-                    } else {
-                        isInfoCollected.value = true;
-                        addMessage(translate('report_ready'), 'ai');
-                    }
-                };
-
-                const generateReport = async () => {
-                    isGenerating.value = true;
-                    
-                    const reportLanguageName = languages[reportLanguage.value]?.name || languages['en'].name;
-
-                    const prompt = `Based on the following information, draft a formal and respectful complaint letter in the style of an Indian police complaint (FIR) report. The language should be polite and formal, and should be written in ${reportLanguageName}.
-                    
-                    Structure the report with the following sections:
-                    1.  **Complaint Details**: A detailed description of the incident, including date, time, and location.
-                    2.  **Relevant Indian Laws**: Based on the incident description, identify and mention the relevant sections of the Indian Penal Code (IPC) or other applicable Indian laws. Mention that these are potential sections and the police will determine the final charges.
-                    3.  **Constitutional Violation**: A single paragraph explaining how the incident violates a fundamental right guaranteed by the Constitution of India, such as the Right to Life and Personal Liberty (Article 21) or any other relevant article.
-                    4.  **Request for Action**: A formal request to the police to register the complaint and take necessary action.
-                    
-                    Incorporate all the details provided below. Do not include any placeholder text. Include a final sentence stating "This document is for drafting purposes and does not constitute legal advice."
-                    
-                    **Complainant's Name:** ${complaintData.value.name}
-                    **Contact & Address:** ${complaintData.value.contact}
-                    **Accused:** ${complaintData.value.accused}
-                    **Date & Time of Incident:** ${complaintData.value.date}
-                    **Place of Incident:** ${complaintData.value.place}
-                    **Witnesses:** ${complaintData.value.witnesses}
-                    **Incident Details:** ${complaintData.value.details}
-                    **Additional Information:** ${complaintData.value.additionalInfo || 'None'}
-                    
-                    Ensure the response is a single block of text suitable for a formal document.`;
-                    
-                    try {
-                        const payload = { contents: [{ parts: [{ text: prompt }] }] };
-                        const result = await fetchWithBackoff(geminiApiUrl, payload);
-                        const aiResponse = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-                        
-                        if (aiResponse) {
-                            generatedReport.value = aiResponse.trim();
-                        } else {
-                            addMessage(translate('report_error'), 'ai');
-                        }
-                    } catch (error) {
-                        console.error(error);
-                        addMessage(translate('api_error'), 'ai');
-                    } finally {
-                        isGenerating.value = false;
-                    }
-                };
-                
-                const downloadPDF = () => {
-                    const { jsPDF } = window.jspdf;
-                    const doc = new jsPDF();
-                    const text = generatedReport.value;
-                    const lines = doc.splitTextToSize(text, 180);
-                    
-                    doc.setFont("helvetica", "normal");
-                    doc.setFontSize(12);
-                    
-                    let y = 20;
-                    
-                    lines.forEach(line => {
-                        if (y > 280) {
-                            doc.addPage();
-                            y = 20;
-                        }
-                        doc.text(line, 15, y);
-                        y += 7;
-                    });
-
-                    doc.save("police_complaint_report.pdf");
-                    showMessage(translate('download_success'), 'info');
-                };
-
-                const resetChat = () => {
-                    chatHistory.value = [];
-                    userMessage.value = '';
-                    conversationState.value = 0;
-                    complaintData.value = {};
-                    isInfoCollected.value = false;
-                    generatedReport.value = '';
                     addMessage(questions.value[0], 'ai');
-                };
-                
-                addMessage(questions.value[0], 'ai');
 
-                return {
-                    userMessage,
-                    chatHistory,
-                    isLoading,
-                    isGenerating,
-                    message,
-                    chatWindow,
-                    generatedReport,
-                    handleInput,
-                    downloadPDF,
-                    chatLanguage,
-                    reportLanguage,
-                    languages,
-                    translate,
-                    isInfoCollected,
-                    generateReport,
-                    resetChat
-                };
-            }
-        }).mount('#app');
-    </script>
+                    return {
+                        userMessage,
+                        chatHistory,
+                        isLoading,
+                        isGenerating,
+                        message,
+                        chatWindow,
+                        generatedReport,
+                        handleInput,
+                        downloadPDF,
+                        chatLanguage,
+                        languages,
+                        translate,
+                        isInfoCollected,
+                        generateReport,
+                        resetChat
+                    };
+                }
+            }).mount('#app');
+        </script>
 </body>
 </html>
