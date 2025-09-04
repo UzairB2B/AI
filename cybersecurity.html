@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CyberShield AI — Fraud Help • News • India Resources</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Smooth scroll for internal anchors */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Dark and Light Theme Styles */
+        :root {
+            /* Dark Theme (Default) */
+            --bg-color: #020617; /* slate-950 */
+            --text-color: #f1f5f9; /* slate-100 */
+            --surface-color: #0f172a; /* slate-900 */
+            --border-color: #1e293b; /* slate-800 */
+            --alt-surface-color: #020617; /* slate-950 */
+            --alt-border-color: #1e293b; /* slate-800 */
+            --primary-color: #4f46e5; /* indigo-600 */
+            --secondary-color: #1e293b; /* slate-800 */
+            --copy-btn-bg: #334155; /* slate-700 */
+            --copy-btn-hover-bg: #475569; /* slate-600 */
+        }
+
+        [data-theme="light"] {
+            /* Light Theme */
+            --bg-color: #f8fafc; /* slate-50 */
+            --text-color: #0f172a; /* slate-900 */
+            --surface-color: #ffffff; /* white */
+            --border-color: #e2e8f0; /* slate-200 */
+            --alt-surface-color: #f1f5f9; /* slate-100 */
+            --alt-border-color: #e2e8f0; /* slate-200 */
+            --primary-color: #6366f1; /* indigo-500 */
+            --secondary-color: #e2e8f0; /* slate-200 */
+            --copy-btn-bg: #cbd5e1; /* slate-300 */
+            --copy-btn-hover-bg: #94a3b8; /* slate-400 */
+        }
+
+        /* Apply CSS variables */
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+        .theme-bg-surface {
+            background-color: var(--surface-color);
+        }
+        .theme-border {
+            border-color: var(--border-color);
+        }
+        .theme-bg-alt-surface {
+            background-color: var(--alt-surface-color);
+        }
+        .theme-alt-border {
+            border-color: var(--alt-border-color);
+        }
+        .theme-primary-btn {
+            background-color: var(--primary-color);
+        }
+        .theme-secondary-btn {
+            background-color: var(--secondary-color);
+        }
+        .theme-copy-btn {
+            background-color: var(--copy-btn-bg);
+        }
+        .theme-copy-btn-hover:hover {
+            background-color: var(--copy-btn-hover-bg);
+        }
+        .theme-input {
+            background-color: var(--alt-surface-color);
+            border-color: var(--border-color);
+        }
+
+        /* Tailwind utility override for color-based classes */
+        .bg-slate-950 { background-color: var(--bg-color); }
+        .text-slate-100 { color: var(--text-color); }
+        .bg-slate-900 { background-color: var(--surface-color); }
+        .border-slate-800 { border-color: var(--border-color); }
+        .bg-indigo-600 { background-color: var(--primary-color); }
+        .bg-slate-900 { background-color: var(--surface-color); }
+        .border-slate-800 { border-color: var(--border-color); }
+        .bg-slate-950\/80 { background-color: rgba(var(--bg-color-rgb, 2 6 23), 0.8); }
+        .bg-slate-950 { background-color: var(--alt-surface-color); }
+        .border-slate-800 { border-color: var(--alt-border-color); }
+        .bg-indigo-600 { background-color: var(--primary-color); }
+        .bg-slate-800 { background-color: var(--secondary-color); }
+        .bg-slate-700 { background-color: var(--copy-btn-bg); }
+        .text-slate-500 { color: var(--text-color); opacity: 0.5; }
+        .text-slate-400 { color: var(--text-color); opacity: 0.7; }
+        .hover\:bg-indigo-500:hover { background-color: color-mix(in srgb, var(--primary-color) 80%, white 20%); }
+        .hover\:bg-slate-800:hover { background-color: color-mix(in srgb, var(--secondary-color) 80%, white 20%); }
+        .hover\:bg-slate-700:hover { background-color: color-mix(in srgb, var(--secondary-color) 80%, white 20%); }
+        .hover\:border-slate-700:hover { border-color: color-mix(in srgb, var(--border-color) 80%, white 20%); }
+
+        /* Fallback for browsers that don't support color-mix */
+        @supports not (background-color: color-mix(in srgb, red, blue)) {
+            .hover\:bg-indigo-500:hover { background-color: #6366f1; }
+            .hover\:bg-slate-800:hover { background-color: #1e293b; }
+            .hover\:bg-slate-700:hover { background-color: #334155; }
+            .hover\:border-slate-700:hover { border-color: #334155; }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div id="app" class="max-w-full sm:max-w-6xl mx-auto p-4 sm:p-6">
+        <header class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg transition hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home text-white">
+                        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
+                </a>
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">CyberShield AI</h1>
+                    <p class="text-sm text-slate-400">Fraud help assistant • Cybersecurity news • India hotlines & links</p>
+                </div>
+            </div>
+            <button @click="toggleTheme" class="flex items-center gap-2 px-4 py-2 rounded-2xl theme-secondary-btn theme-copy-btn-hover font-semibold transition text-sm">
+                <svg v-if="theme === 'dark'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M4.93 19.07l1.41-1.41"/><path d="M17.66 6.34l1.41-1.41"/></svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                Toggle Theme
+            </button>
+        </header>
+
+        <nav class="sticky top-0 z-10 bg-slate-950/80 backdrop-blur theme-border border-b mb-6">
+            <ul class="flex flex-wrap gap-2 p-2">
+                <li v-for="t in tabs" :key="t.key">
+                    <button
+                        @click="activeTab = t.key"
+                        class="px-4 py-2 rounded-2xl border text-sm"
+                        :class="activeTab === t.key ? 'theme-primary-btn border-indigo-500 text-white' : 'theme-secondary-btn theme-border hover:theme-copy-btn-hover'"
+                    >
+                        {{ t.label }}
+                    </button>
+                </li>
+            </ul>
+        </nav>
+
+        <section v-show="activeTab === 'assistant'" class="space-y-4">
+            <div class="rounded-2xl border theme-border theme-bg-surface p-4">
+                <h2 class="text-xl font-bold mb-1">Fraud Help Assistant</h2>
+                <p class="text-sm text-slate-400 mb-4">
+                    Explain what happened and what kind of scam it might be. The assistant will guide you with immediate steps (e.g., calling 1930 for financial fraud), safe checklists, and resources.
+                    <span class="italic">Do not share card/PIN/OTP.</span>
+                </p>
+
+                <div class="flex flex-col gap-3 mb-3">
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input
+                            v-model="profile.name"
+                            placeholder="Your name (optional)"
+                            class="flex-1 px-3 py-2 rounded-xl theme-input"
+                        />
+                        <select v-model="profile.fraudType" class="px-3 py-2 rounded-xl theme-input">
+                            <option disabled value="">Select fraud type</option>
+                            <option>UPI/Bank fraud</option>
+                            <option>Investment scam</option>
+                            <option>Job scam</option>
+                            <option>Sextortion</option>
+                            <option>Identity/Account takeover</option>
+                            <option>Phishing/Smishing/Vishing</option>
+                            <option>Marketplace scam</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <textarea
+                        v-model="userMessage"
+                        rows="3"
+                        placeholder="Describe the situation. Example: 'Got a call claiming my Aadhaar linked to crime; they asked me to transfer money.'"
+                        class="w-full px-3 py-2 rounded-xl theme-input"
+                    ></textarea>
+                    <div class="flex flex-wrap gap-2">
+                        <button
+                            @click="sendToGemini"
+                            :disabled="loading || !userMessage"
+                            class="px-4 py-2 rounded-2xl theme-primary-btn hover:theme-primary-btn font-semibold disabled:opacity-50"
+                        >
+                            Ask Assistant
+                        </button>
+                        <button @click="clearChat" class="px-4 py-2 rounded-2xl theme-secondary-btn hover:theme-copy-btn-hover">Clear</button>
+                    </div>
+                    <p class="text-xs text-slate-500">
+                        Note: This tool offers guidance. For financial loss, immediately dial <strong>1930</strong> and file at <strong>cybercrime.gov.in</strong>. Follow local laws.
+                    </p>
+                </div>
+
+                <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
+                    <div v-for="(m, i) in messages" :key="i" class="flex gap-3" :class="m.role === 'user' ? 'justify-end' : 'justify-start'">
+                        <div class="max-w-[80%] rounded-2xl p-3 whitespace-pre-wrap" :class="m.role === 'user' ? 'theme-primary-btn' : 'theme-secondary-btn'">
+                            <div class="text-sm" :ref="m.role === 'assistant' && i === messages.length - 1 ? setLastMessageRef : null">
+                                {{ m.content }}
+                            </div>
+                            <div v-if="m.role === 'assistant' && i === messages.length - 1" class="flex justify-end mt-2">
+                                <button @click="copyLastResponse" class="px-2 py-1 text-xs rounded-lg theme-copy-btn theme-copy-btn-hover">
+                                    Copy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-if="loading" class="text-sm text-slate-400">Assistant is thinking…</div>
+                </div>
+            </div>
+        </section>
+
+        <section v-show="activeTab==='news'" class="space-y-4">
+            <div class="rounded-2xl border theme-border theme-bg-surface p-4">
+                <h2 class="text-xl font-bold mb-2">Cybersecurity News</h2>
+                <p class="text-sm text-slate-400 mb-4">Live headlines from The Hacker News and CyberSecurityNews. Note: This feature relies on a public proxy service (`allorigins.win`) which may become unreliable.</p>
+
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <button @click="refreshNews" class="px-4 py-2 rounded-2xl theme-primary-btn font-semibold">Refresh</button>
+                    <span class="text-xs text-slate-400 flex items-center">Last updated: {{ newsUpdatedAt || '—' }}</span>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <article v-for="item in newsItems" :key="item.link" class="rounded-2xl border theme-border theme-bg-alt-surface p-4 hover:theme-copy-btn-hover transition">
+                        <a :href="item.link" target="_blank" class="block">
+                            <h3 class="font-semibold leading-snug">{{ item.title }}</h3>
+                            <p class="text-sm text-slate-400 mt-1 line-clamp-3">{{ item.summary }}</p>
+                            <div class="text-xs text-slate-500 mt-2">{{ fmtDate(item.pubDate) }} • {{ item.source }}</div>
+                        </a>
+                    </article>
+                </div>
+                <p v-if="newsItems.length === 0" class="text-sm text-slate-500 mt-4">Could not fetch news. This is likely due to the proxy service being down or a network issue.</p>
+            </div>
+        </section>
+
+        <section v-show="activeTab === 'india'" class="space-y-4">
+            <div class="rounded-2xl border theme-border theme-bg-surface p-4">
+                <h2 class="text-xl font-bold mb-2">India — Hotlines & Official Links</h2>
+                <p class="text-sm text-slate-400 mb-4">If you lost money to online fraud, act fast.</p>
+
+                <div class="grid sm:grid-cols-2 gap-4">
+                    <div class="rounded-2xl theme-bg-alt-surface theme-border border p-4">
+                        <h3 class="font-semibold mb-1">⚠️ Financial Fraud Helpline</h3>
+                        <p class="text-sm">Dial <span class="font-bold">1930</span> (all India) and file a complaint at the National Cyber Crime Reporting Portal.</p>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                            <a href="https://cybercrime.gov.in/" target="_blank" class="px-3 py-2 rounded-xl theme-primary-btn hover:theme-primary-btn text-sm font-semibold">
+                                Open cybercrime.gov.in
+                            </a>
+                            <a href="https://i4c.mha.gov.in/ncrp.aspx" target="_blank" class="px-3 py-2 rounded-xl theme-secondary-btn hover:theme-copy-btn-hover text-sm">About Helpline 1930</a>
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl theme-bg-alt-surface theme-border border p-4">
+                        <h3 class="font-semibold mb-1">🛡️ CERT-In (India)</h3>
+                        <p class="text-sm">National nodal agency for incident response & advisories.</p>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                            <a href="https://www.cert-in.org.in/" target="_blank" class="px-3 py-2 rounded-xl theme-secondary-btn hover:theme-copy-btn-hover text-sm">CERT-In Website</a>
+                            <a href="https://www.cert-in.org.in/s2cMainServlet?pageid=CONTACTUS" target="_blank" class="px-3 py-2 rounded-xl theme-secondary-btn hover:theme-copy-btn-hover text-sm">
+                                Incident Response Desk
+                            </a>
+                            <a href="https://www.csk.gov.in/" target="_blank" class="px-3 py-2 rounded-xl theme-secondary-btn hover:theme-copy-btn-hover text-sm">Cyber Swachhta Kendra</a>
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl theme-bg-alt-surface theme-border border p-4">
+                        <h3 class="font-semibold mb-1">☎️ Other Official Links</h3>
+                        <ul class="text-sm list-disc ml-5 space-y-1">
+                            <li>
+                                <a class="underline hover:no-underline" target="_blank" href="https://www.sancharsaathi.gov.in/">Sanchar Saathi (Track lost phones & report scams)</a>
+                            </li>
+                            <li>
+                                <a class="underline hover:no-underline" target="_blank" href="https://cybercrime.gov.in/Webform/View_FAQ.aspx">Cybercrime FAQ Portal</a>
+                            </li>
+                            <li><a class="underline hover:no-underline" target="_blank" href="https://www.rbi.org.in/Scripts/BS_PressReleaseDisplay.aspx?Id=46979">RBI: Financial Fraud Awareness</a></li>
+                            <li>Local Police: Dial <span class="font-semibold">112</span> for emergency.</li>
+                        </ul>
+                    </div>
+
+                    <div class="rounded-2xl theme-bg-alt-surface theme-border border p-4">
+                        <h3 class="font-semibold mb-1">✅ Quick Checklist</h3>
+                        <ul class="text-sm list-disc ml-5 space-y-1">
+                            <li>Freeze funds: Call <span class="font-bold">1930</span> ASAP for financial fraud.</li>
+                            <li>Reset passwords & enable 2FA on all accounts.</li>
+                            <li>Block cards, UPI, net‑banking if compromised.</li>
+                            <li>Scan devices for malware, update OS/apps.</li>
+                            <li>Keep evidence: screenshots, numbers, URLs, and receipts.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="mt-10 text-xs text-slate-500 text-center">
+  <p>Made by uzair b2b services</p>
+</footer>
+
+    </div>
+
+    <script>
+        const { createApp, ref, reactive, onMounted } = Vue;
+
+        createApp({
+            setup() {
+                // Theme state
+                const theme = ref('dark');
+
+                // Check for theme in local storage on page load
+                onMounted(() => {
+                    if (localStorage.theme === 'light' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+                        theme.value = 'light';
+                        document.documentElement.setAttribute('data-theme', 'light');
+                    }
+                });
+
+                function toggleTheme() {
+                    if (theme.value === 'dark') {
+                        document.documentElement.setAttribute('data-theme', 'light');
+                        localStorage.theme = 'light';
+                        theme.value = 'light';
+                    } else {
+                        document.documentElement.setAttribute('data-theme', 'dark');
+                        localStorage.theme = 'dark';
+                        theme.value = 'dark';
+                    }
+                }
+
+                // Tabs
+                const tabs = [
+                    { key: 'assistant', label: 'AI Assistant' },
+                    { key: 'news', label: 'Cybersecurity News' },
+                    { key: 'india', label: 'India Resources' },
+                ];
+                const activeTab = ref('assistant');
+
+                // Assistant state
+                const profile = reactive({ name: '', fraudType: '' });
+                const userMessage = ref('');
+                const messages = ref([
+                    {
+                        role: 'assistant',
+                        content:
+                            'Hi! I am your cyber‑safety guide. Tell me what happened and I will list immediate actions, checklists, and official links. If money is at risk or lost, dial 1930 now.',
+                    },
+                ]);
+                const loading = ref(false);
+                const lastMessageRef = ref(null);
+
+                function setLastMessageRef(el) {
+                    lastMessageRef.value = el;
+                }
+
+                async function copyLastResponse() {
+                    if (lastMessageRef.value) {
+                        const textToCopy = lastMessageRef.value.innerText;
+                        try {
+                            await navigator.clipboard.writeText(textToCopy);
+                            alert('Response copied to clipboard!');
+                        } catch (err) {
+                            console.error('Failed to copy text:', err);
+                            alert('Failed to copy. Please try again.');
+                        }
+                    }
+                }
+
+                // API keys and URLs
+                const apiKey = "AIzaSyCxLHL7e0BhezM3YWuWyT-dgTNS1GKZXQ0";
+                const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                async function sendToGemini() {
+                    const input = userMessage.value.trim();
+                    if (!input) return;
+
+                    const fullPrompt = `User name: ${profile.name || '—'}\nFraud type: ${profile.fraudType || '—'}\n\nUser message: ${input}`;
+
+                    messages.value.push({ role: 'user', content: fullPrompt });
+                    userMessage.value = '';
+                    loading.value = true;
+
+                    try {
+                        const systemInstruction = {
+                            parts: [{
+                                text: [
+                                    'You are a cybersecurity first‑aid copilot for users in India.',
+                                    'ALWAYS recommend dialing 1930 and cybercrime.gov.in when financial fraud is suspected or money is lost.',
+                                    'Be calm, step‑wise, and non‑judgmental. Include checklists and red‑flag detection.',
+                                    'Do NOT ask for sensitive data (card numbers, PIN, OTP, Aadhaar full number).',
+                                    'If user provides personally identifiable information, remind them to keep it private and do not echo it back.',
+                                    'When relevant, cite CERT‑In and India‑specific resources in plain text links.',
+                                ].join('\n')
+                            }]
+                        };
+
+                        const contents = messages.value.map(msg => ({
+                            role: msg.role === 'assistant' ? 'model' : 'user',
+                            parts: [{ text: msg.content }]
+                        }));
+
+                        const body = {
+                            contents: contents,
+                            systemInstruction: systemInstruction,
+                            generationConfig: {
+                                temperature: 0.8,
+                                topK: 32,
+                                topP: 0.95,
+                                maxOutputTokens: 2048,
+                            },
+                            safetySettings: [
+                                { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+                                { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+                                { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+                            ],
+                        };
+
+                        const resp = await fetch(geminiApiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(body),
+                        });
+
+                        if (!resp.ok) {
+                            const errorText = await resp.text();
+                            throw new Error('Gemini API error: ' + resp.status + ' - ' + errorText);
+                        }
+
+                        const data = await resp.json();
+                        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not generate a response.';
+                        messages.value.push({ role: 'assistant', content: text });
+                    } catch (e) {
+                        console.error('Error during API call:', e);
+                        messages.value.push({
+                            role: 'assistant',
+                            content: `There was an error contacting the AI: ${e.message}. For financial fraud, dial 1930 immediately.`,
+                        });
+                    } finally {
+                        loading.value = false;
+                    }
+                }
+
+                function clearChat() {
+                    messages.value = [{ role: 'assistant', content: 'Chat cleared. How can I help? If money is at risk, dial 1930 now.' }];
+                }
+
+                // Corrected News aggregation (RSS) functionality
+                const newsItems = ref([]);
+                const newsUpdatedAt = ref('');
+
+                async function fetchViaAllOrigins(url) {
+                    const rawUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+                    try {
+                        const r = await fetch(rawUrl);
+                        if (!r.ok) throw new Error('Fetch failed: ' + r.status);
+                        return r.text();
+                    } catch (e) {
+                        console.error('Fetch error:', e);
+                        throw e; // Re-throw to be caught by refreshNews()
+                    }
+                }
+
+                function parseRSS(xmlText, sourceLabel) {
+                    const parser = new DOMParser();
+                    const xml = parser.parseFromString(xmlText, 'text/xml');
+                    const isRSS = xml.querySelector('rss');
+                    const isAtom = xml.querySelector('feed');
+                    const items = [];
+
+                    if (isRSS) {
+                        xml.querySelectorAll('item').forEach(it => {
+                            items.push({
+                                title: it.querySelector('title')?.textContent?.trim() || '(no title)',
+                                link: it.querySelector('link')?.textContent?.trim() || '#',
+                                summary: it.querySelector('description')?.textContent?.replace(/<[^>]+>/g,'').trim().slice(0, 280),
+                                pubDate: new Date(it.querySelector('pubDate')?.textContent || it.querySelector('dc\\:date')?.textContent || Date.now()).toISOString(),
+                                source: sourceLabel,
+                            });
+                        });
+                    } else if (isAtom) {
+                        xml.querySelectorAll('entry').forEach(it => {
+                            items.push({
+                                title: it.querySelector('title')?.textContent?.trim() || '(no title)',
+                                link: it.querySelector('link')?.getAttribute('href') || '#',
+                                summary: (it.querySelector('summary')?.textContent || it.querySelector('content')?.textContent || '').replace(/<[^>]+>/g,'').trim().slice(0, 280),
+                                pubDate: new Date(it.querySelector('updated')?.textContent || it.querySelector('published')?.textContent || Date.now()).toISOString(),
+                                source: sourceLabel,
+                            });
+                        });
+                    }
+                    return items;
+                }
+
+                async function refreshNews() {
+                    newsItems.value = [];
+                    try {
+                        const [thn, csn] = await Promise.all([
+                            fetchViaAllOrigins('https://thehackernews.com/feeds/posts/default'), // Atom
+                            fetchViaAllOrigins('https://cybersecuritynews.com/feed/') // RSS
+                        ]);
+                        const merged = [
+                            ...parseRSS(thn, 'The Hacker News'),
+                            ...parseRSS(csn, 'CyberSecurityNews')
+                        ].sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate)).slice(0, 20);
+                        newsItems.value = merged;
+                        newsUpdatedAt.value = new Date().toLocaleString();
+                    } catch (e) {
+                        console.error(e);
+                        newsItems.value = [];
+                        newsUpdatedAt.value = 'Failed to load';
+                    }
+                }
+
+                function fmtDate(iso) {
+                    try {
+                        return new Date(iso).toLocaleString();
+                    } catch {
+                        return iso;
+                    }
+                }
+
+                onMounted(() => {
+                    refreshNews();
+                });
+
+                return {
+                    theme,
+                    toggleTheme,
+                    tabs,
+                    activeTab,
+                    profile,
+                    userMessage,
+                    messages,
+                    loading,
+                    sendToGemini,
+                    clearChat,
+                    newsItems,
+                    newsUpdatedAt,
+                    refreshNews,
+                    fmtDate,
+                    copyLastResponse,
+                    setLastMessageRef,
+                };
+            },
+        }).mount('#app');
+    </script>
+
+    <script>
+        // Enhance icons (non-blocking)
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                lucide.createIcons();
+            } catch {}
+        });
+    </script>
+</body>
+</html>
