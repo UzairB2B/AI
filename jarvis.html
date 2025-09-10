@@ -170,6 +170,16 @@
             transform: scale(1.1);
         }
         
+        .mic-btn.listening svg {
+            fill: #00ff00;
+            filter: drop-shadow(0 0 5px #00ff00);
+        }
+
+        .mic-btn.processing svg {
+            fill: #ff0000;
+            filter: drop-shadow(0 0 5px #ff0000);
+        }
+        
         .mic-btn:hover svg {
             fill: var(--secondary-color);
             filter: drop-shadow(0 0 5px var(--secondary-color));
@@ -279,7 +289,7 @@
 
         // UI elements
         const micBtn = document.getElementById('mic-btn');
-        const copyBtn = document.HE SHOULD KNOW ANYTHING, EVERY THING IN INTERNAT STATIC AND DYNAMIC AND GIVE RESPONSE IN HUMAN LIKE$0getElementById('copy-btn');
+        const copyBtn = document.getElementById('copy-btn');
         const chatLog = document.getElementById('chat-log');
         const messageStatus = document.getElementById('message-status');
 
@@ -421,25 +431,28 @@
         recognition.onstart = () => {
             isListening = true;
             micBtn.classList.add('listening');
-            updateStatus('Listening...');
+            micBtn.classList.remove('processing');
+            updateStatus('Speak. J.A.R.V.I.S. is listening.');
             toggleCopyButton(false);
         };
 
         recognition.onend = () => {
             isListening = false;
             micBtn.classList.remove('listening');
-            updateStatus('Processing...');
+            micBtn.classList.add('processing');
+            updateStatus('J.A.R.V.I.S. is thinking.');
         };
 
         recognition.onresult = async (event) => {
             const transcript = event.results[0][0].transcript;
             appendMessage('user', transcript);
             
-            updateStatus('Thinking...');
+            updateStatus('J.A.R.V.I.S. is thinking.');
 
             const jarvisResponse = await getGeminiResponse(transcript);
             lastResponseText = jarvisResponse;
 
+            micBtn.classList.remove('processing');
             appendMessage('jarvis', jarvisResponse);
             toggleCopyButton(true);
 
