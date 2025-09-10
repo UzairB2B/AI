@@ -316,17 +316,22 @@
         recognition.lang = 'auto'; // Auto-detect language
 
         // Speech Synthesis setup
+        let hasSpoken = false;
         window.speechSynthesis.onvoiceschanged = () => {
-            const voices = window.speechSynthesis.getVoices();
-            // Try to find a voice for Indian English or Hindi for better language support
-            const chosenVoice = voices.find(voice => voice.lang.includes('en-IN') || voice.lang.includes('hi-IN') || voice.lang.includes('en-US')) || voices[0];
-            if (chosenVoice) {
-                utterance.voice = chosenVoice;
-                utterance.lang = chosenVoice.lang;
+            if (!hasSpoken) {
+                const voices = window.speechSynthesis.getVoices();
+                // Prioritize Indian English, then Hindi, then US English, then default
+                const chosenVoice = voices.find(voice => voice.lang.includes('en-IN') || voice.lang.includes('hi-IN') || voice.lang.includes('en-US')) || voices[0];
+                if (chosenVoice) {
+                    utterance.voice = chosenVoice;
+                    utterance.lang = chosenVoice.lang;
+                }
+                speakInitialMessage();
+                hasSpoken = true;
             }
         };
 
-        // Trigger the onvoiceschanged event if voices are already loaded
+        // If voices are already loaded, trigger the initial message
         if (window.speechSynthesis.getVoices().length > 0) {
             window.speechSynthesis.onvoiceschanged();
         }
@@ -364,6 +369,16 @@
             copyBtn.classList.toggle('visible', visible);
             playBtn.classList.toggle('visible', visible);
             stopBtn.classList.toggle('visible', visible);
+        }
+
+        function speakInitialMessage() {
+            const initialGreeting = "Greetings. I am J.A.R.V.I.S. Awaiting your command.";
+            lastResponseText = initialGreeting;
+            utterance.text = initialGreeting;
+            // A common browser policy is to require a user gesture to trigger speech.
+            // This is a common workaround, but may not work in all environments.
+            window.speechSynthesis.speak(utterance);
+            toggleActionButtons(true);
         }
         
         // Function to make API call with exponential backoff
@@ -446,6 +461,7 @@
 
         playBtn.addEventListener('click', () => {
             if (lastResponseText) {
+                window.speechSynthesis.cancel();
                 window.speechSynthesis.speak(utterance);
             }
         });
