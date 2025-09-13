@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RBI Grade B Prep AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+        }
+        .container-card {
+            background-color: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Calculator styles */
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        .calc-body-dark {
+            background: linear-gradient(145deg, #2c3e50, #212f3d);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2), 0 6px 6px rgba(0, 0, 0, 0.1);
+        }
+        .calc-display-dark {
+            @apply text-white font-mono;
+            background: #253341;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        .calc-button-dark {
+            @apply text-white text-2xl font-bold rounded-xl transition-all duration-100 ease-in-out;
+            @apply bg-gray-600 shadow-md hover:bg-gray-500;
+        }
+        .calc-button-dark:active {
+            @apply transform scale-95 shadow-inner;
+            background-color: #4b5563;
+        }
+        .operator-button-dark {
+            @apply bg-orange-500 text-white hover:bg-orange-600;
+            box-shadow: 0 4px 6px rgba(249, 115, 22, 0.2), 0 1px 3px rgba(249, 115, 22, 0.12);
+        }
+        .equals-button-dark {
+            @apply col-span-2 bg-green-500 text-white hover:bg-green-600;
+            box-shadow: 0 4px 6px rgba(34, 197, 94, 0.2), 0 1px 3px rgba(34, 197, 94, 0.12);
+        }
+    </style>
+</head>
+<body class="p-4 flex flex-col items-center justify-center min-h-screen">
+
+    <div class="container-card w-full max-w-4xl p-8 space-y-8 flex flex-col lg:flex-row lg:space-x-8 lg:space-y-0">
+        <!-- Main Content Area -->
+        <div class="flex-1 space-y-6">
+            <div class="flex items-center justify-center space-x-4 mb-4">
+                <a href="index.html" class="text-gray-600 hover:text-blue-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8">
+                        <path d="M11.47 3.84a.75.75 0 0 1 1.06 0l8.69 8.69a1.5 1.5 0 0 1 .41 1.06V19.5a2.25 2.25 0 0 1-2.25 2.25H15a2.25 2.25 0 0 1-2.25-2.25v-2.25a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75v2.25A2.25 2.25 0 0 1 3 19.5v-5.96a1.5 1.5 0 0 1 .41-1.06l8.69-8.69Z" />
+                    </svg>
+                </a>
+                <h1 class="text-4xl font-bold text-center text-gray-800">RBI Grade B Prep AI</h1>
+            </div>
+            
+            <p class="text-center text-gray-600">Prepare for the RBI Grade B exam by generating custom questions based on phase, paper, topic, and question type.</p>
+
+            <!-- Question Generation Controls -->
+            <div class="space-y-4">
+                <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+                    <div class="flex-1">
+                        <label for="phase-select" class="block text-sm font-medium text-gray-700 mb-1">Select Phase</label>
+                        <select id="phase-select" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                            <option value="" disabled selected>Choose a Phase</option>
+                            <option value="Phase I">Phase I (Prelims)</option>
+                            <option value="Phase II">Phase II (Mains)</option>
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label for="paper-select" class="block text-sm font-medium text-gray-700 mb-1">Select Paper</label>
+                        <select id="paper-select" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition-colors" disabled>
+                            <option value="" disabled selected>Select a Paper</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+                    <div class="flex-1">
+                        <label for="topic-select" class="block text-sm font-medium text-gray-700 mb-1">Select Topic</label>
+                        <select id="topic-select" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition-colors" disabled>
+                            <option value="" disabled selected>Select a Topic</option>
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label for="difficulty-select" class="block text-sm font-medium text-gray-700 mb-1">Select Difficulty</label>
+                        <select id="difficulty-select" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                            <option value="" disabled selected>Select a Difficulty</option>
+                            <option value="Easy">Easy</option>
+                            <option value="Moderate">Moderate</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex-1">
+                    <label for="question-type-select" class="block text-sm font-medium text-gray-700 mb-1">Select Question Type</label>
+                    <select id="question-type-select" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition-colors" disabled>
+                        <option value="" disabled selected>Select a Type</option>
+                        <option value="MCQ">Multiple Choice (MCQ)</option>
+                        <option value="Descriptive">Descriptive</option>
+                    </select>
+                </div>
+                <button id="generate-btn" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2" disabled>
+                    <span id="generate-text">Generate Question</span>
+                    <div id="generate-spinner" class="loading-spinner hidden"></div>
+                </button>
+            </div>
+
+            <!-- Question and Answer Display Area -->
+            <div class="space-y-4">
+                <div id="question-card" class="bg-gray-50 p-6 rounded-xl border border-gray-200 hidden">
+                    <p class="text-xl font-bold text-gray-800 mb-4">Question:</p>
+                    <div id="question-content" class="text-lg text-gray-700 leading-relaxed space-y-4">
+                        <p id="question-text"></p>
+                        <div id="options-container" class="space-y-2"></div>
+                        <textarea id="descriptive-input" class="w-full h-48 p-3 rounded-xl border border-gray-300 hidden resize-none" placeholder="Type your answer here..."></textarea>
+                    </div>
+                </div>
+                <div class="flex space-x-4">
+                    <button id="explain-btn" class="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:bg-indigo-700 transition-colors flex items-center justify-center space-x-2" disabled>
+                        <span id="explain-text">Explain Answer</span>
+                        <div id="explain-spinner" class="loading-spinner hidden"></div>
+                    </button>
+                    <button id="next-question-btn" class="flex-1 py-3 bg-gray-500 text-white font-bold rounded-xl shadow-lg hover:bg-gray-600 transition-colors" disabled>
+                        Next Question
+                    </button>
+                </div>
+                <div id="answer-card" class="bg-gray-50 p-6 rounded-xl border border-gray-200 hidden">
+                    <p class="text-xl font-bold text-gray-800 mb-4">Detailed Explanation/Solution:</p>
+                    <p id="answer-text" class="text-lg text-gray-700 leading-relaxed"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- On-screen Calculator -->
+        <div class="w-full lg:w-96 flex-shrink-0">
+            <div class="flex items-center justify-center space-x-2 mb-4">
+                <h2 class="text-2xl font-bold text-center text-gray-800">On-Screen Calculator</h2>
+                <button id="toggle-calc-btn" class="py-2 px-4 bg-gray-300 rounded-xl text-sm font-bold hover:bg-gray-400 transition-colors">Show</button>
+            </div>
+            <div id="calculator-container" class="p-6 space-y-4 hidden rounded-3xl calc-body-dark">
+                <div id="calc-display" class="p-4 rounded-xl text-3xl font-mono overflow-x-auto whitespace-nowrap text-right calc-display-dark">0</div>
+                <div class="calculator-grid">
+                    <button class="calc-button-dark" data-value="C">C</button>
+                    <button class="calc-button-dark operator-button-dark" data-value="/">/</button>
+                    <button class="calc-button-dark operator-button-dark" data-value="*">*</button>
+                    <button class="calc-button-dark operator-button-dark" data-value="<">&#8592;</button>
+                    <button class="calc-button-dark" data-value="7">7</button>
+                    <button class="calc-button-dark" data-value="8">8</button>
+                    <button class="calc-button-dark" data-value="9">9</button>
+                    <button class="calc-button-dark operator-button-dark" data-value="-">-</button>
+                    <button class="calc-button-dark" data-value="4">4</button>
+                    <button class="calc-button-dark" data-value="5">5</button>
+                    <button class="calc-button-dark" data-value="6">6</button>
+                    <button class="calc-button-dark operator-button-dark" data-value="+">+</button>
+                    <button class="calc-button-dark" data-value="1">1</button>
+                    <button class="calc-button-dark" data-value="2">2</button>
+                    <button class="calc-button-dark" data-value="3">3</button>
+                    <button class="calc-button-dark" data-value=".">.</button>
+                    <button class="calc-button-dark" data-value="0">0</button>
+                    <button class="calc-button-dark equals-button-dark" data-value="=">=</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-8 text-center text-gray-600 text-sm">
+        <p>A B2B Services Project by Uzair</p>
+    </footer>
+
+    <script>
+        // API Configuration
+        const apiKey = "AIzaSyC6p6Rzp-Ol_pB5wPo5uCRg26pq9xL_LCY";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+        // DOM Elements
+        const phaseSelect = document.getElementById('phase-select');
+        const paperSelect = document.getElementById('paper-select');
+        const topicSelect = document.getElementById('topic-select');
+        const difficultySelect = document.getElementById('difficulty-select');
+        const questionTypeSelect = document.getElementById('question-type-select');
+        const generateBtn = document.getElementById('generate-btn');
+        const generateText = document.getElementById('generate-text');
+        const generateSpinner = document.getElementById('generate-spinner');
+        const questionCard = document.getElementById('question-card');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const descriptiveInput = document.getElementById('descriptive-input');
+        const explainBtn = document.getElementById('explain-btn');
+        const explainText = document.getElementById('explain-text');
+        const explainSpinner = document.getElementById('explain-spinner');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+        const answerCard = document.getElementById('answer-card');
+        const answerText = document.getElementById('answer-text');
+        const toggleCalcBtn = document.getElementById('toggle-calc-btn');
+        const calculatorContainer = document.getElementById('calculator-container');
+
+        // Data Structure for Papers and Topics
+        const examStructure = {
+            "Phase I": {
+                papers: {
+                    "Paper 1: General Awareness": ["Current Affairs", "Financial Awareness", "Government Schemes", "General Knowledge"],
+                    "Paper 2: Reasoning": ["Puzzles & Seating Arrangements", "Syllogisms & Statements", "Blood Relations & Directions", "Data Sufficiency"],
+                    "Paper 3: English Language": ["Reading Comprehension", "Grammar", "Vocabulary & Synonyms"],
+                    "Paper 4: Quantitative Aptitude": ["Data Interpretation", "Arithmetic", "Algebra", "Geometry"]
+                },
+                questionTypes: ["MCQ"]
+            },
+            "Phase II": {
+                papers: {
+                    "Paper 1: ESI (Economic & Social Issues)": ["Growth & Development", "Poverty Alleviation", "Social Structure in India", "Fiscal Policy"],
+                    "Paper 2: English (Descriptive)": ["Essay Writing", "Precis Writing", "Comprehension & Summary"],
+                    "Paper 3: Finance & Management": ["Financial Systems", "Risk Management", "Corporate Governance", "Cost & Management Accounting"]
+                },
+                questionTypes: ["MCQ", "Descriptive"]
+            }
+        };
+
+        let currentQuestion = '';
+        let currentQuestionType = '';
+        let currentPaper = '';
+
+        // Function to show a temporary message instead of an alert
+        function showMessage(message, type = 'error') {
+            const messageBox = document.createElement('div');
+            messageBox.className = `fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-xl shadow-lg text-white z-50 transition-opacity duration-300 ${type === 'error' ? 'bg-red-500' : 'bg-green-500'}`;
+            messageBox.textContent = message;
+            document.body.appendChild(messageBox);
+            setTimeout(() => {
+                messageBox.style.opacity = '0';
+                setTimeout(() => messageBox.remove(), 300);
+            }, 3000);
+        }
+
+        // --- LLM API Call Function with Exponential Backoff ---
+        async function callGeminiAPI(prompt, useSearch, retries = 3, delay = 1000) {
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+            };
+            if (useSearch) {
+                payload.tools = [{ "google_search": {} }];
+            }
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) {
+                    if (response.status === 429 && retries > 0) {
+                        await new Promise(res => setTimeout(res, delay));
+                        return callGeminiAPI(prompt, useSearch, retries - 1, delay * 2);
+                    }
+                    throw new Error(`API error: ${response.statusText}`);
+                }
+                const result = await response.json();
+                return result.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from AI.';
+            } catch (error) {
+                console.error('API call failed:', error);
+                return 'Failed to get a response. Please try again later.';
+            }
+        }
+
+        // --- Event Listeners ---
+        phaseSelect.addEventListener('change', () => {
+            const selectedPhase = phaseSelect.value;
+            paperSelect.innerHTML = '<option value="" disabled selected>Select a Paper</option>';
+            topicSelect.innerHTML = '<option value="" disabled selected>Select a Topic</option>';
+            questionTypeSelect.innerHTML = '<option value="" disabled selected>Select a Type</option>';
+            
+            if (selectedPhase) {
+                const papers = examStructure[selectedPhase].papers;
+                for (const paper in papers) {
+                    const option = document.createElement('option');
+                    option.value = paper;
+                    option.textContent = paper;
+                    paperSelect.appendChild(option);
+                }
+                paperSelect.disabled = false;
+                
+                const questionTypes = examStructure[selectedPhase].questionTypes;
+                questionTypes.forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type;
+                    option.textContent = type;
+                    questionTypeSelect.appendChild(option);
+                });
+                questionTypeSelect.disabled = false;
+            } else {
+                paperSelect.disabled = true;
+                topicSelect.disabled = true;
+                questionTypeSelect.disabled = true;
+            }
+            updateGenerateButtonState();
+        });
+
+        paperSelect.addEventListener('change', () => {
+            const selectedPhase = phaseSelect.value;
+            currentPaper = paperSelect.value;
+            topicSelect.innerHTML = '<option value="" disabled selected>Select a Topic</option>';
+            if (selectedPhase && currentPaper) {
+                const topics = examStructure[selectedPhase].papers[currentPaper];
+                topics.forEach(topic => {
+                    const option = document.createElement('option');
+                    option.value = topic;
+                    option.textContent = topic;
+                    topicSelect.appendChild(option);
+                });
+                topicSelect.disabled = false;
+            } else {
+                topicSelect.disabled = true;
+            }
+            updateGenerateButtonState();
+        });
+
+        topicSelect.addEventListener('change', updateGenerateButtonState);
+        difficultySelect.addEventListener('change', updateGenerateButtonState);
+        questionTypeSelect.addEventListener('change', updateGenerateButtonState);
+
+        function updateGenerateButtonState() {
+            if (phaseSelect.value && paperSelect.value && topicSelect.value && difficultySelect.value && questionTypeSelect.value) {
+                generateBtn.disabled = false;
+            } else {
+                generateBtn.disabled = true;
+            }
+        }
+
+        generateBtn.addEventListener('click', async () => {
+            const phase = phaseSelect.value;
+            const paper = paperSelect.value;
+            const topic = topicSelect.value;
+            const difficulty = difficultySelect.value;
+            currentQuestionType = questionTypeSelect.value;
+
+            questionCard.classList.add('hidden');
+            answerCard.classList.add('hidden');
+            optionsContainer.classList.add('hidden');
+            descriptiveInput.classList.add('hidden');
+            explainBtn.disabled = true;
+            nextQuestionBtn.disabled = true;
+
+            // Show loading spinner
+            generateText.textContent = 'Generating...';
+            generateSpinner.classList.remove('hidden');
+            generateBtn.disabled = true;
+            
+            let useSearch = false;
+            if (phase === 'Phase I' && paper === 'Paper 1: General Awareness' && topic === 'Current Affairs') {
+                useSearch = true;
+                showMessage('Fetching the latest current events...', 'info');
+            }
+
+            try {
+                let prompt = `Generate a single ${difficulty}-level RBI Grade B ${phase}, ${paper} question on the topic of ${topic}. The question type should be ${currentQuestionType}. `;
+                if (currentQuestionType === 'MCQ') {
+                    prompt += `Provide the question text followed by four multiple-choice options, labeled (A), (B), (C), and (D). The options should be a separate list.`;
+                } else { // Descriptive
+                    prompt += `The answer should be a comprehensive descriptive response. Do not provide any options or sample answers, just the question itself.`;
+                }
+                prompt += ` Format all mathematical or financial expressions using LaTeX, enclosed in dollar signs ($...$ and $$...$$). Do not include any additional text, headers, or instructions.`;
+
+                const generatedContent = await callGeminiAPI(prompt, useSearch);
+
+                if (generatedContent) {
+                    currentQuestion = generatedContent;
+                    questionCard.classList.remove('hidden');
+                    explainBtn.disabled = false;
+                    nextQuestionBtn.disabled = false;
+
+                    if (currentQuestionType === 'MCQ') {
+                        const lines = generatedContent.split('\n').filter(line => line.trim() !== '');
+                        const questionTextContent = lines[0];
+                        const options = lines.slice(1);
+                        
+                        questionText.innerHTML = questionTextContent.replace(/\n/g, '<br>');
+                        optionsContainer.innerHTML = '';
+                        options.forEach(optionText => {
+                            const optionDiv = document.createElement('div');
+                            optionDiv.className = 'flex items-start space-x-2';
+                            const input = document.createElement('input');
+                            input.type = 'radio';
+                            input.name = 'answer-option';
+                            input.className = 'form-radio h-4 w-4 text-blue-600 mt-1';
+                            const label = document.createElement('label');
+                            label.className = 'text-gray-700';
+                            label.innerHTML = optionText.trim();
+                            
+                            optionDiv.appendChild(input);
+                            optionDiv.appendChild(label);
+                            optionsContainer.appendChild(optionDiv);
+                        });
+                        optionsContainer.classList.remove('hidden');
+                        descriptiveInput.classList.add('hidden');
+
+                    } else { // Descriptive
+                        questionText.innerHTML = generatedContent.replace(/\n/g, '<br>');
+                        optionsContainer.classList.add('hidden');
+                        descriptiveInput.classList.remove('hidden');
+                        descriptiveInput.value = '';
+                    }
+
+                    MathJax.typesetPromise([questionText, optionsContainer]);
+                } else {
+                    showMessage('Failed to generate a question.', 'error');
+                }
+            } finally {
+                generateText.textContent = 'Generate Question';
+                generateSpinner.classList.add('hidden');
+                generateBtn.disabled = false;
+            }
+        });
+
+        explainBtn.addEventListener('click', async () => {
+            if (!currentQuestion) {
+                showMessage('Please generate a question first.', 'error');
+                return;
+            }
+            // Show loading spinner
+            explainText.textContent = 'Explaining...';
+            explainSpinner.classList.remove('hidden');
+            explainBtn.disabled = true;
+
+            try {
+                let prompt = `Provide a detailed, step-by-step solution for the following RBI Grade B question.`;
+                if (currentQuestionType === 'MCQ') {
+                    prompt += ` The response must first provide the correct option and then explain why it's correct.
+                    \n\nQuestion: ${currentQuestion}`;
+                } else { // Descriptive
+                    prompt += ` Provide a comprehensive, well-structured answer that a student could use as a model for their own response.
+                    \n\nQuestion: ${currentQuestion}`;
+                }
+                prompt += ` Ensure all mathematical expressions and formulas are formatted using LaTeX, enclosed in dollar signs ($...$ and $$...$$ for block equations). Do not provide any additional text or headers.`;
+                
+                const generatedExplanation = await callGeminiAPI(prompt, false);
+
+                if (generatedExplanation) {
+                    answerText.innerHTML = generatedExplanation.replace(/\n/g, '<br>');
+                    answerCard.classList.remove('hidden');
+                    MathJax.typesetPromise([answerText]);
+                } else {
+                    showMessage('Failed to generate an explanation.', 'error');
+                }
+            } finally {
+                explainText.textContent = 'Explain Answer';
+                explainSpinner.classList.add('hidden');
+                explainBtn.disabled = false;
+            }
+        });
+
+        nextQuestionBtn.addEventListener('click', () => {
+            questionCard.classList.add('hidden');
+            answerCard.classList.add('hidden');
+            currentQuestion = '';
+            explainBtn.disabled = true;
+            nextQuestionBtn.disabled = true;
+            // Optionally, reset the selections
+            phaseSelect.value = '';
+            paperSelect.innerHTML = '<option value="" disabled selected>Select a Paper</option>';
+            paperSelect.disabled = true;
+            topicSelect.innerHTML = '<option value="" disabled selected>Select a Topic</option>';
+            topicSelect.disabled = true;
+            difficultySelect.value = '';
+            questionTypeSelect.value = '';
+            questionTypeSelect.disabled = true;
+            updateGenerateButtonState();
+        });
+
+        // --- Calculator Logic ---
+        let expression = '';
+        const calcDisplay = document.getElementById('calc-display');
+        const buttons = document.querySelector('.calculator-grid');
+
+        buttons.addEventListener('click', (event) => {
+            const { target } = event;
+            const value = target.dataset.value;
+
+            if (!target.matches('button')) {
+                return;
+            }
+            
+            if (value === 'C') {
+                expression = '';
+            } else if (value === '=') {
+                try {
+                    const result = Function(`return ${expression}`)();
+                    expression = String(result);
+                } catch (e) {
+                    expression = 'Error';
+                }
+            } else if (value === '<') {
+                expression = expression.slice(0, -1);
+            } else {
+                expression += value;
+            }
+
+            calcDisplay.textContent = expression || '0';
+        });
+
+        // Toggle calculator visibility
+        toggleCalcBtn.addEventListener('click', () => {
+            calculatorContainer.classList.toggle('hidden');
+            if (calculatorContainer.classList.contains('hidden')) {
+                toggleCalcBtn.textContent = 'Show';
+            } else {
+                toggleCalcBtn.textContent = 'Hide';
+            }
+        });
+    </script>
+</body>
+</html>
