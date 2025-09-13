@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IIT JAM Prep AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+        }
+        .container-card {
+            background-color: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Calculator styles */
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        .calc-body-dark {
+            background: linear-gradient(145deg, #2c3e50, #212f3d);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2), 0 6px 6px rgba(0, 0, 0, 0.1);
+        }
+        .calc-display-dark {
+            @apply text-white font-mono;
+            background: #253341;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        .calc-button-dark {
+            @apply text-white text-2xl font-bold rounded-xl transition-all duration-100 ease-in-out;
+            @apply bg-gray-600 shadow-md hover:bg-gray-500;
+        }
+        .calc-button-dark:active {
+            @apply transform scale-95 shadow-inner;
+            background-color: #4b5563;
+        }
+        .operator-button-dark {
+            @apply bg-orange-500 text-white hover:bg-orange-600;
+            box-shadow: 0 4px 6px rgba(249, 115, 22, 0.2), 0 1px 3px rgba(249, 115, 22, 0.12);
+        }
+        .equals-button-dark {
+            @apply col-span-2 bg-green-500 text-white hover:bg-green-600;
+            box-shadow: 0 4px 6px rgba(34, 197, 94, 0.2), 0 1px 3px rgba(34, 197, 94, 0.12);
+        }
+    </style>
+</head>
+<body class="p-4 flex flex-col items-center justify-center min-h-screen">
+
+    <div class="container-card w-full max-w-4xl p-8 space-y-8 flex flex-col lg:flex-row lg:space-x-8 lg:space-y-0">
+        <!-- Main Content Area -->
+        <div class="flex-1 space-y-6">
+            <div class="flex items-center justify-center space-x-4 mb-4">
+                <a href="index.html" class="text-gray-600 hover:text-blue-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8">
+                        <path d="M11.47 3.84a.75.75 0 0 1 1.06 0l8.69 8.69a1.5 1.5 0 0 1 .41 1.06V19.5a2.25 2.25 0 0 1-2.25 2.25H15a2.25 2.25 0 0 1-2.25-2.25v-2.25a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75v2.25A2.25 2.25 0 0 1 3 19.5v-5.96a1.5 1.5 0 0 1 .41-1.06l8.69-8.69Z" />
+                    </svg>
+                </a>
+                <h1 class="text-4xl font-bold text-center text-gray-800">IIT JAM Prep AI</h1>
+            </div>
+            
+            <p class="text-center text-gray-600">Prepare for the IIT JAM exam by generating custom questions based on subject, topic, and difficulty level, tailored to the specific exam format.</p>
+
+            <!-- Question Generation Controls -->
+            <div class="space-y-4">
+                <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+                    <div class="flex-1">
+                        <label for="subject-select" class="block text-sm font-medium text-gray-700 mb-1">Select Subject</label>
+                        <select id="subject-select" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                            <option value="" disabled selected>Choose a Subject</option>
+                            <option value="PH">Physics (PH)</option>
+                            <option value="CY">Chemistry (CY)</option>
+                            <option value="MA">Mathematics (MA)</option>
+                            <option value="BT">Biotechnology (BT)</option>
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label for="topic-select" class="block text-sm font-medium text-gray-700 mb-1">Select Topic</label>
+                        <select id="topic-select" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition-colors" disabled>
+                            <option value="" disabled selected>Select a Topic</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+                    <div class="flex-1">
+                        <label for="difficulty-select" class="block text-sm font-medium text-gray-700 mb-1">Select Difficulty</label>
+                        <select id="difficulty-select" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                            <option value="" disabled selected>Select a Difficulty</option>
+                            <option value="Easy">Easy</option>
+                            <option value="Moderate">Moderate</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label for="question-type-select" class="block text-sm font-medium text-gray-700 mb-1">Select Question Type</label>
+                        <select id="question-type-select" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                            <option value="" disabled selected>Select a Type</option>
+                            <option value="MCQ">Multiple Choice (MCQ)</option>
+                            <option value="MSQ">Multiple Select (MSQ)</option>
+                            <option value="NAT">Numerical Answer Type (NAT)</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="generate-btn" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2" disabled>
+                    <span id="generate-text">Generate Question</span>
+                    <div id="generate-spinner" class="loading-spinner hidden"></div>
+                </button>
+            </div>
+
+            <!-- Question and Answer Display Area -->
+            <div class="space-y-4">
+                <div id="question-card" class="bg-gray-50 p-6 rounded-xl border border-gray-200 hidden">
+                    <p class="text-xl font-bold text-gray-800 mb-4">Question:</p>
+                    <div id="question-content" class="text-lg text-gray-700 leading-relaxed space-y-4">
+                        <p id="question-text"></p>
+                        <div id="options-container" class="space-y-2"></div>
+                        <input type="text" id="nat-input" class="w-full p-3 rounded-xl border border-gray-300 hidden" placeholder="Enter your answer (e.g., 12.34)">
+                    </div>
+                </div>
+                <div class="flex space-x-4">
+                    <button id="explain-btn" class="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:bg-indigo-700 transition-colors flex items-center justify-center space-x-2" disabled>
+                        <span id="explain-text">Explain Answer</span>
+                        <div id="explain-spinner" class="loading-spinner hidden"></div>
+                    </button>
+                    <button id="next-question-btn" class="flex-1 py-3 bg-gray-500 text-white font-bold rounded-xl shadow-lg hover:bg-gray-600 transition-colors" disabled>
+                        Next Question
+                    </button>
+                </div>
+                <div id="answer-card" class="bg-gray-50 p-6 rounded-xl border border-gray-200 hidden">
+                    <p class="text-xl font-bold text-gray-800 mb-4">Detailed Explanation:</p>
+                    <p id="answer-text" class="text-lg text-gray-700 leading-relaxed"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- On-screen Calculator -->
+        <div class="w-full lg:w-96 flex-shrink-0">
+            <div class="flex items-center justify-center space-x-2 mb-4">
+                <h2 class="text-2xl font-bold text-center text-gray-800">On-Screen Calculator</h2>
+                <button id="toggle-calc-btn" class="py-2 px-4 bg-gray-300 rounded-xl text-sm font-bold hover:bg-gray-400 transition-colors">Show</button>
+            </div>
+            <div id="calculator-container" class="p-6 space-y-4 hidden rounded-3xl calc-body-dark">
+                <div id="calc-display" class="p-4 rounded-xl text-3xl font-mono overflow-x-auto whitespace-nowrap text-right calc-display-dark">0</div>
+                <div class="calculator-grid">
+                    <button class="calc-button-dark" data-value="C">C</button>
+                    <button class="calc-button-dark operator-button-dark" data-value="/">/</button>
+                    <button class="calc-button-dark operator-button-dark" data-value="*">*</button>
+                    <button class="calc-button-dark operator-button-dark" data-value="<">&#8592;</button>
+                    <button class="calc-button-dark" data-value="7">7</button>
+                    <button class="calc-button-dark" data-value="8">8</button>
+                    <button class="calc-button-dark" data-value="9">9</button>
+                    <button class="calc-button-dark operator-button-dark" data-value="-">-</button>
+                    <button class="calc-button-dark" data-value="4">4</button>
+                    <button class="calc-button-dark" data-value="5">5</button>
+                    <button class="calc-button-dark" data-value="6">6</button>
+                    <button class="calc-button-dark operator-button-dark" data-value="+">+</button>
+                    <button class="calc-button-dark" data-value="1">1</button>
+                    <button class="calc-button-dark" data-value="2">2</button>
+                    <button class="calc-button-dark" data-value="3">3</button>
+                    <button class="calc-button-dark" data-value=".">.</button>
+                    <button class="calc-button-dark" data-value="0">0</button>
+                    <button class="calc-button-dark equals-button-dark" data-value="=">=</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-8 text-center text-gray-600 text-sm">
+        <p>Made By Uzair B2B Services</p>
+    </footer>
+
+    <script>
+        // API Configuration
+        const apiKey = "AIzaSyCOBn7BoT4GhQJbiMia2hXS9EeBDIlFy_s";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+        // DOM Elements
+        const subjectSelect = document.getElementById('subject-select');
+        const topicSelect = document.getElementById('topic-select');
+        const difficultySelect = document.getElementById('difficulty-select');
+        const questionTypeSelect = document.getElementById('question-type-select');
+        const generateBtn = document.getElementById('generate-btn');
+        const generateText = document.getElementById('generate-text');
+        const generateSpinner = document.getElementById('generate-spinner');
+        const questionCard = document.getElementById('question-card');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const natInput = document.getElementById('nat-input');
+        const explainBtn = document.getElementById('explain-btn');
+        const explainText = document.getElementById('explain-text');
+        const explainSpinner = document.getElementById('explain-spinner');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+        const answerCard = document.getElementById('answer-card');
+        const answerText = document.getElementById('answer-text');
+        const toggleCalcBtn = document.getElementById('toggle-calc-btn');
+        const calculatorContainer = document.getElementById('calculator-container');
+
+        // Data Structure for Subjects and Topics
+        const topics = {
+            "PH": [
+                "Mechanics and General Properties",
+                "Oscillations, Waves and Optics",
+                "Kinetic Theory of Gases and Thermodynamics",
+                "Modern Physics and Quantum Mechanics",
+                "Solid State Physics and Electronics"
+            ],
+            "CY": [
+                "Physical Chemistry",
+                "Organic Chemistry",
+                "Inorganic Chemistry"
+            ],
+            "MA": [
+                "Sequences and Series",
+                "Functions of One and Several Real Variables",
+                "Differential Equations",
+                "Vector Calculus",
+                "Group Theory and Linear Algebra"
+            ],
+            "BT": [
+                "Biology (General)",
+                "Chemistry (Biochemistry and Analytical Methods)",
+                "Mathematics and Physics"
+            ]
+        };
+
+        let currentQuestion = '';
+        let currentQuestionType = '';
+
+        // Function to show a temporary message instead of an alert
+        function showMessage(message, type = 'error') {
+            const messageBox = document.createElement('div');
+            messageBox.className = `fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-xl shadow-lg text-white z-50 transition-opacity duration-300 ${type === 'error' ? 'bg-red-500' : 'bg-green-500'}`;
+            messageBox.textContent = message;
+            document.body.appendChild(messageBox);
+            setTimeout(() => {
+                messageBox.style.opacity = '0';
+                setTimeout(() => messageBox.remove(), 300);
+            }, 3000);
+        }
+
+        // --- LLM API Call Function with Exponential Backoff ---
+        async function callGeminiAPI(prompt, retries = 3, delay = 1000) {
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+            };
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) {
+                    if (response.status === 429 && retries > 0) {
+                        await new Promise(res => setTimeout(res, delay));
+                        return callGeminiAPI(prompt, retries - 1, delay * 2);
+                    }
+                    throw new Error(`API error: ${response.statusText}`);
+                }
+                const result = await response.json();
+                return result.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from AI.';
+            } catch (error) {
+                console.error('API call failed:', error);
+                return 'Failed to get a response. Please try again later.';
+            }
+        }
+
+        // --- Event Listeners ---
+        subjectSelect.addEventListener('change', () => {
+            const selectedSubject = subjectSelect.value;
+            topicSelect.innerHTML = '<option value="" disabled selected>Select a Topic</option>';
+            if (selectedSubject) {
+                topics[selectedSubject].forEach(topic => {
+                    const option = document.createElement('option');
+                    option.value = topic;
+                    option.textContent = topic;
+                    topicSelect.appendChild(option);
+                });
+                topicSelect.disabled = false;
+            } else {
+                topicSelect.disabled = true;
+            }
+            updateGenerateButtonState();
+        });
+
+        topicSelect.addEventListener('change', updateGenerateButtonState);
+        difficultySelect.addEventListener('change', updateGenerateButtonState);
+        questionTypeSelect.addEventListener('change', updateGenerateButtonState);
+
+        function updateGenerateButtonState() {
+            if (subjectSelect.value && topicSelect.value && difficultySelect.value && questionTypeSelect.value) {
+                generateBtn.disabled = false;
+            } else {
+                generateBtn.disabled = true;
+            }
+        }
+
+        generateBtn.addEventListener('click', async () => {
+            const subject = subjectSelect.value;
+            const topic = topicSelect.value;
+            const difficulty = difficultySelect.value;
+            currentQuestionType = questionTypeSelect.value;
+
+            questionCard.classList.add('hidden');
+            answerCard.classList.add('hidden');
+            optionsContainer.classList.add('hidden');
+            natInput.classList.add('hidden');
+            explainBtn.disabled = true;
+            nextQuestionBtn.disabled = true;
+
+            // Show loading spinner
+            generateText.textContent = 'Generating...';
+            generateSpinner.classList.remove('hidden');
+            generateBtn.disabled = true;
+
+            try {
+                let prompt = `Generate a single ${difficulty}-level IIT JAM-style ${subject} question of type ${currentQuestionType} on the topic of ${topic}. `;
+                if (currentQuestionType === 'MCQ') {
+                    prompt += `Provide the question text followed by four multiple-choice options, labeled (A), (B), (C), and (D). The options should be a separate list. Only one option should be correct.`;
+                } else if (currentQuestionType === 'MSQ') {
+                    prompt += `Provide the question text followed by four multiple-select options, labeled (A), (B), (C), and (D). The options should be a separate list. At least two options must be correct.`;
+                } else { // NAT
+                    prompt += `This should be a Numerical Answer Type (NAT) question. The answer must be a single numerical value. Do not provide any options.`;
+                }
+                prompt += ` Format all mathematical or scientific expressions using LaTeX, enclosed in dollar signs ($...$). Do not include any additional text or headers.`;
+
+                const generatedContent = await callGeminiAPI(prompt);
+
+                if (generatedContent) {
+                    currentQuestion = generatedContent;
+                    questionCard.classList.remove('hidden');
+                    explainBtn.disabled = false;
+                    nextQuestionBtn.disabled = false;
+
+                    if (currentQuestionType === 'MCQ' || currentQuestionType === 'MSQ') {
+                        const lines = generatedContent.split('\n').filter(line => line.trim() !== '');
+                        const questionTextContent = lines[0];
+                        const options = lines.slice(1);
+                        
+                        questionText.innerHTML = questionTextContent.replace(/\n/g, '<br>');
+                        optionsContainer.innerHTML = '';
+                        options.forEach(optionText => {
+                            const optionDiv = document.createElement('div');
+                            optionDiv.className = 'flex items-start space-x-2';
+                            const input = document.createElement('input');
+                            input.type = currentQuestionType === 'MCQ' ? 'radio' : 'checkbox';
+                            input.name = 'answer-option';
+                            input.className = currentQuestionType === 'MCQ' ? 'form-radio h-4 w-4 text-blue-600 mt-1' : 'form-checkbox h-4 w-4 text-blue-600 mt-1 rounded-sm';
+                            const label = document.createElement('label');
+                            label.className = 'text-gray-700';
+                            label.innerHTML = optionText.trim();
+                            
+                            optionDiv.appendChild(input);
+                            optionDiv.appendChild(label);
+                            optionsContainer.appendChild(optionDiv);
+                        });
+                        optionsContainer.classList.remove('hidden');
+                        natInput.classList.add('hidden');
+
+                    } else { // NAT
+                        questionText.innerHTML = generatedContent.replace(/\n/g, '<br>');
+                        optionsContainer.classList.add('hidden');
+                        natInput.classList.remove('hidden');
+                        natInput.value = '';
+                    }
+
+                    MathJax.typesetPromise([questionText, optionsContainer]);
+                } else {
+                    showMessage('Failed to generate a question.', 'error');
+                }
+            } finally {
+                generateText.textContent = 'Generate Question';
+                generateSpinner.classList.add('hidden');
+                generateBtn.disabled = false;
+            }
+        });
+
+        explainBtn.addEventListener('click', async () => {
+            if (!currentQuestion) {
+                showMessage('Please generate a question first.', 'error');
+                return;
+            }
+            // Show loading spinner
+            explainText.textContent = 'Explaining...';
+            explainSpinner.classList.remove('hidden');
+            explainBtn.disabled = true;
+
+            try {
+                let prompt = `Provide a detailed step-by-step solution and the final answer for the following IIT JAM question.`;
+                if (currentQuestionType === 'MCQ' || currentQuestionType === 'MSQ') {
+                    prompt += ` Also, explain why the other options are incorrect.`;
+                    const selectedOptions = Array.from(document.querySelectorAll('input[name="answer-option"]:checked'));
+                    if (selectedOptions.length > 0) {
+                        const userAnswers = selectedOptions.map(option => option.nextElementSibling.textContent.trim()).join(', ');
+                        prompt += ` The user's provided answer(s) was/were: "${userAnswers}".`;
+                    }
+                } else {
+                    const userAnswer = natInput.value;
+                    if (userAnswer) {
+                         prompt += ` The user's provided answer was: "${userAnswer}".`;
+                    }
+                }
+                prompt += ` Ensure all mathematical expressions and formulas are formatted using LaTeX, enclosed in dollar signs ($...$ and $$...$$ for block equations). Do not provide any additional text or headers.
+                \n\nQuestion: ${currentQuestion}`;
+
+                const generatedExplanation = await callGeminiAPI(prompt);
+
+                if (generatedExplanation) {
+                    answerText.innerHTML = generatedExplanation.replace(/\n/g, '<br>');
+                    answerCard.classList.remove('hidden');
+                    MathJax.typesetPromise([answerText]);
+                } else {
+                    showMessage('Failed to generate an explanation.', 'error');
+                }
+            } finally {
+                explainText.textContent = 'Explain Answer';
+                explainSpinner.classList.add('hidden');
+                explainBtn.disabled = false;
+            }
+        });
+
+        nextQuestionBtn.addEventListener('click', () => {
+            questionCard.classList.add('hidden');
+            answerCard.classList.add('hidden');
+            currentQuestion = '';
+            explainBtn.disabled = true;
+            nextQuestionBtn.disabled = true;
+            // Optionally, reset the selections
+            subjectSelect.value = '';
+            topicSelect.innerHTML = '<option value="" disabled selected>Select a Topic</option>';
+            topicSelect.disabled = true;
+            difficultySelect.value = '';
+            questionTypeSelect.value = '';
+            updateGenerateButtonState();
+        });
+
+        // --- Calculator Logic ---
+        let expression = '';
+        const calcDisplay = document.getElementById('calc-display');
+        const buttons = document.querySelector('.calculator-grid');
+
+        buttons.addEventListener('click', (event) => {
+            const { target } = event;
+            const value = target.dataset.value;
+
+            if (!target.matches('button')) {
+                return;
+            }
+            
+            if (value === 'C') {
+                expression = '';
+            } else if (value === '=') {
+                try {
+                    const result = Function(`return ${expression}`)();
+                    expression = String(result);
+                } catch (e) {
+                    expression = 'Error';
+                }
+            } else if (value === '<') {
+                expression = expression.slice(0, -1);
+            } else {
+                expression += value;
+            }
+
+            calcDisplay.textContent = expression || '0';
+        });
+
+        // Toggle calculator visibility
+        toggleCalcBtn.addEventListener('click', () => {
+            calculatorContainer.classList.toggle('hidden');
+            if (calculatorContainer.classList.contains('hidden')) {
+                toggleCalcBtn.textContent = 'Show';
+            } else {
+                toggleCalcBtn.textContent = 'Hide';
+            }
+        });
+    </script>
+</body>
+</html>
