@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MGKVP MBA AI PREP SUPPLEMENT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .select-field, .btn, .text-area {
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            border: 1px solid #d1d5db;
+            transition: all 0.2s ease-in-out;
+            width: 100%;
+        }
+        .select-field:focus, .text-area:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+        .btn {
+            font-weight: 600;
+        }
+        .btn-primary {
+            background-color: #2563eb;
+            color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .btn-primary:hover:not(:disabled) {
+            background-color: #1d4ed8;
+            transform: translateY(-2px);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .notes-area-container {
+            position: relative;
+        }
+        .notes-area {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            min-height: 200px;
+            max-height: 600px;
+            overflow-y: auto;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        .copy-btn, .sources-btn {
+            position: absolute;
+            top: 0.75rem;
+            background-color: #e5e7eb;
+            color: #4b5563;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .copy-btn {
+            right: 0.75rem;
+        }
+        .sources-btn {
+            right: 3.5rem;
+            display: flex;
+            align-items: center;
+        }
+        .copy-btn:hover, .sources-btn:hover {
+            background-color: #d1d5db;
+            color: #1f2937;
+        }
+        .message-box {
+            background-color: #dbeafe;
+            color: #1e40af;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+        }
+        .notes-area h1, .notes-area h2, .notes-area h3 {
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .notes-area h1 { font-size: 1.5rem; }
+        .notes-area h2 { font-size: 1.25rem; }
+        .notes-area h3 { font-size: 1.125rem; }
+        .notes-area p { margin-bottom: 1rem; }
+        .home-btn {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            color: #1f2937;
+            text-decoration: none;
+            transition: color 0.2s ease-in-out;
+        }
+        .home-btn:hover {
+            color: #2563eb;
+        }
+        .footer {
+            margin-top: 2rem;
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        .sources-list {
+            background-color: #eef2ff;
+            border: 1px solid #c7d2fe;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8 relative">
+    <a href="index.html" class="home-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+        </svg>
+        Home
+    </a>
+    <div class="container">
+        <h1 class="text-4xl font-extrabold text-center text-gray-800 mb-4">MGKVP MBA AI PREP SUPPLEMENT</h1>
+        <p class="text-gray-600 text-center mb-6">Select your course and keywords to generate detailed study notes.</p>
+
+
+        <!-- Elfsight PDF Embed | Untitled PDF Embed -->
+<script src="https://elfsightcdn.com/platform.js" async></script>
+<div class="elfsight-app-0aa61af9-8f11-4799-9d60-8f08d31299ed" data-elfsight-app-lazy></div>
+<hr class="my-12 border-t border-light-border"><br>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="space-y-2">
+                <label for="semester" class="block text-sm font-medium text-gray-700">Semester</label>
+                <select id="semester" class="select-field">
+                    <option value="1">1st Semester</option>
+                    <option value="2">2nd Semester</option>
+                    <option value="3">3rd Semester</option>
+                    <option value="4">4th Semester</option>
+                </select>
+            </div>
+            <div class="space-y-2">
+                <label for="subject" class="block text-sm font-medium text-gray-700">Subject</label>
+                <select id="subject" class="select-field">
+                    <option value="" disabled selected>Select Subject</option>
+                </select>
+            </div>
+            <div class="space-y-2">
+                <label for="notes-type-select" class="block text-sm font-medium text-gray-700">Notes Content Type</label>
+                <select id="notes-type-select" class="select-field">
+                    <option value="detailed">Detailed Notes (500+ Words)</option>
+                    <option value="case_study">Case Study / Examples</option>
+                    <option value="simpler">Simpler Explanation</option>
+                    <option value="in_depth">In-Depth Analysis</option>
+                    <option value="short_notes">Short bullet notes for last min revision</option>
+                </select>
+            </div>
+            <div class="space-y-2">
+                <label for="language" class="block text-sm font-medium text-gray-700">Language</label>
+                <select id="language" class="select-field">
+                    <option value="English">English</option>
+                    <option value="Spanish">Spanish</option>
+                    <option value="German">German</option>
+                    <option value="Hindi">Hindi</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="space-y-2 mb-6">
+            <label for="query" class="block text-sm font-medium text-gray-700">Additional Questions or Topics</label>
+            <textarea id="query" class="text-area" rows="3" placeholder="Enter keywords for the subject topic or a custom question..."></textarea>
+        </div>
+        
+        <div class="flex flex-col md:flex-row gap-4 mb-6">
+            <div class="flex-1">
+                <button id="generate-notes-btn" class="btn btn-primary flex items-center justify-center space-x-2">
+                    <span id="notes-btn-text">Generate Notes</span>
+                    <div id="notes-spinner" class="loading-spinner hidden"></div>
+                </button>
+            </div>
+            <div class="flex-1">
+                <button id="generate-questions-btn" class="btn btn-primary flex items-center justify-center space-x-2">
+                    <span id="questions-btn-text">Generate Questions</span>
+                    <div id="questions-spinner" class="loading-spinner hidden"></div>
+                </button>
+            </div>
+        </div>
+
+      <div class="space-y-2 mb-6"> <label class="block text-sm font-medium text-gray-700">University Syllabus</label> <div class="grid grid-cols-1 sm:grid-cols-3 gap-4"> <a href="https://www.bhu.ac.in/Images/files/MBA%20Course%20Structure%202012-13%20onwards.pdf" target="_blank" class="btn btn-primary text-center">BHU MBA</a> <a href="https://www.bhu.ac.in/Content/Syllabus/Syllabus_3309720200412010054.pdf" target="_blank" class="btn btn-primary text-center">BHU MBA IB</a> <a href="https://www.mgkvp.ac.in/Uploads/SyllabusHome/M.B.A._193.pdf" target="_blank" class="btn btn-primary text-center">MGKVP MBA</a> </div> </div>
+        
+        <div id="message-box" class="message-box hidden mb-6"></div>
+        
+        <div class="notes-area-container">
+            <button id="copy-btn" class="copy-btn hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M8 2a2 2 0 00-2 2v2H4a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-2h2a2 2 0 002-2V4a2 2 0 00-2-2H8zm0 2h4a2 2 0 012 2v6h2V8a2 2 0 00-2-2h-2V4a2 2 0 00-2-2z" />
+                </svg>
+            </button>
+            <button id="show-sources-btn" class="sources-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M3.293 9.707a1 1 0 010-1.414L6.586 5.586a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L9 9.414V16a1 1 0 11-2 0V9.414l-1.293 1.293a1 1 0 01-1.414-1.414z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd" d="M12.707 2.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L14.586 7H9a1 1 0 010-2h5.586l-1.293-1.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+                <span>Show/Hide Sources</span>
+            </button>
+            <div id="notes-area" class="notes-area">
+                <p id="notes-placeholder" class="text-gray-400 text-center italic">Select a subject and generate notes or questions to get started.</p>
+            </div>
+            <div id="sources-container" class="sources-list hidden">
+                <h3 class="font-semibold text-gray-800 mb-2">Web Sources Used:</h3>
+                <ul id="references-list" class="list-disc list-inside space-y-1 mb-4"></ul>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="footer">
+        <p>Made by Uzair B2B Services</p>
+    </footer>
+
+    <script>
+        // Global variables provided by the environment
+        const __app_id = typeof window.__app_id !== 'undefined' ? window.__app_id : 'default-app-id';
+        const __firebase_config = typeof window.__firebase_config !== 'undefined' ? window.__firebase_config : '{}';
+        const __initial_auth_token = typeof window.__initial_auth_token !== 'undefined' ? window.__initial_auth_token : '';
+        const appId = __app_id;
+        const firebaseConfig = JSON.parse(__firebase_config);
+        
+        // Syllabus data
+        const syllabusData = {
+            '1': [
+                "MANAGEMENT PRINCIPAL AND PROCESS",
+                "MANAGERIAL ECONOMICS",
+                "BUSINESS STATISTICS",
+                "BUSINESS ENVIRONMENT",
+                "ACCOUNTING FOR MANAGERS",
+                "COMPUTER APPLICATION IN MANAGEMENT",
+                "BUSINESS LAW",
+                "BUSINESS COMMUNICATION"
+            ],
+            '2': [
+                "ORGANIZATIONAL BEHAVIOUR",
+                "MANAGERIAL ACCOUNTING",
+                "RESEARCH METHODOLOGY",
+                "PRODUCTION AND OPERATIONS MANAGEMENT",
+                "MARKETING MANAGEMENT",
+                "FINANCIAL MANAGEMENT",
+                "HUMAN RESOURCE MANAGEMENT"
+            ],
+            '3': [
+                "ENTREPRENEURSHIP DEVELOPMENT AND PROJECT MANAGEMENT",
+                "MANAGEMENT SCIENCES",
+                "INTERNATIONAL BUSINESS MANAGEMENT",
+                "SPECIALIZATION - MARKETING",
+                "SPECIALIZATION - FINANCE",
+                "SPECIALIZATION - HUMAN RESOURCE MANAGEMENT",
+                "SPECIALIZATION - INFORMATION TECHNOLOGY"
+            ],
+            '4': [
+                "CORPORATE MANAGEMENT",
+                "STRATEGIC MANAGEMENT",
+                "MANAGEMENT INFORMATION SYSTEM",
+                "RURAL MANAGEMENT",
+                "OPTIONAL - INTERNATIONAL MARKETING",
+                "OPTIONAL - MARKETING OF SERVICES",
+                "OPTIONAL - SECURITY ANALYSIS AND PORTFOLIO MANAGEMENT",
+                "OPTIONAL - CORPORATE TAX MANAGEMENT",
+                "OPTIONAL - ORGANIZATIONAL CHANGE AND INTERVENTION STRATEGIES",
+                "OPTIONAL - MANAGEMENT TRAINING AND DEVELOPMENT",
+                "OPTIONAL - BUSINESS PROCESS RE ENGINEERING AND ERP",
+                "OPTIONAL - COMPUTER GRAPHICS AND MULTIMEDIA MANAGEMENT"
+            ]
+        };
+
+        // DOM elements
+        const semesterSelect = document.getElementById('semester');
+        const subjectSelect = document.getElementById('subject');
+        const languageSelect = document.getElementById('language');
+        const notesTypeSelect = document.getElementById('notes-type-select');
+        const queryTextarea = document.getElementById('query');
+        const generateNotesBtn = document.getElementById('generate-notes-btn');
+        const generateQuestionsBtn = document.getElementById('generate-questions-btn');
+        const notesArea = document.getElementById('notes-area');
+        const notesPlaceholder = document.getElementById('notes-placeholder');
+        const sourcesContainer = document.getElementById('sources-container');
+        const referencesList = document.getElementById('references-list');
+        const copyBtn = document.getElementById('copy-btn');
+        const showSourcesBtn = document.getElementById('show-sources-btn');
+        const messageBox = document.getElementById('message-box');
+
+        // Note: API key is left empty as per instructions for the environment
+        const API_KEY = "AIzaSyCA-TXrEZgSP3Arr_fZyyO0QAv0x3sCWpY"; 
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`;
+        
+        const showMessage = (message) => {
+            messageBox.textContent = message;
+            messageBox.classList.remove('hidden');
+            setTimeout(() => {
+                messageBox.classList.add('hidden');
+            }, 3000);
+        };
+        
+        const copyToClipboard = (text) => {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showMessage('Copied to clipboard!');
+        };
+        
+        const updateSubjects = () => {
+            const selectedSemester = semesterSelect.value;
+            const subjects = syllabusData[selectedSemester] || [];
+            
+            subjectSelect.innerHTML = '<option value="" disabled selected>Select Subject</option>';
+            subjects.forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject;
+                option.textContent = subject;
+                subjectSelect.appendChild(option);
+            });
+        };
+        
+        document.addEventListener('DOMContentLoaded', updateSubjects);
+        semesterSelect.addEventListener('change', updateSubjects);
+        copyBtn.addEventListener('click', () => {
+            copyToClipboard(notesArea.innerText);
+        });
+
+        showSourcesBtn.addEventListener('click', () => {
+            sourcesContainer.classList.toggle('hidden');
+        });
+        
+        subjectSelect.addEventListener('change', () => {
+            if (subjectSelect.value) {
+                generateNotesBtn.disabled = false;
+                generateQuestionsBtn.disabled = false;
+            }
+        });
+
+        const generateContent = async (type) => {
+            const semester = semesterSelect.value;
+            const subject = subjectSelect.value;
+            const language = languageSelect.value;
+            const notesType = notesTypeSelect.value;
+            const userQuery = queryTextarea.value.trim();
+            
+            if (!subject) {
+                showMessage("Please select a subject first.");
+                return;
+            }
+
+            // Set loading state
+            if (type === 'notes') {
+                document.getElementById('notes-btn-text').textContent = 'Generating...';
+                document.getElementById('notes-spinner').classList.remove('hidden');
+            } else {
+                document.getElementById('questions-btn-text').textContent = 'Generating...';
+                document.getElementById('questions-spinner').classList.remove('hidden'); // Fixed: was .add('hidden')
+            }
+            generateNotesBtn.disabled = true;
+            generateQuestionsBtn.disabled = true;
+
+            notesPlaceholder.classList.add('hidden');
+            notesArea.textContent = '';
+            sourcesContainer.classList.add('hidden');
+            copyBtn.classList.add('hidden');
+
+            let prompt;
+            if (type === 'notes') {
+                let noteTypePrompt;
+                switch (notesType) {
+                    case 'detailed':
+                        noteTypePrompt = `Generate a detailed and comprehensive study guide of at least 500 - 1000 words.`;
+                        break;
+                    case 'case_study':
+                        noteTypePrompt = `Provide case studies and examples related to the topic from india and world in detail.`;
+                        break;
+                    case 'simpler':
+                        noteTypePrompt = `Explain the concept in simple, easy-to-understand language, in atleast 500 words.`;
+                        break;
+                    case 'in_depth':
+                        noteTypePrompt = `Provide an in-depth analytical overview of the topic.`;
+                        break;
+                    case 'short_notes':
+                        noteTypePrompt = `Generate concise, bullet-pointed notes, yet detailed covering all parts for last-minute revision.`;
+                        break;
+                }
+                prompt = `${noteTypePrompt} for the MBA subject "${subject}" from Semester ${semester}. Focus on the following concepts and keywords: "${userQuery}". The output should be a well-structured explanation with clear headings.`;
+            } else { // type === 'questions'
+                prompt = `Generate a long answer (approximately 500 - 1000 words) for the question "${userQuery}" related to the MBA subject "${subject}" from Semester ${semester} in ${language}.`;
+            }
+
+            // Construct the payload for the API call - This was the primary missing piece.
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                tools: [{ "google_search": {} }],
+            };
+
+            // Log API call details for debugging
+            console.log('Attempting to call Gemini API...');
+            console.log(`API URL: ${API_URL}`);
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                });
+                
+                if (!response.ok) {
+                    console.error('API call failed with status:', response.status);
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                const candidate = result.candidates?.[0];
+                
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    const text = candidate.content.parts[0].text;
+                    notesArea.textContent = text;
+                    copyBtn.classList.remove('hidden');
+                    
+                    const groundingMetadata = candidate.groundingMetadata;
+                    referencesList.innerHTML = '';
+                    if (groundingMetadata && groundingMetadata.groundingAttributions) {
+                        const sources = groundingMetadata.groundingAttributions
+                            .map(attribution => ({
+                                uri: attribution.web?.uri,
+                                title: attribution.web?.title,
+                            }))
+                            .filter(source => source.uri && source.title);
+                        
+                        if (sources.length > 0) {
+                            sources.forEach(source => {
+                                const listItem = document.createElement('li');
+                                const link = document.createElement('a');
+                                link.href = source.uri;
+                                link.target = "_blank";
+                                link.textContent = source.title;
+                                link.className = "text-blue-600 hover:underline";
+                                listItem.appendChild(link);
+                                referencesList.appendChild(listItem);
+                            });
+                            showSourcesBtn.classList.remove('hidden');
+                        } else {
+                            showSourcesBtn.classList.add('hidden');
+                        }
+                    } else {
+                        showSourcesBtn.classList.add('hidden');
+                    }
+                } else {
+                    showMessage("Unable to generate content. Please try again with different keywords.");
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage("An error occurred. Please check your network and try again.");
+            } finally {
+                // Reset loading state
+                if (type === 'notes') {
+                    document.getElementById('notes-btn-text').textContent = 'Generate Notes';
+                    document.getElementById('notes-spinner').classList.add('hidden');
+                } else {
+                    document.getElementById('questions-btn-text').textContent = 'Generate Questions';
+                    document.getElementById('questions-spinner').classList.add('hidden');
+                }
+                generateNotesBtn.disabled = false;
+                generateQuestionsBtn.disabled = false;
+            }
+        };
+
+        generateNotesBtn.addEventListener('click', () => generateContent('notes'));
+        generateQuestionsBtn.addEventListener('click', () => generateContent('questions'));
+    </script>
+</body>
+</html>
