@@ -264,14 +264,17 @@
 
  <div class="max-w-4xl mx-auto flex flex-col gap-6 p-4">
 
-    <header class="text-center">
-        <h1 class="text-2xl md:text-3xl font-semibold">Notes Editor — Hindi + English</h1>
-        <p class="text-sm md:text-base text-gray-600 mt-1">
-            Type or paste Hindi and English together. Adjust style, preview, and save to PDF.
-        </p>
-    </header>
+
 
     <section class="bg-white p-4 rounded-lg shadow-sm">
+<div class="text-center">
+    <h1 class="text-2xl md:text-3xl font-semibold">Notes Editor — Hindi + English</h1>
+    <p class="text-sm md:text-base text-gray-600 mt-1">
+        Type or paste text. Adjust style, preview, and save to PDF.
+    </p>
+</div>
+
+<br>
         <label class="block text-sm font-medium mb-2">Type your notes below</label>
         <textarea id="bilingual" class="w-full p-3 border rounded-md editor-textarea"
             placeholder="Type your notes here... (e.g. This is a bilingual note — यह हिंदी और English दोनों है)">
@@ -312,20 +315,20 @@
         </div>
     </section>
 
-    <section class="bg-white p-4 rounded-lg shadow-sm">
-        <h2 class="text-base font-medium mb-3">📄 PDF Options</h2>
-        <div class="flex flex-col sm:flex-row items-center gap-3">
-            <div class="flex items-center gap-2 w-full sm:w-auto">
-                <label class="text-sm">Filename</label>
-                <input id="filename" class="border rounded px-2 py-1 text-sm w-full sm:w-40" value="notes.pdf" />
-            </div>
-
-            <div class="flex gap-2 flex-wrap justify-center w-full sm:w-auto">
-                <button id="downloadPdf" class="px-3 py-2 rounded bg-green-600 text-white text-sm">Download PDF</button>
-                <button id="downloadPdfLandscape" class="px-3 py-2 rounded bg-amber-600 text-white text-sm">Landscape</button>
-            </div>
+<section class="bg-white p-4 rounded-lg shadow-sm">
+    <h2 class="text-base font-medium mb-3">📄 PDF Options</h2>
+    <div class="flex flex-col sm:flex-row items-center gap-3">
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+            <label class="text-sm">Filename</label>
+            <input id="filename" class="border rounded px-2 py-1 text-sm w-full sm:w-40" value="notes.pdf" />
         </div>
-    </section>
+
+        <div class="flex gap-2 flex-wrap justify-center w-full sm:w-auto">
+            <button id="downloadPdf" class="px-3 py-2 rounded bg-green-600 text-white text-sm">Download PDF</button> 
+            <button id="downloadPdfLandscape" class="px-3 py-2 rounded bg-amber-600 text-white text-sm">Landscape</button>
+        </div>
+    </div>
+</section>
 </div>
 
     
@@ -371,11 +374,17 @@
     refreshPreview.addEventListener('click', refresh);
     clearBtn.addEventListener('click', () => { bilingual.value = ''; refresh(); });
 
-    // PDF Download Function
-    function downloadPdfWithOrientation(orientation = 'portrait') {
+    // PDF Download Function - MODIFIED FOR COLOR CHANGE
+    function downloadPdfWithOrientation(orientation = 'portrait', buttonElement) {
         refresh(); // Ensure the content is current
 
-        // Create a temporary DIV to render the content for html2pdf
+        // 1. Store original classes and apply temporary "downloading" style
+        const originalClass = buttonElement.className;
+        
+        // This line applies the temporary color. We use a bold blue/gray to show activity.
+        buttonElement.className = 'px-3 py-2 rounded bg-blue-500 text-white text-sm opacity-75'; 
+
+        // 2. Create a temporary DIV to render the content for html2pdf
         const element = document.createElement('div');
         element.style.fontFamily = "'Open Sans', 'Noto Sans Devanagari', sans-serif";
         element.style.fontSize = fontSize.value + 'px';
@@ -394,13 +403,18 @@
             jsPDF: { unit: 'mm', format: 'a4', orientation }
         };
 
-        // Generate and Save the PDF
+        // 3. Generate and Save the PDF
         html2pdf().set(opt).from(element).save();
+
+        // 4. Revert the button style after a short delay (1.5 seconds)
+        setTimeout(() => {
+            buttonElement.className = originalClass;
+        }, 1500); // 1500 milliseconds (1.5 seconds) delay
     }
 
-    // Event listeners for PDF buttons
-    downloadPdf.addEventListener('click', () => downloadPdfWithOrientation('portrait'));
-    downloadPdfLandscape.addEventListener('click', () => downloadPdfWithOrientation('landscape'));
+    // Event listeners for PDF buttons - MODIFIED to pass the element
+    downloadPdf.addEventListener('click', (event) => downloadPdfWithOrientation('portrait', event.currentTarget));
+    downloadPdfLandscape.addEventListener('click', (event) => downloadPdfWithOrientation('landscape', event.currentTarget));
 
     // Initialize the preview content when the page loads
     refresh();
