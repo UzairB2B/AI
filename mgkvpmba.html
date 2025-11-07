@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -243,10 +244,169 @@
             </div>
         </div>
     </div>
+
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+
+<style>
+    /* Specific styles for the editor components */
+    .editor-textarea { height: 260px; }
+    .preview-box { min-height: 300px; border: 1px dashed #e5e7eb; padding: 1.25rem; border-radius: 0.5rem; background: white; }
+    /* Ensure the Devanagari font is prioritized for input and preview if not already set on <body> */
+    #bilingual, #preview { font-family: 'Open Sans', 'Noto Sans Devanagari', sans-serif; }
+</style>
+
+
+
+
+
+ <div class="max-w-4xl mx-auto flex flex-col gap-6 p-4">
+
+    <header class="text-center">
+        <h1 class="text-2xl md:text-3xl font-semibold">📝 Bilingual Notes Editor — Hindi + English</h1>
+        <p class="text-sm md:text-base text-gray-600 mt-1">
+            Type or paste Hindi and English together. Adjust style, preview, and save to PDF.
+        </p>
+    </header>
+
+    <section class="bg-white p-4 rounded-lg shadow-sm">
+        <label class="block text-sm font-medium mb-2">Your Notes (Hindi + English)</label>
+        <textarea id="bilingual" class="w-full p-3 border rounded-md editor-textarea"
+            placeholder="Type your notes here... (e.g. This is a bilingual note — यह हिंदी और English दोनों है)">
+        </textarea>
+    </section>
+
+    <section class="bg-white p-4 rounded-lg shadow-sm space-y-3">
+        <h2 class="text-base font-medium mb-2">🧩 Formatting Options</h2>
+
+        <div class="flex flex-col md:flex-row gap-4 items-center">
+            <div class="flex gap-2 items-center w-full md:w-1/2">
+                <label class="text-sm">Font Size</label>
+                <input id="fontSize" type="range" min="10" max="40" value="16" class="flex-1" />
+                <span id="fontSizeVal" class="w-10 text-right">16px</span>
+            </div>
+
+            <div class="flex gap-2 items-center w-full md:w-1/2">
+                <label class="text-sm">Line Height</label>
+                <input id="lineHeight" type="range" min="1" max="2" step="0.1" value="1.5" class="flex-1" />
+                <span id="lineHeightVal" class="w-10 text-right">1.5</span>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2 justify-center">
+            <button id="applyBtn" class="px-3 py-2 rounded bg-indigo-600 text-white text-sm">Apply</button>
+            <button id="refreshPreview" class="px-3 py-2 rounded bg-blue-600 text-white text-sm">Refresh Preview</button>
+            <button id="clearBtn" class="px-3 py-2 rounded border text-sm">Clear</button>
+        </div>
+    </section>
+
+    <section class="bg-white p-4 rounded-lg shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-medium">👁️ Preview</h2>
+        </div>
+
+        <div id="preview" class="preview-box text-lg leading-relaxed whitespace-pre-wrap">
+            <p class="text-gray-500 text-sm">Your notes preview will appear here...</p>
+        </div>
+    </section>
+
+    <section class="bg-white p-4 rounded-lg shadow-sm">
+        <h2 class="text-base font-medium mb-3">📄 PDF Options</h2>
+        <div class="flex flex-col sm:flex-row items-center gap-3">
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <label class="text-sm">Filename</label>
+                <input id="filename" class="border rounded px-2 py-1 text-sm w-full sm:w-40" value="notes.pdf" />
+            </div>
+
+            <div class="flex gap-2 flex-wrap justify-center w-full sm:w-auto">
+                <button id="downloadPdf" class="px-3 py-2 rounded bg-green-600 text-white text-sm">Download PDF</button>
+                <button id="downloadPdfLandscape" class="px-3 py-2 rounded bg-amber-600 text-white text-sm">Landscape</button>
+            </div>
+        </div>
+    </section>
+</div>
+
     
     <footer class="footer">
         <p>Made by Uzair B2B Services</p>
     </footer>
+
+
+
+
+<script>
+    const bilingual = document.getElementById('bilingual');
+    const preview = document.getElementById('preview');
+    const fontSize = document.getElementById('fontSize');
+    const lineHeight = document.getElementById('lineHeight');
+    const fontSizeVal = document.getElementById('fontSizeVal');
+    const lineHeightVal = document.getElementById('lineHeightVal');
+    const applyBtn = document.getElementById('applyBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const filename = document.getElementById('filename');
+    const downloadPdf = document.getElementById('downloadPdf');
+    const downloadPdfLandscape = document.getElementById('downloadPdfLandscape');
+    const refreshPreview = document.getElementById('refreshPreview');
+
+    // Initial value setup
+    fontSizeVal.textContent = fontSize.value + 'px';
+    lineHeightVal.textContent = lineHeight.value;
+
+    function refresh() {
+        const text = bilingual.value.trim();
+        const size = parseInt(fontSize.value, 10);
+        const lh = parseFloat(lineHeight.value);
+
+        preview.style.fontSize = size + 'px';
+        preview.style.lineHeight = lh;
+        preview.textContent = text || 'Your notes preview will appear here...';
+    }
+
+    // Event listeners for controls
+    fontSize.addEventListener('input', () => fontSizeVal.textContent = fontSize.value + 'px');
+    lineHeight.addEventListener('input', () => lineHeightVal.textContent = lineHeight.value);
+    applyBtn.addEventListener('click', refresh);
+    refreshPreview.addEventListener('click', refresh);
+    clearBtn.addEventListener('click', () => { bilingual.value = ''; refresh(); });
+
+    // PDF Download Function
+    function downloadPdfWithOrientation(orientation = 'portrait') {
+        refresh(); // Ensure the content is current
+
+        // Create a temporary DIV to render the content for html2pdf
+        const element = document.createElement('div');
+        element.style.fontFamily = "'Open Sans', 'Noto Sans Devanagari', sans-serif";
+        element.style.fontSize = fontSize.value + 'px';
+        element.style.lineHeight = lineHeight.value;
+        element.style.whiteSpace = 'pre-wrap';
+        element.style.padding = '20px';
+        element.style.background = '#fff';
+        element.textContent = bilingual.value.trim();
+
+        // html2pdf options
+        const opt = {
+            margin: 10,
+            filename: filename.value || 'notes.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation }
+        };
+
+        // Generate and Save the PDF
+        html2pdf().set(opt).from(element).save();
+    }
+
+    // Event listeners for PDF buttons
+    downloadPdf.addEventListener('click', () => downloadPdfWithOrientation('portrait'));
+    downloadPdfLandscape.addEventListener('click', () => downloadPdfWithOrientation('landscape'));
+
+    // Initialize the preview content when the page loads
+    refresh();
+</script>
+
+
 
     <script>
         // Global variables provided by the environment
