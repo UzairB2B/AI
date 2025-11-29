@@ -1068,7 +1068,58 @@
         const webSourcesList = document.getElementById('web-sources-list');
         const bookSourcesList = document.getElementById('book-sources-list');
 
-        const apiKey = "AIzaSyAh9NwNYioZpf-l2i8nmB4rWXFuGQYaLyk";
+        // CSV URL (your sheet)
+const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRc6uOZ-ezkbILtIJ1mlfrpoNX2cR1h10owYpeDLWxp_dWhw1Vq4zSsZOS1Wtvarech4BTOorQp9fFR/pub?gid=0&single=true&output=csv";
+
+// Function: fetch CSV and convert to JSON
+async function loadBotAPI(botName) {
+    const response = await fetch(csvUrl);
+    const csvText = await response.text();
+
+    // Convert CSV to rows
+    const rows = csvText.trim().split('\n').map(r => r.split(','));
+
+    // First row = headers
+    const headers = rows[0];
+
+    // Convert remaining rows to objects
+    const data = rows.slice(1).map(row => {
+        let obj = {};
+        row.forEach((value, i) => {
+            obj[headers[i]] = value;
+        });
+        return obj;
+    });
+
+    // Search for bot name
+    const bot = data.find(row => row[headers[0]] === botName);
+
+    if (!bot) {
+        console.error("❌ Bot name not found in sheet:", botName);
+        return null;
+    }
+
+    // Extract API Key (column B)
+    const apiKey = bot[headers[1]];
+
+    return apiKey;
+}
+
+// Example use:
+async function startBot() {
+    const botName = "journalism.ai"; // dynamic input (can come from UI)
+    const apiKey = await loadBotAPI(botName);
+
+    if (apiKey) {
+        console.log("✔ API Key found:", apiKey);
+
+        // Use API key dynamically
+        // const client = new OpenAI({ apiKey });
+    }
+}
+
+startBot();
+
         const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
         // Populate subjects based on selected year
