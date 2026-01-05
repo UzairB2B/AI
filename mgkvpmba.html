@@ -1,47 +1,74 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MGKVP MBA AI PREP SUPPLEMENT</title>
+    <title>MBA AI Supplement</title>
+    
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Libraries -->
+    <script src="https://js.puter.com/v2/"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f3f4f6;
             color: #1f2937;
         }
-        .container {
-            max-width: 900px;
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8; 
+        }
+
+        .container-custom {
+            max-width: 1000px;
             margin: 2rem auto;
-            padding: 2rem;
             background-color: #ffffff;
             border-radius: 1.5rem;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
-        .select-field, .btn, .text-area {
+
+        .select-field, .btn, .text-area, .input-field {
             padding: 0.75rem;
             border-radius: 0.75rem;
             border: 1px solid #d1d5db;
             transition: all 0.2s ease-in-out;
             width: 100%;
         }
-        .select-field:focus, .text-area:focus {
+        
+        .select-field:focus, .text-area:focus, .input-field:focus {
             outline: none;
             border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
         }
-        .btn {
-            font-weight: 600;
-        }
+
+        .btn { font-weight: 600; cursor: pointer; }
+        
         .btn-primary {
             background-color: #2563eb;
             color: #ffffff;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
         .btn-primary:hover:not(:disabled) {
             background-color: #1d4ed8;
@@ -50,717 +77,495 @@
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
-            transform: none;
         }
+
+        /* Loading Spinner */
         .loading-spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
+            border: 3px solid rgba(255, 255, 255, 0.3);
             border-top-color: #ffffff;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             animation: spin 1s linear infinite;
+            display: inline-block;
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .notes-area-container {
-            position: relative;
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Notes Output Area */
         .notes-area {
             background-color: #f9fafb;
             border: 1px solid #e5e7eb;
             border-radius: 0.75rem;
-            padding: 1.5rem;
-            min-height: 200px;
+            padding: 2rem;
+            min-height: 300px;
             max-height: 600px;
             overflow-y: auto;
-            line-height: 1.6;
-            white-space: pre-wrap;
+            line-height: 1.7;
+            font-size: 1rem;
         }
-        .copy-btn, .sources-btn {
-            position: absolute;
-            top: 0.75rem;
-            background-color: #e5e7eb;
-            color: #4b5563;
-            border-radius: 0.5rem;
-            padding: 0.5rem;
-            transition: all 0.2s ease-in-out;
-            cursor: pointer;
+
+        /* Markdown Styles within Notes Area */
+        .notes-area h1 { font-size: 1.75em; font-weight: 700; margin-bottom: 0.5em; color: #111827; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.2em; }
+        .notes-area h2 { font-size: 1.5em; font-weight: 600; margin-top: 1em; margin-bottom: 0.5em; color: #1f2937; }
+        .notes-area h3 { font-size: 1.25em; font-weight: 600; margin-top: 1em; margin-bottom: 0.5em; color: #374151; }
+        .notes-area p { margin-bottom: 1em; }
+        .notes-area ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; }
+        .notes-area ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: 1em; }
+        .notes-area strong { color: #000; font-weight: 700; }
+        .notes-area blockquote { border-left: 4px solid #3b82f6; padding-left: 1rem; font-style: italic; color: #4b5563; background: #eff6ff; padding: 0.5rem 1rem; border-radius: 0.25rem; margin-bottom: 1em; }
+
+        /* Editor Section Styles */
+        .editor-textarea { height: 300px; font-family: 'Open Sans', 'Noto Sans Devanagari', sans-serif; }
+        .preview-box { 
+            min-height: 300px; 
+            border: 1px dashed #e5e7eb; 
+            padding: 2rem; 
+            border-radius: 0.5rem; 
+            background: white;
+            font-family: 'Open Sans', 'Noto Sans Devanagari', sans-serif;
         }
-        .copy-btn {
-            right: 0.75rem;
-        }
-        .sources-btn {
-            right: 3.5rem;
-            display: flex;
-            align-items: center;
-        }
-        .copy-btn:hover, .sources-btn:hover {
-            background-color: #d1d5db;
-            color: #1f2937;
-        }
-        .message-box {
-            background-color: #dbeafe;
-            color: #1e40af;
-            border-radius: 0.75rem;
-            padding: 1rem;
-            text-align: center;
-        }
-        .notes-area h1, .notes-area h2, .notes-area h3 {
-            font-weight: 600;
-            margin-top: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
-        .notes-area h1 { font-size: 1.5rem; }
-        .notes-area h2 { font-size: 1.25rem; }
-        .notes-area h3 { font-size: 1.125rem; }
-        .notes-area p { margin-bottom: 1rem; }
-        .home-btn {
-            position: absolute;
-            top: 1rem;
-            left: 1rem;
-            display: flex;
-            align-items: center;
-            font-weight: 600;
-            color: #1f2937;
-            text-decoration: none;
-            transition: color 0.2s ease-in-out;
-        }
-        .home-btn:hover {
-            color: #2563eb;
-        }
-        .footer {
-            margin-top: 2rem;
-            text-align: center;
-            color: #6b7280;
-            font-size: 0.875rem;
-        }
-        .sources-list {
-            background-color: #eef2ff;
-            border: 1px solid #c7d2fe;
-            border-radius: 0.75rem;
-            padding: 1rem;
-            margin-top: 1rem;
+        
+        /* Print/PDF Optimization */
+        .pdf-content-block {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
         }
     </style>
-<link rel="me" href="https://www.blogger.com/profile/01748367413858673028" />
-<meta name='google-adsense-platform-account' content='ca-host-pub-1556223355139109'/>
-<meta name='google-adsense-platform-domain' content='blogspot.com'/>
 </head>
-<body class="p-4 sm:p-8 relative">
-    <a href="index.html" class="home-btn">
+<body class="p-4 sm:p-8">
+
+    <!-- Navbar / Home Button -->
+    <a href="#" class="inline-flex items-center text-gray-700 hover:text-blue-600 font-semibold mb-6 transition-colors">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
             <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
         </svg>
         Home
     </a>
-    <div class="container">
-        <h1 class="text-4xl font-extrabold text-center text-gray-800 mb-4">MGKVP MBA AI PREP SUPPLEMENT</h1>
-        <p class="text-gray-600 text-center mb-6">Select your course and keywords to generate detailed study notes.</p>
 
+    <!-- MAIN AI GENERATOR SECTION -->
+    <div class="container-custom p-6 sm:p-8 mb-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 mb-2">MBA AI PREP SUPPLEMENT</h1>
+            <p class="text-gray-600">Select your course and keywords to generate detailed study notes.</p>
+        </header>
 
-        <!-- Elfsight PDF Embed | Untitled PDF Embed -->
-<script src="https://elfsightcdn.com/platform.js" async></script>
-<div class="elfsight-app-0aa61af9-8f11-4799-9d60-8f08d31299ed" data-elfsight-app-lazy></div>
-<hr class="my-12 border-t border-light-border"><br>
+        <hr class="my-6 border-gray-200">
         
+        <!-- Controls Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div class="space-y-2">
+            <div class="space-y-1">
                 <label for="semester" class="block text-sm font-medium text-gray-700">Semester</label>
-                <select id="semester" class="select-field">
+                <select id="semester" class="select-field bg-white">
                     <option value="1">1st Semester</option>
                     <option value="2">2nd Semester</option>
                     <option value="3">3rd Semester</option>
                     <option value="4">4th Semester</option>
                 </select>
             </div>
-            <div class="space-y-2">
+            <div class="space-y-1">
                 <label for="subject" class="block text-sm font-medium text-gray-700">Subject</label>
-                <select id="subject" class="select-field">
+                <select id="subject" class="select-field bg-white">
                     <option value="" disabled selected>Select Subject</option>
                 </select>
             </div>
-            <div class="space-y-2">
-                <label for="notes-type-select" class="block text-sm font-medium text-gray-700">Notes Content Type</label>
-                <select id="notes-type-select" class="select-field">
+            <div class="space-y-1">
+                <label for="notes-type-select" class="block text-sm font-medium text-gray-700">Content Type</label>
+                <select id="notes-type-select" class="select-field bg-white">
                     <option value="detailed">Detailed Notes (500+ Words)</option>
                     <option value="case_study">Case Study / Examples</option>
                     <option value="simpler">Simpler Explanation</option>
                     <option value="in_depth">In-Depth Analysis</option>
-                    <option value="short_notes">Short bullet notes for last min revision</option>
+                    <option value="short_notes">Revision Bullet Points</option>
                 </select>
             </div>
-            <div class="space-y-2">
+            <div class="space-y-1">
                 <label for="language" class="block text-sm font-medium text-gray-700">Language</label>
-                <select id="language" class="select-field">
+                <select id="language" class="select-field bg-white">
                     <option value="English">English</option>
                     <option value="Spanish">Spanish</option>
-                    <option value="German">German</option>
                     <option value="Hindi">Hindi</option>
                 </select>
             </div>
         </div>
         
+        <!-- Query Input -->
         <div class="space-y-2 mb-6">
-            <label for="query" class="block text-sm font-medium text-gray-700">Type your topics / Keywords Here..</label>
-            <textarea id="query" class="text-area" rows="3" placeholder="Enter keywords for the subject topic or a custom question..."></textarea>
+            <label for="query" class="block text-sm font-medium text-gray-700">Topic Keywords / Specific Question</label>
+            <textarea id="query" class="text-area" rows="3" placeholder="Enter keywords (e.g., SWOT Analysis, Marketing Mix) or a custom question..."></textarea>
         </div>
         
-        <div class="flex flex-col md:flex-row gap-4 mb-6">
-            <div class="flex-1">
-                <button id="generate-notes-btn" class="btn btn-primary flex items-center justify-center space-x-2">
-                    <span id="notes-btn-text">Generate Notes</span>
-                    <div id="notes-spinner" class="loading-spinner hidden"></div>
-                </button>
-            </div>
-            <div class="flex-1">
-                <button id="generate-questions-btn" class="btn btn-primary flex items-center justify-center space-x-2">
-                    <span id="questions-btn-text">Generate Questions</span>
-                    <div id="questions-spinner" class="loading-spinner hidden"></div>
-                </button>
-            </div>
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 mb-8">
+            <button id="generate-notes-btn" class="btn btn-primary flex-1 flex items-center justify-center space-x-2 py-3">
+                <span class="btn-text">Generate Notes</span>
+                <div class="loading-spinner hidden"></div>
+            </button>
+            <button id="generate-questions-btn" class="btn btn-primary flex-1 flex items-center justify-center space-x-2 py-3 bg-indigo-600 hover:bg-indigo-700">
+                <span class="btn-text">Generate Questions</span>
+                <div class="loading-spinner hidden"></div>
+            </button>
         </div>
 
-      <div class="space-y-2 mb-6"> <label class="block text-sm font-medium text-gray-700">University Syllabus</label> <div class="grid grid-cols-1 sm:grid-cols-3 gap-4"> <a href="https://www.bhu.ac.in/Images/files/MBA%20Course%20Structure%202012-13%20onwards.pdf" target="_blank" class="btn btn-primary text-center">BHU MBA</a> <a href="https://www.bhu.ac.in/Content/Syllabus/Syllabus_3309720200412010054.pdf" target="_blank" class="btn btn-primary text-center">BHU MBA IB</a> <a href="https://www.mgkvp.ac.in/Uploads/SyllabusHome/M.B.A._193.pdf" target="_blank" class="btn btn-primary text-center">MGKVP MBA</a> </div> </div>
-        
-        <div id="message-box" class="message-box hidden mb-6"></div>
-        
-        <div class="notes-area-container">
-            <button id="copy-btn" class="copy-btn hidden">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M8 2a2 2 0 00-2 2v2H4a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-2h2a2 2 0 002-2V4a2 2 0 00-2-2H8zm0 2h4a2 2 0 012 2v6h2V8a2 2 0 00-2-2h-2V4a2 2 0 00-2-2z" />
-                </svg>
-            </button>
-            <button id="show-sources-btn" class="sources-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M3.293 9.707a1 1 0 010-1.414L6.586 5.586a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L9 9.414V16a1 1 0 11-2 0V9.414l-1.293 1.293a1 1 0 01-1.414-1.414z" clip-rule="evenodd" />
-                    <path fill-rule="evenodd" d="M12.707 2.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L14.586 7H9a1 1 0 010-2h5.586l-1.293-1.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-                </svg>
-                <span>Show/Hide Sources</span>
-            </button>
-            <div id="notes-area" class="notes-area">
-                <p id="notes-placeholder" class="text-gray-400 text-center italic">Select a subject and generate notes or questions to get started.</p>
+        <!-- Output Area -->
+        <div class="notes-area-container relative">
+            <div class="flex justify-end gap-2 mb-2">
+                <button id="transfer-btn" class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-md transition-colors flex items-center hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    </svg>
+                    Edit & Print
+                </button>
+                <button id="copy-btn" class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-md transition-colors hidden">
+                    Copy Text
+                </button>
             </div>
-            <div id="sources-container" class="sources-list hidden">
-                <h3 class="font-semibold text-gray-800 mb-2">Web Sources Used:</h3>
-                <ul id="references-list" class="list-disc list-inside space-y-1 mb-4"></ul>
+
+            <div id="notes-area" class="notes-area prose prose-blue max-w-none">
+                <div class="flex flex-col items-center justify-center h-48 text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                    </svg>
+                    <p class="italic">AI Content will appear here...</p>
+                </div>
             </div>
         </div>
     </div>
 
 
+    <!-- EDITOR & PDF SECTION -->
+    <div id="editor-section" class="container-custom p-6 sm:p-8">
+        <header class="text-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Document Editor & PDF Export</h2>
+            <p class="text-sm text-gray-500 mt-1">Refine your notes, adjust formatting, and download.</p>
+        </header>
 
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
-<style>
-/* Specific styles for the editor components */
-.editor-textarea { height: 260px; }
- .preview-box { min-height: 300px; border: 1px dashed #e5e7eb; padding: 1.25rem; border-radius: 0.5rem; background: white; }
- /* Ensure the Devanagari font is prioritized for input and preview if not already set on <body> */
- #bilingual, #preview { font-family: 'Open Sans', 'Noto Sans Devanagari', sans-serif; }
-    
-    /* NEW: CSS to explicitly avoid page breaks inside content blocks */
-    .pdf-content-block {
-        page-break-inside: avoid !important; /* Standard property */
-        break-inside: avoid !important; /* Modern property */
-    }
-</style>
-
-
-
-
- <div class="max-w-4xl mx-auto flex flex-col gap-6 p-4">
-
-
-
-    <section class="bg-white p-4 rounded-lg shadow-sm">
-<div class="text-center">
-    <h1 class="text-2xl md:text-3xl font-semibold">Notes Editor — Hindi + English</h1>
-    <p class="text-sm md:text-base text-gray-600 mt-1">
-        Type or paste text. Adjust style, preview, and save to PDF.
-    </p>
-</div>
-
-<br>
-        <label class="block text-sm font-medium mb-2">Type your notes below</label>
-        <textarea id="bilingual" class="w-full p-3 border rounded-md editor-textarea"
-            placeholder="Type your notes here... (e.g. This is a bilingual note — यह हिंदी और English दोनों है)">
-        </textarea>
-    </section>
-
-    <section class="bg-white p-4 rounded-lg shadow-sm space-y-3">
-        <h2 class="text-base font-medium mb-2">🧩 Formatting Options</h2>
-
-        <div class="flex flex-col md:flex-row gap-4 items-center">
-            <div class="flex gap-2 items-center w-full md:w-1/2">
-                <label class="text-sm">Font Size</label>
-                <input id="fontSize" type="range" min="10" max="40" value="16" class="flex-1" />
-                <span id="fontSizeVal" class="w-10 text-right">16px</span>
+        <div class="flex flex-col lg:flex-row gap-6">
+            <!-- Left: Input -->
+            <div class="w-full lg:w-1/2 flex flex-col gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">Editor Content (Markdown/Text)</label>
+                    <textarea id="bilingual" class="w-full p-4 border rounded-md editor-textarea focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Type here or generate notes above..."></textarea>
+                </div>
+                
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h3 class="text-sm font-semibold mb-3 text-gray-700">Formatting Controls</h3>
+                    <div class="flex flex-wrap gap-4">
+                        <div class="flex-1 min-w-[120px]">
+                            <label class="text-xs text-gray-500 block mb-1">Font Size</label>
+                            <div class="flex items-center gap-2">
+                                <input id="fontSize" type="range" min="12" max="24" value="16" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                <span id="fontSizeVal" class="text-xs font-mono w-8">16px</span>
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-[120px]">
+                            <label class="text-xs text-gray-500 block mb-1">Line Height</label>
+                            <div class="flex items-center gap-2">
+                                <input id="lineHeight" type="range" min="1.2" max="2.0" step="0.1" value="1.6" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                <span id="lineHeightVal" class="text-xs font-mono w-8">1.6</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex gap-2">
+                        <button id="applyBtn" class="px-3 py-1.5 rounded bg-gray-800 text-white text-xs hover:bg-black transition">Refresh Preview</button>
+                        <button id="clearBtn" class="px-3 py-1.5 rounded border border-gray-300 text-gray-600 text-xs hover:bg-gray-100 transition">Clear</button>
+                    </div>
+                </div>
             </div>
 
-            <div class="flex gap-2 items-center w-full md:w-1/2">
-                <label class="text-sm">Line Height</label>
-                <input id="lineHeight" type="range" min="1" max="2" step="0.1" value="1.5" class="flex-1" />
-                <span id="lineHeightVal" class="w-10 text-right">1.5</span>
+            <!-- Right: Preview -->
+            <div class="w-full lg:w-1/2 flex flex-col gap-4">
+                 <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700">Live Preview (What prints)</label>
+                    <div id="preview" class="preview-box shadow-inner bg-white">
+                        <p class="text-gray-400 italic text-center mt-20">Preview area...</p>
+                    </div>
+                 </div>
             </div>
         </div>
 
-        <div class="flex flex-wrap gap-2 justify-center">
-            <button id="applyBtn" class="px-3 py-2 rounded bg-indigo-600 text-white text-sm">Apply</button>
-            <button id="refreshPreview" class="px-3 py-2 rounded bg-blue-600 text-white text-sm">Refresh Preview</button>
-            <button id="clearBtn" class="px-3 py-2 rounded border text-sm">Clear</button>
-        </div>
-    </section>
-
-    <section class="bg-white p-4 rounded-lg shadow-sm">
-        <div class="flex items-center justify-between mb-3">
-            <h2 class="text-lg font-medium">👁️ Preview</h2>
-        </div>
-
-        <div id="preview" class="preview-box text-lg leading-relaxed whitespace-pre-wrap">
-            <p class="text-gray-500 text-sm">Your notes preview will appear here...</p>
-        </div>
-    </section>
-
-<section class="bg-white p-4 rounded-lg shadow-sm">
-    <h2 class="text-base font-medium mb-3">⬇️ Download Options</h2>
-    <div class="flex flex-col sm:flex-row items-center gap-3">
-        <div class="flex items-center gap-2 w-full sm:w-auto">
-            <label class="text-sm">Filename</label>
-            <input id="filename" class="border rounded px-2 py-1 text-sm w-full sm:w-40" value="notes" /> 
-        </div>
-        <div class="flex gap-2 flex-wrap justify-center w-full sm:w-auto">
-            <button id="downloadPdf" class="px-3 py-2 rounded bg-green-600 text-white text-sm">Download PDF</button> 
-            <button id="downloadPdfLandscape" class="px-3 py-2 rounded bg-amber-600 text-white text-sm">PDF Landscape</button>
-            <button id="downloadDoc" class="px-3 py-2 rounded bg-blue-600 text-white text-sm">Download DOC</button>
+        <!-- Download Bar -->
+        <div class="mt-8 pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <label class="text-sm font-medium text-gray-700">Filename:</label>
+                <input id="filename" class="input-field py-2 px-3 text-sm w-full sm:w-48" value="My_Study_Notes" /> 
+            </div>
+            <div class="flex gap-3 w-full sm:w-auto justify-center">
+                <button id="downloadPdf" class="btn bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded shadow-sm transition">
+                    Download PDF
+                </button>
+                <button id="downloadDoc" class="btn bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded shadow-sm transition">
+                    Download DOC
+                </button>
+            </div>
         </div>
     </div>
-</section>
 
-</div>
-
-    
-    <footer class="footer">
-        <p>Made by Uzair B2B Services</p>
+    <footer class="text-center text-gray-500 text-sm mt-12 mb-6">
+        <p>AI Education Supplement | Powered by Gemini & Puter.js</p>
     </footer>
 
-
-
-
-<script>
-    const bilingual = document.getElementById('bilingual');
-    const preview = document.getElementById('preview');
-    const fontSize = document.getElementById('fontSize');
-    const lineHeight = document.getElementById('lineHeight');
-    const fontSizeVal = document.getElementById('fontSizeVal');
-    const lineHeightVal = document.getElementById('lineHeightVal');
-    const applyBtn = document.getElementById('applyBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const filenameInput = document.getElementById('filename'); // Renamed to filenameInput to avoid conflict
-    const downloadPdf = document.getElementById('downloadPdf');
-    const downloadPdfLandscape = document.getElementById('downloadPdfLandscape');
-    const downloadDoc = document.getElementById('downloadDoc'); // NEW DOC button ID
-    const refreshPreview = document.getElementById('refreshPreview');
-
-    // Initial value setup
-    fontSizeVal.textContent = fontSize.value + 'px';
-    lineHeightVal.textContent = lineHeight.value;
-
-    function refresh() {
-        const text = bilingual.value.trim();
-        const size = parseInt(fontSize.value, 10);
-        const lh = parseFloat(lineHeight.value);
-
-        preview.style.fontSize = size + 'px';
-        preview.style.lineHeight = lh;
-        preview.textContent = text || 'Your notes preview will appear here...';
-    }
-
-    // Event listeners for controls
-    fontSize.addEventListener('input', () => fontSizeVal.textContent = fontSize.value + 'px');
-    lineHeight.addEventListener('input', () => lineHeightVal.textContent = lineHeight.value);
-    applyBtn.addEventListener('click', refresh);
-    refreshPreview.addEventListener('click', refresh);
-    clearBtn.addEventListener('click', () => { bilingual.value = ''; refresh(); });
-
-    // --- PDF Download Function (Portrait & Landscape) ---
-    function downloadPdfWithOrientation(orientation = 'portrait', buttonElement) {
-        refresh(); 
-
-        const originalClass = buttonElement.className;
-        buttonElement.className = 'px-3 py-2 rounded bg-blue-500 text-white text-sm opacity-75'; 
-
-        // 1. Create a temporary DIV for html2pdf
-        const element = document.createElement('div');
-        element.style.fontFamily = "'Open Sans', 'Noto Sans Devangari', sans-serif";
-        element.style.padding = '20px';
-        element.style.background = '#fff';
-
-        // 2. Split text into paragraphs for page-break avoidance (The fix!)
-        const text = bilingual.value.trim();
-        const paragraphs = text.split('\n\n').filter(p => p.trim() !== '');
-
-        if (paragraphs.length > 0) {
-            paragraphs.forEach(pText => {
-                const p = document.createElement('p');
-                p.style.fontSize = fontSize.value + 'px';
-                p.style.lineHeight = lineHeight.value;
-                p.style.margin = '0 0 1em 0'; 
-                p.style.whiteSpace = 'pre-wrap';
-                // CRITICAL CSS for page break avoidance
-                p.style.pageBreakInside = 'avoid';
-                p.style.breakInside = 'avoid'; 
-                p.textContent = pText.trim();
-                element.appendChild(p);
-            });
-        } else {
-            const placeholder = document.createElement('p');
-            placeholder.textContent = 'No notes to display.';
-            element.appendChild(placeholder);
-        }
-
-        // html2pdf options
-        const opt = {
-            margin: 10,
-            filename: (filenameInput.value || 'notes') + '.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'mm', format: 'a4', orientation },
-            pagebreak: { mode: ['css', 'legacy'] }
-        };
-
-        // 3. Generate and Save the PDF
-        html2pdf().set(opt).from(element).save();
-
-        // 4. Revert button style
-        setTimeout(() => {
-            buttonElement.className = originalClass;
-        }, 1500);
-    }
-
-    // --- DOC Download Function ---
-    function downloadWordDoc(buttonElement) {
-        refresh(); 
-
-        const originalClass = buttonElement.className;
-        buttonElement.className = 'px-3 py-2 rounded bg-blue-500 text-white text-sm opacity-75'; 
-
-        const rawText = bilingual.value.trim();
-        const docFilename = (filenameInput.value.replace(/\.pdf$/i, '') || 'notes') + '.doc';
-        const size = fontSize.value + 'px';
-        const lh = lineHeight.value;
-        const fontFamily = "'Open Sans', 'Noto Sans Devangari', sans-serif";
-
-        // Create structured HTML content for Word
-        const contentHtml = rawText
-            .split('\n\n')
-            .map(pText => `<p style="font-size: ${size}; line-height: ${lh}; font-family: ${fontFamily}; margin: 0 0 1em 0;">${pText.replace(/\n/g, '<br/>')}</p>`)
-            .join('');
-
-        // Wrap HTML content with MS Word specific headers
-        const html = `
-            <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-                <head>
-                    <meta charset="utf-8">
-                    <title>${docFilename}</title>
-                    <style>
-                        @page { margin: 1in 1in 1in 1in; }
-                        body { font-family: ${fontFamily}; }
-                    </style>
-                </head>
-                <body>
-                    ${contentHtml}
-                </body>
-            </html>`;
-
-        // Trigger the download
-        const url = 'data:application/msword;charset=utf-8,' + encodeURIComponent(html);
-        const downloadLink = document.createElement('a');
-        document.body.appendChild(downloadLink);
-        
-        downloadLink.href = url;
-        downloadLink.download = docFilename;
-        downloadLink.click();
-        
-        document.body.removeChild(downloadLink);
-
-        // Revert button style
-        setTimeout(() => {
-            buttonElement.className = originalClass;
-        }, 1500);
-    }
-
-    // --- Event Listeners ---
-    downloadPdf.addEventListener('click', (event) => downloadPdfWithOrientation('portrait', event.currentTarget));
-    downloadPdfLandscape.addEventListener('click', (event) => downloadPdfWithOrientation('landscape', event.currentTarget));
-    downloadDoc.addEventListener('click', (event) => downloadWordDoc(event.currentTarget));
-
-    // Initialize the preview content when the page loads
-    refresh();
-</script>
-
-
-
-
+    <!-- Logic Script -->
     <script>
-        // Global variables provided by the environment
-        const __app_id = typeof window.__app_id !== 'undefined' ? window.__app_id : 'default-app-id';
-        const __firebase_config = typeof window.__firebase_config !== 'undefined' ? window.__firebase_config : '{}';
-        const __initial_auth_token = typeof window.__initial_auth_token !== 'undefined' ? window.__initial_auth_token : '';
-        const appId = __app_id;
-        const firebaseConfig = JSON.parse(__firebase_config);
-        
-        // Syllabus data
+        // --- DATA ---
         const syllabusData = {
             '1': [
-                "MANAGEMENT PRINCIPAL AND PROCESS",
-                "MANAGERIAL ECONOMICS",
-                "BUSINESS STATISTICS",
-                "BUSINESS ENVIRONMENT",
-                "ACCOUNTING FOR MANAGERS",
-                "COMPUTER APPLICATION IN MANAGEMENT",
-                "BUSINESS LAW",
-                "BUSINESS COMMUNICATION"
+                "MANAGEMENT PRINCIPAL AND PROCESS", "MANAGERIAL ECONOMICS", "BUSINESS STATISTICS",
+                "BUSINESS ENVIRONMENT", "ACCOUNTING FOR MANAGERS", "COMPUTER APPLICATION IN MANAGEMENT",
+                "BUSINESS LAW", "BUSINESS COMMUNICATION"
             ],
             '2': [
-                "ORGANIZATIONAL BEHAVIOUR",
-                "MANAGERIAL ACCOUNTING",
-                "RESEARCH METHODOLOGY",
-                "PRODUCTION AND OPERATIONS MANAGEMENT",
-                "MARKETING MANAGEMENT",
-                "FINANCIAL MANAGEMENT",
+                "ORGANIZATIONAL BEHAVIOUR", "MANAGERIAL ACCOUNTING", "RESEARCH METHODOLOGY",
+                "PRODUCTION AND OPERATIONS MANAGEMENT", "MARKETING MANAGEMENT", "FINANCIAL MANAGEMENT",
                 "HUMAN RESOURCE MANAGEMENT"
             ],
             '3': [
-                "ENTREPRENEURSHIP DEVELOPMENT AND PROJECT MANAGEMENT",
-                "MANAGEMENT SCIENCES",
-                "INTERNATIONAL BUSINESS MANAGEMENT",
-                "SPECIALIZATION - MARKETING",
-                "SPECIALIZATION - FINANCE",
-                "SPECIALIZATION - HUMAN RESOURCE MANAGEMENT",
-                "SPECIALIZATION - INFORMATION TECHNOLOGY"
+                "ENTREPRENEURSHIP DEVELOPMENT", "MANAGEMENT SCIENCES", "INTERNATIONAL BUSINESS",
+                "MARKETING SPECIALIZATION", "FINANCE SPECIALIZATION", "HR SPECIALIZATION"
             ],
             '4': [
-                "CORPORATE MANAGEMENT",
-                "STRATEGIC MANAGEMENT",
-                "MANAGEMENT INFORMATION SYSTEM",
-                "RURAL MANAGEMENT",
-                "OPTIONAL - INTERNATIONAL MARKETING",
-                "OPTIONAL - MARKETING OF SERVICES",
-                "OPTIONAL - SECURITY ANALYSIS AND PORTFOLIO MANAGEMENT",
-                "OPTIONAL - CORPORATE TAX MANAGEMENT",
-                "OPTIONAL - ORGANIZATIONAL CHANGE AND INTERVENTION STRATEGIES",
-                "OPTIONAL - MANAGEMENT TRAINING AND DEVELOPMENT",
-                "OPTIONAL - BUSINESS PROCESS RE ENGINEERING AND ERP",
-                "OPTIONAL - COMPUTER GRAPHICS AND MULTIMEDIA MANAGEMENT"
+                "CORPORATE MANAGEMENT", "STRATEGIC MANAGEMENT", "MIS", "RURAL MANAGEMENT",
+                "INTERNATIONAL MARKETING", "SECURITY ANALYSIS"
             ]
         };
 
-        // DOM elements
-        const semesterSelect = document.getElementById('semester');
-        const subjectSelect = document.getElementById('subject');
-        const languageSelect = document.getElementById('language');
-        const notesTypeSelect = document.getElementById('notes-type-select');
-        const queryTextarea = document.getElementById('query');
-        const generateNotesBtn = document.getElementById('generate-notes-btn');
-        const generateQuestionsBtn = document.getElementById('generate-questions-btn');
-        const notesArea = document.getElementById('notes-area');
-        const notesPlaceholder = document.getElementById('notes-placeholder');
-        const sourcesContainer = document.getElementById('sources-container');
-        const referencesList = document.getElementById('references-list');
-        const copyBtn = document.getElementById('copy-btn');
-        const showSourcesBtn = document.getElementById('show-sources-btn');
-        const messageBox = document.getElementById('message-box');
+        // --- DOM ELEMENTS ---
+        const els = {
+            semester: document.getElementById('semester'),
+            subject: document.getElementById('subject'),
+            notesType: document.getElementById('notes-type-select'),
+            language: document.getElementById('language'),
+            query: document.getElementById('query'),
+            btnNotes: document.getElementById('generate-notes-btn'),
+            btnQuestions: document.getElementById('generate-questions-btn'),
+            notesArea: document.getElementById('notes-area'),
+            editor: document.getElementById('bilingual'),
+            preview: document.getElementById('preview'),
+            fontSize: document.getElementById('fontSize'),
+            lineHeight: document.getElementById('lineHeight'),
+            fontSizeVal: document.getElementById('fontSizeVal'),
+            lineHeightVal: document.getElementById('lineHeightVal'),
+            copyBtn: document.getElementById('copy-btn'),
+            transferBtn: document.getElementById('transfer-btn'),
+            downloadPdf: document.getElementById('downloadPdf'),
+            downloadDoc: document.getElementById('downloadDoc'),
+            filename: document.getElementById('filename')
+        };
 
-        // Note: API key is left empty as per instructions for the environment
-        const API_KEY = "AIzaSyCA-TXrEZgSP3Arr_fZyyO0QAv0x3sCWpY"; 
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`;
-        
-        const showMessage = (message) => {
-            messageBox.textContent = message;
-            messageBox.classList.remove('hidden');
-            setTimeout(() => {
-                messageBox.classList.add('hidden');
-            }, 3000);
-        };
-        
-        const copyToClipboard = (text) => {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-            showMessage('Copied to clipboard!');
-        };
-        
-        const updateSubjects = () => {
-            const selectedSemester = semesterSelect.value;
-            const subjects = syllabusData[selectedSemester] || [];
-            
-            subjectSelect.innerHTML = '<option value="" disabled selected>Select Subject</option>';
-            subjects.forEach(subject => {
-                const option = document.createElement('option');
-                option.value = subject;
-                option.textContent = subject;
-                subjectSelect.appendChild(option);
+        // --- INIT ---
+        function updateSubjects() {
+            const sem = els.semester.value;
+            const subjects = syllabusData[sem] || [];
+            els.subject.innerHTML = '<option value="" disabled selected>Select Subject</option>';
+            subjects.forEach(sub => {
+                const opt = document.createElement('option');
+                opt.value = sub;
+                opt.textContent = sub;
+                els.subject.appendChild(opt);
             });
-        };
+        }
         
-        document.addEventListener('DOMContentLoaded', updateSubjects);
-        semesterSelect.addEventListener('change', updateSubjects);
-        copyBtn.addEventListener('click', () => {
-            copyToClipboard(notesArea.innerText);
-        });
-
-        showSourcesBtn.addEventListener('click', () => {
-            sourcesContainer.classList.toggle('hidden');
-        });
+        els.semester.addEventListener('change', updateSubjects);
+        updateSubjects(); // Run once on load
         
-        subjectSelect.addEventListener('change', () => {
-            if (subjectSelect.value) {
-                generateNotesBtn.disabled = false;
-                generateQuestionsBtn.disabled = false;
-            }
-        });
-
-        const generateContent = async (type) => {
-            const semester = semesterSelect.value;
-            const subject = subjectSelect.value;
-            const language = languageSelect.value;
-            const notesType = notesTypeSelect.value;
-            const userQuery = queryTextarea.value.trim();
-            
+        // --- AI LOGIC (Puter.js) ---
+        async function runGeneration(mode) {
+            const subject = els.subject.value;
             if (!subject) {
-                showMessage("Please select a subject first.");
+                alert("Please select a subject first.");
                 return;
             }
 
-            // Set loading state
-            if (type === 'notes') {
-                document.getElementById('notes-btn-text').textContent = 'Generating...';
-                document.getElementById('notes-spinner').classList.remove('hidden');
+            const query = els.query.value.trim();
+            const language = els.language.value;
+            const btn = mode === 'notes' ? els.btnNotes : els.btnQuestions;
+            const spinner = btn.querySelector('.loading-spinner');
+            const btnText = btn.querySelector('.btn-text');
+
+            // UI Loading State
+            btn.disabled = true;
+            spinner.classList.remove('hidden');
+            btnText.textContent = "Thinking...";
+            els.notesArea.innerHTML = '<div class="animate-pulse space-y-3"><div class="h-4 bg-gray-200 rounded w-3/4"></div><div class="h-4 bg-gray-200 rounded"></div><div class="h-4 bg-gray-200 rounded w-5/6"></div></div>';
+            
+            // Build Prompt
+            let prompt = "";
+            if (mode === 'notes') {
+                const type = els.notesType.value;
+                let instructions = "";
+                if(type === 'detailed') instructions = "Write a comprehensive study guide (approx 800 words).";
+                else if(type === 'case_study') instructions = "Provide real-world case studies and examples (India/Global context).";
+                else if(type === 'simpler') instructions = "Explain in very simple, easy-to-understand language for beginners.";
+                else if(type === 'short_notes') instructions = "Create concise, high-yield bullet points for last-minute revision.";
+                else instructions = "Provide an in-depth critical analysis.";
+
+                prompt = `Role: MBA Professor. Task: ${instructions}
+                Subject: ${subject}
+                Topic/Keywords: ${query || "General Overview of Subject"}
+                Language: ${language} (If Hindi, use Devanagari script mixed with English terms where appropriate).
+                Format: Use Markdown (headings, bold, lists).`;
             } else {
-                document.getElementById('questions-btn-text').textContent = 'Generating...';
-                document.getElementById('questions-spinner').classList.remove('hidden'); // Fixed: was .add('hidden')
+                prompt = `Role: Exam Paper Setter. Task: Generate 3 Long Answer Questions and 5 Short Answer Questions with detailed model answers.
+                Subject: ${subject}
+                Topic: ${query || "Key Topics"}
+                Language: ${language}
+                Format: Markdown.`;
             }
-            generateNotesBtn.disabled = true;
-            generateQuestionsBtn.disabled = true;
 
-            notesPlaceholder.classList.add('hidden');
-            notesArea.textContent = '';
-            sourcesContainer.classList.add('hidden');
-            copyBtn.classList.add('hidden');
+            let fullText = "";
 
-            let prompt;
-            if (type === 'notes') {
-                let noteTypePrompt;
-                switch (notesType) {
-                    case 'detailed':
-                        noteTypePrompt = `Generate a detailed and comprehensive study guide of at least 500 - 1000 words.`;
-                        break;
-                    case 'case_study':
-                        noteTypePrompt = `Provide case studies and examples related to the topic from india and world in detail.`;
-                        break;
-                    case 'simpler':
-                        noteTypePrompt = `Explain the concept in simple, easy-to-understand language, in atleast 500 words.`;
-                        break;
-                    case 'in_depth':
-                        noteTypePrompt = `Provide an in-depth analytical overview of the topic.`;
-                        break;
-                    case 'short_notes':
-                        noteTypePrompt = `Generate concise, bullet-pointed notes, yet detailed covering all parts for last-minute revision.`;
-                        break;
+            try {
+                // Check if Puter is available
+                if (typeof puter === 'undefined') {
+                    throw new Error("Puter.js library failed to load.");
                 }
-                prompt = `${noteTypePrompt} for the MBA subject "${subject}" from Semester ${semester}. Focus on the following concepts and keywords: "${userQuery}". The output should be a well-structured explanation with clear headings.`;
-            } else { // type === 'questions'
-                prompt = `Generate a long answer (approximately 500 - 1000 words) for the question "${userQuery}" related to the MBA subject "${subject}" from Semester ${semester} in ${language}.`;
+
+                // Call Streaming API
+                const response = await puter.ai.chat(prompt, {
+                    model: 'gemini-2.5-flash', // Using a stable, fast model available on Puter
+                    stream: true
+                });
+
+                els.notesArea.innerHTML = ''; // Clear loading skeleton
+
+                for await (const part of response) {
+                    if (part?.text) {
+                        fullText += part.text;
+                        // Real-time render
+                        els.notesArea.innerHTML = marked.parse(fullText);
+                        // Auto-scroll
+                        els.notesArea.scrollTop = els.notesArea.scrollHeight;
+                    }
+                }
+
+                // Show action buttons
+                els.copyBtn.classList.remove('hidden');
+                els.transferBtn.classList.remove('hidden');
+
+            } catch (err) {
+                console.error(err);
+                els.notesArea.innerHTML = `<div class="text-red-500 bg-red-50 p-4 rounded border border-red-200">
+                    <strong>Error:</strong> ${err.message || "Failed to generate content. Please try again."}
+                </div>`;
+            } finally {
+                // Reset UI
+                btn.disabled = false;
+                spinner.classList.add('hidden');
+                btnText.textContent = mode === 'notes' ? "Generate Notes" : "Generate Questions";
             }
+        }
 
-            // Construct the payload for the API call - This was the primary missing piece.
-            const payload = {
-                contents: [{ parts: [{ text: prompt }] }],
-                tools: [{ "google_search": {} }],
-            };
+        // --- EVENT HANDLERS ---
+        els.btnNotes.addEventListener('click', () => runGeneration('notes'));
+        els.btnQuestions.addEventListener('click', () => runGeneration('questions'));
 
-            // Log API call details for debugging
-            console.log('Attempting to call Gemini API...');
-            console.log(`API URL: ${API_URL}`);
+        els.copyBtn.addEventListener('click', () => {
+            const text = els.notesArea.innerText;
+            
+            // Fallback method using textarea for broader compatibility (especially in iframes)
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed'; // Prevent scrolling to bottom
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
             
             try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload),
-                });
-                
-                if (!response.ok) {
-                    console.error('API call failed with status:', response.status);
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const result = await response.json();
-                const candidate = result.candidates?.[0];
-                
-                if (candidate && candidate.content?.parts?.[0]?.text) {
-                    const text = candidate.content.parts[0].text;
-                    notesArea.textContent = text;
-                    copyBtn.classList.remove('hidden');
-                    
-                    const groundingMetadata = candidate.groundingMetadata;
-                    referencesList.innerHTML = '';
-                    if (groundingMetadata && groundingMetadata.groundingAttributions) {
-                        const sources = groundingMetadata.groundingAttributions
-                            .map(attribution => ({
-                                uri: attribution.web?.uri,
-                                title: attribution.web?.title,
-                            }))
-                            .filter(source => source.uri && source.title);
-                        
-                        if (sources.length > 0) {
-                            sources.forEach(source => {
-                                const listItem = document.createElement('li');
-                                const link = document.createElement('a');
-                                link.href = source.uri;
-                                link.target = "_blank";
-                                link.textContent = source.title;
-                                link.className = "text-blue-600 hover:underline";
-                                listItem.appendChild(link);
-                                referencesList.appendChild(listItem);
-                            });
-                            showSourcesBtn.classList.remove('hidden');
-                        } else {
-                            showSourcesBtn.classList.add('hidden');
-                        }
-                    } else {
-                        showSourcesBtn.classList.add('hidden');
-                    }
-                } else {
-                    showMessage("Unable to generate content. Please try again with different keywords.");
-                }
-                
-            } catch (error) {
-                console.error('Error:', error);
-                showMessage("An error occurred. Please check your network and try again.");
+                document.execCommand('copy');
+                els.copyBtn.textContent = "Copied!";
+                setTimeout(() => els.copyBtn.textContent = "Copy Text", 2000);
+            } catch (err) {
+                console.error('Copy failed:', err);
+                alert('Failed to copy text to clipboard.');
             } finally {
-                // Reset loading state
-                if (type === 'notes') {
-                    document.getElementById('notes-btn-text').textContent = 'Generate Notes';
-                    document.getElementById('notes-spinner').classList.add('hidden');
-                } else {
-                    document.getElementById('questions-btn-text').textContent = 'Generate Questions';
-                    document.getElementById('questions-spinner').classList.add('hidden');
-                }
-                generateNotesBtn.disabled = false;
-                generateQuestionsBtn.disabled = false;
+                document.body.removeChild(textarea);
             }
-        };
+        });
 
-        generateNotesBtn.addEventListener('click', () => generateContent('notes'));
-        generateQuestionsBtn.addEventListener('click', () => generateContent('questions'));
+        els.transferBtn.addEventListener('click', () => {
+            // Convert the HTML content of notes area back to text/markdown for the editor
+            // Or simpler: just use the innerText. 
+            // Better UX: Let's grab the HTML, convert common tags to newlines, and put it in editor.
+            // Actually, we can just put the text content in the editor so the user can format it.
+            
+            els.editor.value = els.notesArea.innerText; // Plain text transfer
+            els.editor.scrollIntoView({ behavior: 'smooth' });
+            refreshPreview();
+        });
+
+        // --- EDITOR & PREVIEW LOGIC ---
+        function refreshPreview() {
+            const text = els.editor.value;
+            const size = els.fontSize.value + 'px';
+            const lh = els.lineHeight.value;
+
+            // Simple parse: Treat double newline as paragraph
+            // We use marked.parse again here to render any markdown typed in the editor
+            const html = marked.parse(text);
+
+            els.preview.style.fontSize = size;
+            els.preview.style.lineHeight = lh;
+            els.preview.innerHTML = html || '<p class="text-gray-400 italic">Preview...</p>';
+            
+            // Update UI labels
+            els.fontSizeVal.textContent = size;
+            els.lineHeightVal.textContent = lh;
+        }
+
+        document.getElementById('applyBtn').addEventListener('click', refreshPreview);
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            els.editor.value = '';
+            refreshPreview();
+        });
+        els.editor.addEventListener('input', refreshPreview);
+        els.fontSize.addEventListener('input', refreshPreview);
+        els.lineHeight.addEventListener('input', refreshPreview);
+
+        // --- PDF DOWNLOAD ---
+        els.downloadPdf.addEventListener('click', () => {
+            const element = document.createElement('div');
+            // Clone style from preview
+            element.innerHTML = els.preview.innerHTML;
+            element.style.padding = '20px';
+            element.style.fontSize = els.fontSize.value + 'px';
+            element.style.lineHeight = els.lineHeight.value;
+            element.style.fontFamily = "'Open Sans', sans-serif";
+            
+            const opt = {
+                margin: 10,
+                filename: (els.filename.value || 'notes') + '.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['css', 'legacy'] }
+            };
+            
+            const btnOrigText = els.downloadPdf.textContent;
+            els.downloadPdf.textContent = "Saving...";
+            
+            html2pdf().set(opt).from(element).save().then(() => {
+                els.downloadPdf.textContent = btnOrigText;
+            });
+        });
+
+        // --- DOC DOWNLOAD ---
+        els.downloadDoc.addEventListener('click', () => {
+            const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' "+
+                "xmlns:w='urn:schemas-microsoft-com:office:word' "+
+                "xmlns='http://www.w3.org/TR/REC-html40'>"+
+                "<head><meta charset='utf-8'><title>Export HTML to Word Document with JavaScript</title></head><body>";
+            const footer = "</body></html>";
+            const sourceHTML = header + els.preview.innerHTML + footer;
+            
+            const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
+            const fileDownload = document.createElement("a");
+            document.body.appendChild(fileDownload);
+            fileDownload.href = source;
+            fileDownload.download = (els.filename.value || 'notes') + '.doc';
+            fileDownload.click();
+            document.body.removeChild(fileDownload);
+        });
+
     </script>
 </body>
 </html>
