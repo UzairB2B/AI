@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CyberShield AI — Fraud Help • News • India Resources</title>
+    <!-- Puter.js SDK -->
+    <script src="https://js.puter.com/v2/"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -75,6 +77,26 @@
             background-color: var(--alt-surface-color);
             border-color: var(--border-color);
         }
+
+        /* Voice Pulse Animation */
+        .voice-active {
+            animation: pulse-red 1.5s infinite;
+            background-color: #ef4444 !important;
+            color: white !important;
+            border-color: #ef4444 !important;
+        }
+        @keyframes pulse-red {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        /* Formatting Helpers */
+        .msg-content strong { font-weight: 700; color: inherit; }
+        .msg-content em { font-style: italic; opacity: 0.9; }
+        .msg-content h3 { font-size: 1.1em; font-weight: 700; margin-top: 0.75rem; margin-bottom: 0.25rem; text-decoration: underline; text-decoration-color: var(--primary-color); }
+        .msg-content ul { list-style-type: disc; padding-left: 1.25rem; margin-top: 0.5rem; margin-bottom: 0.5rem; }
+        .msg-content li { margin-bottom: 0.25rem; }
 
         /* Tailwind utility override for color-based classes */
         .bg-slate-950 { background-color: var(--bg-color); }
@@ -169,41 +191,64 @@
                             <option>Other</option>
                         </select>
                     </div>
-                    <textarea
-                        v-model="userMessage"
-                        rows="3"
-                        placeholder="Describe the situation. Example: 'Got a call claiming my Aadhaar linked to crime; they asked me to transfer money.'"
-                        class="w-full px-3 py-2 rounded-xl theme-input"
-                    ></textarea>
+                    
+                    <!-- Text Area with Voice Button -->
+                    <div class="relative w-full">
+                        <textarea
+                            v-model="userMessage"
+                            rows="3"
+                            placeholder="Describe the situation... (e.g., 'Got a call about an illegal parcel')"
+                            class="w-full px-3 py-2 pr-12 rounded-xl theme-input"
+                        ></textarea>
+                        <button 
+                            @click="toggleVoiceInput"
+                            :class="['absolute right-2 top-2 p-2 rounded-lg transition-all border border-transparent', isListening ? 'voice-active' : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600']"
+                            title="Voice Typing (Speech to Text)"
+                        >
+                            <i class="fas fa-microphone"></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mic"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+                        </button>
+                    </div>
+
                     <div class="flex flex-wrap gap-2">
                         <button
-                            @click="sendToGemini"
+                            @click="sendToPuter"
                             :disabled="loading || !userMessage"
                             class="px-4 py-2 rounded-2xl theme-primary-btn hover:theme-primary-btn font-semibold disabled:opacity-50"
                         >
                             Ask Assistant
                         </button>
-                        <button @click="clearChat" class="px-4 py-2 rounded-2xl theme-secondary-btn hover:theme-copy-btn-hover">Clear</button>
+                        <button @click="clearChat" class="px-4 py-2 rounded-2xl theme-secondary-btn hover:theme-copy-btn-hover">Clear Chat</button>
                     </div>
                     <p class="text-xs text-slate-500">
                         Note: This tool offers guidance. For financial loss, immediately dial <strong>1930</strong> and file at <strong>cybercrime.gov.in</strong>. Follow local laws.
                     </p>
                 </div>
 
-                <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
+                <div ref="chatContainer" class="space-y-3 max-h-[60vh] overflow-y-auto pr-2 scroll-smooth">
                     <div v-for="(m, i) in messages" :key="i" class="flex gap-3" :class="m.role === 'user' ? 'justify-end' : 'justify-start'">
-                        <div class="max-w-[80%] rounded-2xl p-3 whitespace-pre-wrap" :class="m.role === 'user' ? 'theme-primary-btn' : 'theme-secondary-btn'">
-                            <div class="text-sm" :ref="m.role === 'assistant' && i === messages.length - 1 ? setLastMessageRef : null">
-                                {{ m.content }}
-                            </div>
-                            <div v-if="m.role === 'assistant' && i === messages.length - 1" class="flex justify-end mt-2">
-                                <button @click="copyLastResponse" class="px-2 py-1 text-xs rounded-lg theme-copy-btn theme-copy-btn-hover">
+                        <div class="max-w-[90%] rounded-2xl p-4 whitespace-pre-wrap shadow-sm" :class="m.role === 'user' ? 'theme-primary-btn' : 'theme-secondary-btn'">
+                            <!-- Message Content with Formatting -->
+                            <div class="text-sm msg-content" v-html="formatMessage(m.content)"></div>
+                            
+                            <!-- Action Bar for Assistant Messages -->
+                            <div v-if="m.role === 'assistant' && i === messages.length - 1 && !loading" class="flex flex-wrap items-center justify-end mt-3 pt-2 border-t border-white/10 gap-2">
+                                <button @click="copyText(m.content)" class="p-1.5 rounded-lg hover:bg-white/10 transition text-xs flex items-center gap-1" title="Copy Text">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
                                     Copy
+                                </button>
+                                <button @click="speakText(m.content)" class="p-1.5 rounded-lg hover:bg-white/10 transition text-xs flex items-center gap-1" :class="isSpeaking === m.content ? 'text-green-400' : ''" title="Read Aloud">
+                                    <svg v-if="isSpeaking !== m.content" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-volume-2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+                                    <svg v-else xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square"><rect width="18" height="18" x="3" y="3" rx="2"/></svg>
+                                    Listen
                                 </button>
                             </div>
                         </div>
                     </div>
-                    <div v-if="loading" class="text-sm text-slate-400">Assistant is thinking…</div>
+                    <div v-if="loading" class="text-sm text-slate-400 flex items-center gap-2">
+                        <svg class="animate-spin h-4 w-4 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        Analyzing scenario...
+                    </div>
                 </div>
             </div>
         </section>
@@ -295,7 +340,7 @@
     </div>
 
     <script>
-        const { createApp, ref, reactive, onMounted } = Vue;
+        const { createApp, ref, reactive, onMounted, nextTick } = Vue;
 
         createApp({
             setup() {
@@ -342,95 +387,137 @@
                 ]);
                 const loading = ref(false);
                 const lastMessageRef = ref(null);
+                const chatContainer = ref(null);
 
                 function setLastMessageRef(el) {
                     lastMessageRef.value = el;
                 }
 
-                async function copyLastResponse() {
-                    if (lastMessageRef.value) {
-                        const textToCopy = lastMessageRef.value.innerText;
-                        try {
-                            await navigator.clipboard.writeText(textToCopy);
-                            alert('Response copied to clipboard!');
-                        } catch (err) {
-                            console.error('Failed to copy text:', err);
-                            alert('Failed to copy. Please try again.');
+                function scrollToBottom() {
+                    nextTick(() => {
+                        if (chatContainer.value) {
+                            chatContainer.value.scrollTo({
+                                top: chatContainer.value.scrollHeight,
+                                behavior: 'smooth'
+                            });
                         }
+                    });
+                }
+
+                // --- TEXT FORMATTING ---
+                function formatMessage(text) {
+                    if (!text) return '';
+                    return text
+                        .replace(/##\s?(.*?)$/gm, '<h3>$1</h3>') // Header ##
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold **text**
+                        .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italic *text*
+                        .replace(/\n/g, '<br>');
+                }
+
+                // --- UTILITIES (Copy, PDF, Voice, Speak) ---
+                async function copyText(text) {
+                    try {
+                        // Strip HTML tags for clipboard
+                        const cleanText = text.replace(/<[^>]*>/g, '');
+                        await navigator.clipboard.writeText(cleanText);
+                        alert('Copied to clipboard');
+                    } catch (err) {
+                        console.error(err);
                     }
                 }
 
-                // API keys and URLs
-                const apiKey = "AIzaSyCxLHL7e0BhezM3YWuWyT-dgTNS1GKZXQ0";
-                const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                const isSpeaking = ref(null);
+                function speakText(text) {
+                    window.speechSynthesis.cancel();
+                    if (isSpeaking.value === text) {
+                        isSpeaking.value = null;
+                        return;
+                    }
+                    const cleanText = text.replace(/<[^>]*>|[*#]/g, ''); // Remove tags and markdown
+                    const u = new SpeechSynthesisUtterance(cleanText);
+                    u.lang = 'en-IN'; // Indian accent if available
+                    u.onend = () => { isSpeaking.value = null; };
+                    isSpeaking.value = text;
+                    window.speechSynthesis.speak(u);
+                }
 
-                async function sendToGemini() {
+                // Voice Typing
+                const isListening = ref(false);
+                let recognition;
+                
+                function toggleVoiceInput() {
+                    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+                        alert("Voice input is not supported in this browser.");
+                        return;
+                    }
+                    if (!recognition) {
+                        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                        recognition = new SpeechRecognition();
+                        recognition.continuous = false;
+                        recognition.lang = 'en-US'; // Or en-IN
+                        recognition.onresult = (e) => {
+                            userMessage.value += (userMessage.value ? ' ' : '') + e.results[0][0].transcript;
+                            isListening.value = false;
+                        };
+                        recognition.onerror = () => { isListening.value = false; };
+                        recognition.onend = () => { isListening.value = false; };
+                    }
+
+                    if (isListening.value) {
+                        recognition.stop();
+                        isListening.value = false;
+                    } else {
+                        recognition.start();
+                        isListening.value = true;
+                    }
+                }
+
+                // --- PUTER.JS INTEGRATION ---
+                async function sendToPuter() {
                     const input = userMessage.value.trim();
                     if (!input) return;
 
                     const fullPrompt = `User name: ${profile.name || '—'}\nFraud type: ${profile.fraudType || '—'}\n\nUser message: ${input}`;
 
-                    messages.value.push({ role: 'user', content: fullPrompt });
+                    messages.value.push({ role: 'user', content: input }); // Show just user text in chat
                     userMessage.value = '';
                     loading.value = true;
+                    scrollToBottom(); // Scroll on user message
+
+                    // Create placeholder for AI response
+                    const aiMsg = { role: 'assistant', content: '' };
+                    messages.value.push(aiMsg);
+                    scrollToBottom(); // Scroll on AI placeholder
 
                     try {
-                        const systemInstruction = {
-                            parts: [{
-                                text: [
-                                    'You are a cybersecurity first‑aid copilot for users in India.',
-                                    'ALWAYS recommend dialing 1930 and cybercrime.gov.in when financial fraud is suspected or money is lost.',
-                                    'Be calm, step‑wise, and non‑judgmental. Include checklists and red‑flag detection.',
-                                    'Do NOT ask for sensitive data (card numbers, PIN, OTP, Aadhaar full number).',
-                                    'If user provides personally identifiable information, remind them to keep it private and do not echo it back.',
-                                    'When relevant, cite CERT‑In and India‑specific resources in plain text links.',
-                                ].join('\n')
-                            }]
-                        };
+                        const systemInstruction = [
+                            'You are a cybersecurity first‑aid copilot for users in India.',
+                            'ALWAYS recommend dialing 1930 and cybercrime.gov.in when financial fraud is suspected or money is lost.',
+                            'Be calm, step‑wise, and non‑judgmental. Include checklists and red‑flag detection.',
+                            'Use **bold** for key actions and phone numbers.',
+                            'Use ## for Section Headers.',
+                            'Do NOT ask for sensitive data (card numbers, PIN, OTP, Aadhaar full number).',
+                            'If user provides personally identifiable information, remind them to keep it private and do not echo it back.',
+                            'When relevant, cite CERT‑In and India‑specific resources in plain text links.',
+                        ].join('\n');
 
-                        const contents = messages.value.map(msg => ({
-                            role: msg.role === 'assistant' ? 'model' : 'user',
-                            parts: [{ text: msg.content }]
-                        }));
+                        const finalPrompt = `${systemInstruction}\n\nContext:\n${fullPrompt}`;
 
-                        const body = {
-                            contents: contents,
-                            systemInstruction: systemInstruction,
-                            generationConfig: {
-                                temperature: 0.8,
-                                topK: 32,
-                                topP: 0.95,
-                                maxOutputTokens: 2048,
-                            },
-                            safetySettings: [
-                                { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-                                { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
-                                { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
-                            ],
-                        };
+                        const response = await puter.ai.chat(finalPrompt, { stream: true, model: 'gpt-4o' });
 
-                        const resp = await fetch(geminiApiUrl, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(body),
-                        });
-
-                        if (!resp.ok) {
-                            const errorText = await resp.text();
-                            throw new Error('Gemini API error: ' + resp.status + ' - ' + errorText);
+                        for await (const part of response) {
+                            if (part?.text) {
+                                aiMsg.content += part.text;
+                                scrollToBottom(); // Scroll as text generates
+                            }
                         }
-
-                        const data = await resp.json();
-                        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not generate a response.';
-                        messages.value.push({ role: 'assistant', content: text });
                     } catch (e) {
                         console.error('Error during API call:', e);
-                        messages.value.push({
-                            role: 'assistant',
-                            content: `There was an error contacting the AI: ${e.message}. For financial fraud, dial 1930 immediately.`,
-                        });
+                        aiMsg.content += `\n(Error contacting AI: ${e.message || 'Unknown error'}. For financial fraud, dial 1930 immediately.)`;
+                        scrollToBottom();
                     } finally {
                         loading.value = false;
+                        scrollToBottom();
                     }
                 }
 
@@ -438,7 +525,7 @@
                     messages.value = [{ role: 'assistant', content: 'Chat cleared. How can I help? If money is at risk, dial 1930 now.' }];
                 }
 
-                // Corrected News aggregation (RSS) functionality
+                // News aggregation (RSS) functionality
                 const newsItems = ref([]);
                 const newsUpdatedAt = ref('');
 
@@ -450,7 +537,7 @@
                         return r.text();
                     } catch (e) {
                         console.error('Fetch error:', e);
-                        throw e; // Re-throw to be caught by refreshNews()
+                        throw e; 
                     }
                 }
 
@@ -526,21 +613,26 @@
                     userMessage,
                     messages,
                     loading,
-                    sendToGemini,
+                    sendToPuter,
                     clearChat,
                     newsItems,
                     newsUpdatedAt,
                     refreshNews,
                     fmtDate,
-                    copyLastResponse,
+                    copyText,
+                    speakText,
+                    isSpeaking,
+                    toggleVoiceInput,
+                    isListening,
+                    formatMessage,
                     setLastMessageRef,
+                    chatContainer,
                 };
             },
         }).mount('#app');
     </script>
 
     <script>
-        // Enhance icons (non-blocking)
         window.addEventListener('DOMContentLoaded', () => {
             try {
                 lucide.createIcons();
