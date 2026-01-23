@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedLens | Simple Medical Report AI</title>
+    <script src="https://js.puter.com/v2/"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Library for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        .loading-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #fff;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .markdown-content h3 { font-weight: bold; margin-top: 1rem; color: #1e40af; }
+        .markdown-content p { margin-bottom: 0.75rem; line-height: 1.6; }
+        .markdown-content ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
+        #videoElement { transform: scaleX(1); }
+        #videoElement.mirror { transform: scaleX(-1); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+    <div class="max-w-4xl mx-auto px-4 py-8 pb-20">
+        <!-- Header -->
+        <header class="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
+            <div class="flex items-center gap-2">
+                <div class="bg-blue-600 p-2 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold tracking-tight text-slate-900">MedLens AI</h1>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <select id="languageSelect" class="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="English">English</option>
+                    <option value="Hindi">Hindi (हिंदी)</option>
+                </select>
+                <div class="text-sm bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full border border-blue-100 font-medium">
+                    Personal Health Assistant
+                </div>
+            </div>
+        </header>
+
+        <!-- Warning Banner -->
+        <div class="mb-8 bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-lg">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-amber-700 font-medium">
+                        Not a Medical Diagnosis. This AI helps you understand your reports, but always consult a doctor before making medical decisions.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Camera Section (Initially Hidden) -->
+        <div id="cameraContainer" class="hidden mb-8 bg-black rounded-2xl overflow-hidden relative group">
+            <video id="videoElement" autoplay playsinline class="w-full h-[400px] object-cover"></video>
+            <div class="absolute bottom-4 left-0 right-0 flex justify-center items-center gap-4">
+                <button id="switchCamBtn" class="bg-white/20 backdrop-blur-md p-3 rounded-full text-white hover:bg-white/30 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                </button>
+                <button id="captureBtn" class="bg-white p-4 rounded-full shadow-lg hover:scale-105 active:scale-95 transition-all">
+                    <div class="w-8 h-8 rounded-full border-4 border-blue-600"></div>
+                </button>
+                <button id="closeCamBtn" class="bg-red-500 p-3 rounded-full text-white hover:bg-red-600 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Upload & Action Section -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-8">
+            <div class="p-8">
+                <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                    <div id="dropzone" class="flex-1 border-2 border-dashed border-slate-200 rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all group">
+                        <input type="file" id="fileInput" class="hidden" multiple accept="image/*">
+                        <div class="bg-blue-50 group-hover:bg-blue-100 p-3 rounded-full mb-3 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                            </svg>
+                        </div>
+                        <p class="font-semibold text-slate-700">Upload Images</p>
+                    </div>
+
+                    <div id="openCameraBtn" class="flex-1 border-2 border-dashed border-slate-200 rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all group">
+                        <div class="bg-green-50 group-hover:bg-green-100 p-3 rounded-full mb-3 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </div>
+                        <p class="font-semibold text-slate-700">Capture with Camera</p>
+                    </div>
+                </div>
+
+                <!-- Preview Area -->
+                <div id="previewArea" class="mt-6 flex flex-wrap gap-4"></div>
+            </div>
+
+            <div class="bg-slate-50 px-8 py-4 flex justify-end">
+                <button id="analyzeBtn" disabled class="bg-blue-600 text-white px-6 py-2.5 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                    Analyze Reports
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultContainer" class="hidden space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8" id="analysisContent">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-100 pb-4">
+                    <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Simplified Explanation
+                    </h2>
+                    <div class="flex items-center gap-2">
+                        <button id="listenBtn" class="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Listen to results">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                            </svg>
+                        </button>
+                        <button id="copyBtn" class="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Copy to clipboard">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                            </svg>
+                        </button>
+                        <button id="pdfBtn" class="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Save as PDF">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="resultOutput" class="markdown-content text-slate-700">
+                    <!-- AI Results go here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center z-50">
+            <div class="bg-white p-8 rounded-2xl shadow-2xl flex flex-col items-center max-w-sm w-full">
+                <div class="loading-spinner border-blue-600 border-t-transparent mb-4"></div>
+                <h3 class="font-bold text-lg">Analyzing Reports...</h3>
+                <p class="text-slate-500 text-center text-sm mt-2">Our AI is reading your medical documents and simplifying the terms. Please wait.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const dropzone = document.getElementById('dropzone');
+        const previewArea = document.getElementById('previewArea');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const resultContainer = document.getElementById('resultContainer');
+        const resultOutput = document.getElementById('resultOutput');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const openCameraBtn = document.getElementById('openCameraBtn');
+        const cameraContainer = document.getElementById('cameraContainer');
+        const videoElement = document.getElementById('videoElement');
+        const captureBtn = document.getElementById('captureBtn');
+        const closeCamBtn = document.getElementById('closeCamBtn');
+        const switchCamBtn = document.getElementById('switchCamBtn');
+        const languageSelect = document.getElementById('languageSelect');
+        const listenBtn = document.getElementById('listenBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const pdfBtn = document.getElementById('pdfBtn');
+
+        let uploadedImages = [];
+        let stream = null;
+        let currentFacingMode = 'environment';
+        let isSpeaking = false;
+
+        // UI Interactions
+        dropzone.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            handleFiles(files);
+        });
+
+        function handleFiles(files) {
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    addImageToPreview(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function addImageToPreview(dataUrl) {
+            uploadedImages.push(dataUrl);
+            const div = document.createElement('div');
+            div.className = "relative w-24 h-24 rounded-lg overflow-hidden border border-slate-200 shadow-sm group";
+            div.innerHTML = `
+                <img src="${dataUrl}" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button class="text-white hover:text-red-400" onclick="removeImage('${dataUrl}', this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+                </div>
+            `;
+            previewArea.appendChild(div);
+            updateAnalyzeButton();
+        }
+
+        window.removeImage = (url, btn) => {
+            uploadedImages = uploadedImages.filter(img => img !== url);
+            btn.closest('div').remove();
+            updateAnalyzeButton();
+        };
+
+        function updateAnalyzeButton() {
+            analyzeBtn.disabled = uploadedImages.length === 0;
+        }
+
+        // Camera Logic
+        openCameraBtn.addEventListener('click', async () => {
+            cameraContainer.classList.remove('hidden');
+            await startCamera();
+            cameraContainer.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        async function startCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: currentFacingMode }
+                });
+                videoElement.srcObject = stream;
+                if (currentFacingMode === 'user') {
+                    videoElement.classList.add('mirror');
+                } else {
+                    videoElement.classList.remove('mirror');
+                }
+            } catch (err) {
+                console.error("Camera access denied", err);
+                alert("Please enable camera access to use this feature.");
+            }
+        }
+
+        captureBtn.addEventListener('click', () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            const ctx = canvas.getContext('2d');
+            
+            if (currentFacingMode === 'user') {
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
+            }
+            
+            ctx.drawImage(videoElement, 0, 0);
+            const dataUrl = canvas.toDataURL('image/jpeg');
+            addImageToPreview(dataUrl);
+            
+            // Visual feedback
+            videoElement.classList.add('opacity-50');
+            setTimeout(() => videoElement.classList.remove('opacity-50'), 100);
+        });
+
+        switchCamBtn.addEventListener('click', () => {
+            currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+            startCamera();
+        });
+
+        closeCamBtn.addEventListener('click', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            cameraContainer.classList.add('hidden');
+        });
+
+        // Results Actions (Copy, PDF, TTS)
+        copyBtn.addEventListener('click', () => {
+            const text = resultOutput.innerText;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = text;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+            
+            const originalColor = copyBtn.style.color;
+            copyBtn.style.color = '#10b981';
+            setTimeout(() => copyBtn.style.color = originalColor, 2000);
+        });
+
+        pdfBtn.addEventListener('click', () => {
+            const element = document.getElementById('analysisContent');
+            const opt = {
+                margin: 10,
+                filename: 'Medical_Report_Analysis.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        });
+
+        listenBtn.addEventListener('click', () => {
+            if (isSpeaking) {
+                window.speechSynthesis.cancel();
+                isSpeaking = false;
+                listenBtn.classList.remove('text-blue-600');
+                return;
+            }
+
+            const text = resultOutput.innerText;
+            const utterance = new SpeechSynthesisUtterance(text);
+            const lang = languageSelect.value === 'Hindi' ? 'hi-IN' : 'en-US';
+            utterance.lang = lang;
+            
+            utterance.onend = () => {
+                isSpeaking = false;
+                listenBtn.classList.remove('text-blue-600');
+            };
+
+            window.speechSynthesis.speak(utterance);
+            isSpeaking = true;
+            listenBtn.classList.add('text-blue-600');
+        });
+
+        // AI Logic
+        analyzeBtn.addEventListener('click', async () => {
+            if (uploadedImages.length === 0) return;
+            
+            // Stop camera if running
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                cameraContainer.classList.add('hidden');
+            }
+
+            loadingOverlay.classList.remove('hidden');
+            resultContainer.classList.add('hidden');
+            window.speechSynthesis.cancel();
+            isSpeaking = false;
+
+            const selectedLang = languageSelect.value;
+            const systemPrompt = `You are a helpful, empathetic medical report assistant. 
+            Your goal is to help individuals understand their medical laboratory reports in BASIC, SIMPLE language in ${selectedLang}.
+            1. Extract key markers (e.g., Blood sugar, Cholesterol, Vitamin levels).
+            2. Explain what they mean using everyday analogies.
+            3. Highlight values that are outside the normal range (flagged as High or Low).
+            4. Use a supportive tone.
+            5. ALWAYS include a prominent disclaimer that this is not a diagnosis.
+            6. Format your response with clear headings and bullet points.
+            7. If there are multiple pages (front/back), synthesize the information into one summary.
+            8. If language is Hindi, use simple Hindi words that are easy to understand.`;
+
+            try {
+                const response = await puter.ai.chat(
+                    systemPrompt,
+                    uploadedImages,
+                    { model: 'gemini-3-flash-preview' }
+                );
+
+                const rawText = response.toString();
+                
+                // Simple markdown-to-html converter
+                const formattedText = rawText
+                    .replace(/\n/g, '<br>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/### (.*?)(<br>|$)/g, '<h3 class="text-lg font-bold text-blue-800 mt-4">$1</h3>')
+                    .replace(/^- (.*)/gm, '<li>$1</li>');
+
+                resultOutput.innerHTML = formattedText;
+                resultContainer.classList.remove('hidden');
+                
+                resultContainer.scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                console.error("AI Analysis Error:", error);
+                alert("Sorry, there was an error analyzing your reports. Please try again.");
+            } finally {
+                loadingOverlay.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
