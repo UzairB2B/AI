@@ -1,9 +1,12 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Complaint Filing AI</title>
+    <!-- Puter JS Library -->
+    <script src="https://js.puter.com/v2/"></script>
     <!-- Font links for Inter font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,210 +16,352 @@
     <!-- CDN for Vue.js to handle reactivity and logic -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- jsPDF for PDF generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+            background-color: #f0f2f5;
         }
         .chat-window {
             flex-grow: 1;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            padding: 1rem;
-            border: 1px solid #e5e7eb;
-            border-radius: 0.75rem;
-            margin-bottom: 1rem;
-            background-color: #fafafa;
+            padding: 1.5rem;
+            background-color: #ffffff;
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 1.25rem;
+            scroll-behavior: smooth;
         }
-        .message {
-            max-width: 85%;
-            padding: 0.75rem 1rem;
-            border-radius: 1.5rem;
+        /* Message Transition Animation */
+        .message-enter-active,
+        .message-leave-active {
+            transition: all 0.4s ease;
+        }
+        .message-enter-from,
+        .message-leave-to {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .message-bubble {
+            max-width: 80%;
+            padding: 1rem 1.25rem;
+            border-radius: 1.25rem;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             word-wrap: break-word;
             white-space: pre-wrap;
-            line-height: 1.5;
+            line-height: 1.6;
+            font-size: 0.95rem;
         }
-        .user-message {
-            background-color: #3b82f6;
+        .user-bubble {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             color: #ffffff;
-            align-self: flex-end;
-            border-bottom-right-radius: 0.5rem;
+            border-bottom-right-radius: 0.25rem;
         }
-        .ai-message {
-            background-color: #dbeafe;
-            color: #1e40af;
-            align-self: flex-start;
-            border-bottom-left-radius: 0.5rem;
+        .ai-bubble {
+            background-color: #f3f4f6;
+            color: #1f2937;
+            border-bottom-left-radius: 0.25rem;
+            border: 1px solid #e5e7eb;
         }
-        .loading-spinner {
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top-color: #ffffff;
+        .loading-dots {
+            display: inline-flex;
+            gap: 4px;
+        }
+        .loading-dots span {
+            width: 8px;
+            height: 8px;
+            background-color: #9ca3af;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
+            animation: bounce 1.4s infinite ease-in-out both;
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
         }
-        .disclaimer-box {
-            padding: 1rem;
-            border-radius: 0.75rem;
-            background-color: #fef2f2;
-            border: 1px solid #fca5a5;
-            color: #b91c1c;
-            font-size: 0.875rem;
-            font-weight: 500;
+        
+        /* Custom Scrollbar */
+        .chat-window::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-window::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .chat-window::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 3px;
+        }
+        .chat-window::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
         }
     </style>
 </head>
-<body class="bg-gray-100 font-sans antialiased min-h-screen flex flex-col items-center justify-center p-4">
+<body class="bg-gray-100 font-sans antialiased min-h-screen flex flex-col p-4">
 
     <!-- Vue.js app container -->
-    <div id="app" class="flex flex-col flex-grow w-full max-w-4xl mx-auto rounded-xl shadow-lg overflow-hidden bg-white mt-6 mb-6 md:mt-12 md:mb-6">
+    <div id="app" class="flex flex-col w-full max-w-5xl mx-auto rounded-2xl shadow-xl overflow-hidden bg-white flex-1 max-h-full my-auto">
         <!-- Header -->
-        <div class="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 flex-wrap">
-            <div class="flex items-center space-x-4">
-                <a href="index.html" class="p-2 text-gray-600 hover:text-blue-500 transition-colors duration-200" title="Go to home">
-                    <i class="fas fa-home text-2xl"></i>
-                </a>
-                <h1 class="text-xl sm:text-3xl font-extrabold text-gray-900">{{ translate('app_title') }}</h1>
-            </div>
-            <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 mt-4 sm:mt-0">
-                <div class="flex-1">
-                    <label for="chat-language-select" class="block text-sm font-semibold text-gray-700 mb-1">{{ translate('chat_language') }}</label>
-                    <select id="chat-language-select" v-model="chatLanguage" class="p-3 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full transition-all duration-200">
+        <div class="flex flex-col border-b border-gray-200 bg-white z-10">
+            <div class="flex items-center justify-between p-4 sm:p-5">
+                <div class="flex items-center space-x-4">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                        <i class="fas fa-balance-scale text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg sm:text-xl font-bold text-gray-900 leading-tight">{{ translate('app_title') }}</h1>
+                        <p class="text-xs text-gray-500 hidden sm:block">{{ translate('tagline') }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <select id="chat-language-select" v-model="chatLanguage" @change="resetChat" class="py-1.5 px-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
                         <option v-for="(lang, key) in languages" :key="key" :value="key">{{ lang.name }}</option>
                     </select>
                 </div>
             </div>
+            <!-- Progress Bar -->
+            <div class="w-full bg-gray-100 h-1.5" v-if="!isInfoCollected">
+                <div class="bg-blue-600 h-1.5 transition-all duration-500 ease-out" :style="{ width: progressPercentage + '%' }"></div>
+            </div>
         </div>
 
         <!-- Main Content Section -->
-        <div class="p-6 flex flex-col flex-grow w-full">
-            <p class="text-gray-600 mb-6 text-center">{{ translate('tagline') }}</p>
+        <div class="flex flex-col flex-grow overflow-hidden relative">
             
-            <div class="disclaimer-box mb-4">
-                {{ translate('disclaimer') }}
-            </div>
-
             <!-- Message Box for status -->
-            <div v-if="message" :class="['rounded-xl px-4 py-2 text-center text-sm font-medium mb-4', message.type === 'error' ? 'bg-red-200 text-red-800' : 'bg-blue-200 text-blue-800']">
-                {{ message.text }}
-            </div>
+            <transition name="message">
+                <div v-if="message" class="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 px-6 py-3 rounded-full text-sm font-semibold shadow-lg backdrop-blur-sm" 
+                    :class="message.type === 'error' ? 'bg-red-100/90 text-red-700 border border-red-200' : 'bg-green-100/90 text-green-700 border border-green-200'">
+                    {{ message.text }}
+                </div>
+            </transition>
 
             <!-- Chat Window -->
             <div ref="chatWindow" class="chat-window">
-                <div class="ai-message">{{ translate('initial_message') }}</div>
-                <div v-for="(message, index) in chatHistory" :key="index" :class="['message', message.sender === 'user' ? 'user-message' : 'ai-message']">
-                    {{ message.text }}
+                <div class="p-4 mb-2 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-sm flex items-start gap-3">
+                    <i class="fas fa-exclamation-circle mt-0.5 shrink-0"></i>
+                    <span>{{ translate('disclaimer') }}</span>
                 </div>
-                <div v-if="isGenerating" class="ai-message">
-                    {{ translate('generating_report') }}
-                    <svg class="animate-spin h-5 w-5 text-gray-600 mt-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
+
+                <div v-if="initialMessage" class="flex items-end gap-3 group">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0 mb-1">
+                        <i class="fas fa-robot text-sm"></i>
+                    </div>
+                    <div class="message-bubble ai-bubble">
+                       {{ initialMessage.text }}
+                    </div>
+                    <button @click="speak(initialMessage.text)" class="text-gray-400 hover:text-blue-600 transition-all opacity-0 group-hover:opacity-100 ml-1">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
                 </div>
+                
+                <transition-group name="message">
+                    <div v-for="(message, index) in chatHistory" :key="index" class="flex items-end gap-3" :class="message.sender === 'user' ? 'flex-row-reverse' : 'group'">
+                        <div class="w-8 h-8 rounded-full shrink-0 mb-1 flex items-center justify-center"
+                             :class="message.sender === 'user' ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-600'">
+                            <i :class="message.sender === 'user' ? 'fas fa-user text-sm' : 'fas fa-robot text-sm'"></i>
+                        </div>
+                        <div :class="['message-bubble', message.sender === 'user' ? 'user-bubble' : 'ai-bubble', 'group relative']">
+                            {{ message.text }}
+                            <button v-if="message.sender === 'user' && !isInfoCollected && message.step !== undefined" @click="startEdit(message.step)" class="absolute -bottom-2 -right-2 bg-white rounded-full p-1.5 shadow text-gray-500 hover:text-blue-600 text-xs transition-opacity opacity-0 group-hover:opacity-100">
+                                <i class="fas fa-pencil-alt fa-fw"></i>
+                            </button>
+                        </div>
+                         <button v-if="message.sender === 'ai'" @click="speak(message.text)" class="text-gray-400 hover:text-blue-600 transition-all opacity-0 group-hover:opacity-100 ml-1">
+                            <i class="fas fa-volume-up"></i>
+                        </button>
+                    </div>
+                </transition-group>
+                
+                <div v-if="isGenerating" class="flex items-end gap-3">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0 mb-1">
+                        <i class="fas fa-robot text-sm"></i>
+                    </div>
+                    <div class="message-bubble ai-bubble flex items-center gap-2">
+                        <span>{{ translate('generating_report') }}</span>
+                        <div class="loading-dots">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Report View -->
+                <transition name="message">
+                    <div v-if="generatedReport" class="mt-4 border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white">
+                        <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                            <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                                <i class="fas fa-file-alt text-blue-600"></i> {{ translate('generated_report_title') }}
+                            </h3>
+                            <button @click="downloadPDF" class="text-sm bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded-lg transition-colors">
+                                <i class="fas fa-download mr-1"></i> PDF
+                            </button>
+                        </div>
+                        <div class="p-6 bg-white overflow-x-auto">
+                            <pre class="whitespace-pre-wrap font-serif text-gray-800 text-sm leading-relaxed">{{ generatedReport }}</pre>
+                        </div>
+                    </div>
+                </transition>
             </div>
 
-            <div v-if="generatedReport" class="flex flex-col gap-2 mb-4 p-4 rounded-xl bg-gray-50 border border-gray-200">
-                <h3 class="text-lg font-bold text-gray-800">{{ translate('generated_report_title') }}</h3>
-                <p class="text-sm text-gray-600 whitespace-pre-wrap">{{ generatedReport }}</p>
-            </div>
+            <!-- Input Area -->
+            <div class="p-4 bg-white border-t border-gray-200">
+                <div class="flex flex-col gap-3">
+                    <div v-if="isPhotoUploadStep && incidentPhotos.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 p-2 bg-gray-50 rounded-lg">
+                        <div v-for="photo in incidentPhotos" :key="photo.id" class="relative group">
+                            <img :src="photo.base64" class="rounded-md object-cover w-full h-24">
+                            <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-md">
+                                <button @click="removePhoto(photo.id)" class="text-white text-xl">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
-            <!-- Input and Action Container -->
-            <div class="flex flex-col gap-4">
-                <input
-                    v-model="userMessage"
-                    type="text"
-                    @keyup.enter="handleInput"
-                    class="flex-grow px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out"
-                    :placeholder="translate('input_placeholder')"
-                    :disabled="isLoading || isGenerating || isInfoCollected"
-                >
-                <div class="flex flex-col sm:flex-row gap-2">
-                    <button
-                        v-if="!isInfoCollected"
-                        @click="handleInput"
-                        class="px-6 py-3 rounded-full bg-blue-600 text-white font-semibold shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed flex-grow"
-                        :disabled="isLoading || isGenerating || !userMessage.trim()"
-                    >
-                        <span v-if="!isLoading">{{ translate('send') }}</span>
-                        <svg v-else class="animate-spin h-5 w-5 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                    </button>
-                    <button
-                        v-if="isInfoCollected && !generatedReport"
-                        @click="generateReport"
-                        class="px-6 py-3 rounded-full bg-blue-600 text-white font-semibold shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out flex-grow"
-                        :disabled="isGenerating"
-                    >
-                        <span v-if="!isGenerating">{{ translate('generate_report') }}</span>
-                        <svg v-else class="animate-spin h-5 w-5 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                    </button>
-                    <button
-                        v-if="generatedReport"
-                        @click="downloadPDF"
-                        class="px-6 py-3 rounded-full bg-green-600 text-white font-semibold shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200 ease-in-out flex-grow sm:flex-none"
-                    >
-                        <i class="fas fa-file-pdf mr-2"></i>{{ translate('download_pdf') }}
-                    </button>
-                    <button
-                        v-if="isInfoCollected"
-                        @click="resetChat"
-                        class="px-6 py-3 rounded-full bg-red-600 text-white font-semibold shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-200 ease-in-out flex-grow sm:flex-none"
-                    >
-                        <i class="fas fa-redo-alt mr-2"></i>{{ translate('start_over') }}
-                    </button>
+                     <!-- Action Buttons Row -->
+                    <div v-if="isInfoCollected || generatedReport" class="flex gap-2 justify-center pb-2">
+                        <button
+                            v-if="isInfoCollected && !generatedReport"
+                            @click="generateReport"
+                            class="px-5 py-2 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all text-sm flex items-center gap-2"
+                            :disabled="isGenerating"
+                        >
+                            <i class="fas fa-magic"></i>
+                            <span v-if="!isGenerating">{{ translate('generate_report') }}</span>
+                            <span v-else>Processing...</span>
+                        </button>
+                        <button v-if="isInfoCollected" @click="resetChat" class="px-5 py-2 rounded-full bg-white border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-all text-sm flex items-center gap-2">
+                            <i class="fas fa-redo-alt"></i> {{ translate('start_over') }}
+                        </button>
+                    </div>
+
+                    <!-- Conditional Input Area -->
+                    <div v-if="!isInfoCollected && !generatedReport">
+                        <!-- Photo Upload UI -->
+                        <div v-if="isPhotoUploadStep" class="flex flex-col gap-3">
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <input type="file" ref="fileInput" @change="handleFileChange" class="hidden" accept="image/*" multiple>
+                                <button @click="() => fileInput.click()" class="flex-1 px-4 py-3 text-sm font-semibold text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors flex items-center justify-center gap-2">
+                                    <i class="fas fa-upload"></i> {{ translate('upload_photo') }}
+                                </button>
+                                <button @click="capturePhoto" class="flex-1 px-4 py-3 text-sm font-semibold text-purple-600 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors flex items-center justify-center gap-2">
+                                    <i class="fas fa-camera"></i> {{ translate('capture_photo') }}
+                                </button>
+                            </div>
+                            <button @click="advanceConversation" class="w-full px-4 py-3 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 shadow-sm">
+                                {{ translate('continue_step') }} <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+    
+                        <!-- Standard Text Input UI -->
+                        <div v-else class="relative flex items-center">
+                            <input
+                                ref="inputBox"
+                                v-model="userMessage"
+                                type="text"
+                                @keyup.enter="handleInput"
+                                class="w-full pl-5 pr-14 py-4 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm text-gray-700 placeholder-gray-400 bg-gray-50 transition-all"
+                                :placeholder="editingStep !== null ? translate('edit_placeholder') : translate('input_placeholder')"
+                                :disabled="isLoading || isGenerating"
+                            >
+                            <button
+                                @click="handleInput"
+                                class="absolute right-2 p-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+                                :disabled="isLoading || isGenerating || !userMessage.trim()"
+                            >
+                               <i :class="editingStep !== null ? 'fas fa-check' : 'fas fa-paper-plane'" class="text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         
-        <!-- Footer -->
-        <footer class="mt-auto text-center text-gray-500 text-sm py-4">
-            Made by uzair b2b services
-        </footer>
-
         <script>
-            const { createApp, ref, computed, nextTick } = Vue;
+            const { createApp, ref, computed, nextTick, onMounted } = Vue;
 
             const languages = {
-                en: { name: 'English', questions: ["What is your full name?", "What is your contact information and address? ", "What is the full name and address of the person you are complaining against? If you don't know their name, please provide a description.", "What is the date and time of the incident?", "Where did the incident take place?", "Were there any witnesses? If so, please provide their names and contact information.", "Please describe the incident in detail, including what happened and what specific crime you believe was committed (e.g., theft, harassment, assault, fraud).", "Is there any other information you would like to include?"],
-                    app_title: 'Legal Complaint AI', tagline: 'Use this AI to draft a formal complaint for police. We will ask you a few questions to gather details.', disclaimer: 'Disclaimer: This is a drafting tool and does not constitute legal advice. Please use this document as a template and consult with legal authorities.',
-                    chat_language: 'Chat Language', report_language: 'Report Language', initial_message: 'Hello. I am here to help you. What is your full name?', generating_report: 'Generating report...', generated_report_title: 'Generated Complaint Report:', input_placeholder: 'Type your message...', send: 'Send', download_pdf: 'Download PDF', report_ready: 'Your information has been collected. You can now generate the report.', generate_report: 'Generate Report', start_over: 'Start Over', report_error: 'I am sorry, I could not generate the report. Please try again.', api_error: 'An error occurred. Please try again.', download_success: 'Complaint report downloaded as PDF!'
+                en: { 
+                    name: 'English', 
+                    questions: [
+                        { key: 'name', text: "What is your full name?" },
+                        { key: 'contact', text: "What is your contact information (Phone & Address)?" },
+                        { key: 'recipient', text: "Who are you addressing this complaint to? (e.g., Station House Officer, College Principal, HR Manager)" },
+                        { key: 'subject', text: "What is the specific Subject or Nature of your complaint? (e.g., Theft of Mobile Phone, Workplace Harassment)" },
+                        { key: 'accused', text: "What is the full name and address of the person(s) you are complaining against? If unknown, provide a description." },
+                        { key: 'date', text: "What was the Date and Time of the incident?" },
+                        { key: 'place', text: "Where specifically did the incident take place?" },
+                        { key: 'witnesses', text: "Were there any witnesses? If yes, please provide their names and contact details." },
+                        { key: 'details', text: "Please describe the incident in chronological detail. What exactly happened?" },
+                        { key: 'evidenceDescription', text: "Please describe any evidence you have (e.g., Screenshots, Documents). You can upload photos in the next step." },
+                        { key: 'photoEvidence', text: "You can now upload or capture photos as evidence. Add as many as you need, then click 'Continue'. You can also click 'Continue' to skip this step." },
+                        { key: 'relief', text: "What specific action or relief are you requesting from the authorities? (e.g., Register FIR, take disciplinary action)" },
+                        { key: 'additionalInfo', text: "Is there any other information you would like to add?" }
+                    ],
+                    app_title: 'Legal Complaint Assistant', 
+                    tagline: 'AI-drafting for Police, HR, or Institutional complaints.', 
+                    disclaimer: 'Disclaimer: This tool drafts complaints based on your inputs. It is not legal advice. Consult a lawyer for serious matters.',
+                    initial_message: 'Hello. I can help you draft a formal legal complaint. To begin, what is your full name?',
+                    generating_report: 'Drafting your document...', 
+                    generated_report_title: 'Final Draft:', 
+                    input_placeholder: 'Type your answer here...',
+                    edit_placeholder: 'Enter your updated answer...',
+                    report_ready: 'All details collected. Ready to draft?', 
+                    generate_report: 'Draft Complaint', 
+                    start_over: 'New Complaint',
+                    upload_photo: 'Upload Photo',
+                    capture_photo: 'Capture Photo',
+                    continue_step: 'Continue',
+                    photo_description_prompt: 'Please enter a brief description for this photo:',
+                    photo_upload_success: 'Photo added successfully!',
+                    edit_success: 'Answer updated!',
+                    report_error: 'Could not generate report. Please try again.', 
+                    api_error: 'Connection error. Please try again.', 
+                    download_success: 'Document downloaded successfully!'
                 },
-                hi: { name: 'हिन्दी', questions: ["आपका पूरा नाम क्या है?", "आपकी संपर्क जानकारी और पता क्या है?", "जिस व्यक्ति के खिलाफ आप शिकायत कर रहे हैं उसका पूरा नाम और पता क्या है? यदि आप उनका नाम नहीं जानते हैं, तो कृपया एक विवरण प्रदान करें।", "घटना की तारीख और समय क्या है?", "घटना कहाँ हुई?", "क्या कोई गवाह थे? यदि हाँ, तो कृपया उनके नाम और संपर्क जानकारी प्रदान करें।", "कृपया घटना का विस्तार से वर्णन करें, जिसमें क्या हुआ और आपके अनुसार कौन सा विशिष्ट अपराध किया गया (जैसे, चोरी, उत्पीड़न, हमला, धोखाधड़ी)।", "क्या आप कोई अन्य जानकारी शामिल करना चाहेंगे?"],
-                    app_title: 'कानूनी शिकायत AI', tagline: 'पुलिस के लिए एक औपचारिक शिकायत का मसौदा तैयार करने के लिए इस AI का उपयोग करें। हम आपसे कुछ विवरण इकट्ठा करने के लिए कुछ प्रश्न पूछेंगे।', disclaimer: 'अस्वीकरण: यह एक मसौदा तैयार करने का उपकरण है और कानूनी सलाह नहीं है। कृपया इस दस्तावेज़ को एक टेम्पलेट के रूप में उपयोग करें और कानूनी अधिकारियों से परामर्श करें।',
-                    chat_language: 'चैट भाषा', report_language: 'रिपोर्ट भाषा', initial_message: 'नमस्ते। मैं आपकी मदद करने के लिए यहाँ हूँ। आपका पूरा नाम क्या है?', generating_report: 'रिपोर्ट तैयार हो रही है...', generated_report_title: 'तैयार की गई शिकायत रिपोर्ट:', input_placeholder: 'अपना संदेश टाइप करें...', send: 'भेजें', download_pdf: 'पीडीएफ डाउनलोड करें', report_ready: 'आपकी जानकारी एकत्र कर ली गई है। अब आप रिपोर्ट बना सकते हैं।', generate_report: 'रिपोर्ट बनाएं', start_over: 'नए सिरे से शुरू करें', report_error: 'क्षमा करें, मैं रिपोर्ट तैयार नहीं कर सका। कृपया पुनः प्रयास करें।', api_error: 'एक त्रुटि हुई। कृपया पुनः प्रयास करें।', download_success: 'शिकायत रिपोर्ट पीडीएफ के रूप में डाउनलोड की गई!'
+                hi: {
+                    name: 'हिन्दी',
+                    questions: [
+                        { key: 'name', text: "आपका पूरा नाम क्या है?" },
+                        { key: 'contact', text: "आपकी संपर्क जानकारी और पता क्या है?" },
+                        { key: 'recipient', text: "आप यह शिकायत किसे संबोधित कर रहे हैं? (e.g., Station House Officer, College Principal, HR Manager)" },
+                        { key: 'subject', text: "आपकी शिकायत का मुख्य विषय क्या है?" },
+                        { key: 'accused', text: "जिस व्यक्ति के खिलाफ आप शिकायत कर रहे हैं उसका नाम और पता क्या है?" },
+                        { key: 'date', text: "घटना की तारीख और समय क्या था?" },
+                        { key: 'place', text: "घटना ठीक कहाँ हुई?" },
+                        { key: 'witnesses', text: "क्या कोई गवाह थे? यदि हाँ, तो उनके नाम दें।" },
+                        { key: 'details', text: "कृपया घटना का विस्तार से वर्णन करें।" },
+                        { key: 'evidenceDescription', text: "कृपया किसी भी सबूत का वर्णन करें। आप अगले चरण में तस्वीरें अपलोड कर सकते हैं।" },
+                        { key: 'photoEvidence', text: "अब आप सबूत के तौर पर तस्वीरें अपलोड या कैप्चर कर सकते हैं। अपनी आवश्यकतानुसार फ़ोटो जोड़ें, फिर 'जारी रखें' पर क्लिक करें। आप इस चरण को छोड़ने के लिए भी 'जारी रखें' पर क्लिक कर सकते हैं।" },
+                        { key: 'relief', text: "आप अधिकारियों से क्या विशिष्ट कार्रवाई चाहते हैं?" },
+                        { key: 'additionalInfo', text: "क्या आप कोई अन्य जानकारी जोड़ना चाहेंगे?" }
+                    ],
+                    app_title: 'कानूनी शिकायत सहायक',
+                    tagline: 'पुलिस या संस्थागत शिकायतों के लिए पेशेवर एआई ड्राफ्टिंग।',
+                    disclaimer: 'अस्वीकरण: यह टूल आपके इनपुट के आधार पर ड्राफ्ट बनाता है। यह कानूनी सलाह नहीं है।',
+                    initial_message: 'नमस्ते। मैं आपकी औपचारिक शिकायत लिखने में मदद कर सकता हूँ। आपका पूरा नाम क्या है?',
+                    generating_report: 'दस्तावेज़ तैयार हो रहा है...',
+                    generated_report_title: 'अंतिम ड्राफ्ट:',
+                    input_placeholder: 'अपना उत्तर यहाँ लिखें...',
+                    edit_placeholder: 'अपना अपडेट किया हुआ उत्तर दर्ज करें...',
+                    report_ready: 'सभी जानकारी एकत्र कर ली गई है। ड्राफ्ट बनाएं?',
+                    generate_report: 'शिकायत ड्राफ्ट करें',
+                    start_over: 'नई शिकायत',
+                    upload_photo: 'फोटो अपलोड करें',
+                    capture_photo: 'फोटो खींचे',
+                    continue_step: 'जारी रखें',
+                    photo_description_prompt: 'कृपया इस तस्वीर के लिए एक संक्षिप्त विवरण दर्ज करें:',
+                    photo_upload_success: 'फोटो सफलतापूर्वक जोड़ा गया!',
+                    edit_success: 'उत्तर अपडेट हो गया!',
+                    report_error: 'रिपोर्ट तैयार नहीं हो सकी।',
+                    api_error: 'कनेक्शन त्रुटि।',
+                    download_success: 'दस्तावेज़ डाउनलोड हो गया!'
                 },
-                bn: { name: 'বাংলা', questions: ["আপনার পুরো নাম কি?", "আপনার যোগাযোগের তথ্য এবং ঠিকানা কি?", "আপনি যার বিরুদ্ধে অভিযোগ করছেন তার পুরো নাম এবং ঠিকানা কি? যদি আপনি তাদের নাম না জানেন, তাহলে একটি বিবরণ দিন।", "ঘটনার তারিখ এবং সময় কি ছিল?", "ঘটনাটি কোথায় ঘটেছিল?", "কোনো সাক্ষী ছিল কি? যদি থাকে, তাহলে তাদের নাম এবং যোগাযোগের তথ্য দিন।", "দয়া করে ঘটনার বিস্তারিত বিবরণ দিন, কী ঘটেছিল এবং আপনি কী নির্দিষ্ট অপরাধ হয়েছে বলে মনে করেন (যেমন, চুরি, হয়রানি, হামলা, জালিয়াতি)।", "আপনি অন্য কোনো তথ্য যোগ করতে চান?"],
-                    app_title: 'আইনি অভিযোগ এআই', tagline: 'পুলিশের জন্য একটি আনুষ্ঠানিক অভিযোগের খসড়া তৈরি করতে এই এআই ব্যবহার করুন। আমরা আপনাকে কিছু প্রশ্ন করব বিস্তারিত তথ্য সংগ্রহের জন্য।', disclaimer: 'অস্বীকৃতি: এটি একটি খসড়া তৈরির সরঞ্জাম এবং আইনি পরামর্শ নয়। দয়া করে এই নথিটিকে একটি টেমপ্লেট হিসাবে ব্যবহার করুন এবং আইনি কর্তৃপক্ষের সাথে পরামর্শ করুন।',
-                    chat_language: 'চ্যাট ভাষা', report_language: 'রিপোর্ট ভাষা', initial_message: 'নমস্কার। আমি আপনাকে সাহায্য করতে এখানে আছি। আপনার পুরো নাম কি?', generating_report: 'রিপোর্ট তৈরি হচ্ছে...', generated_report_title: 'তৈরি করা অভিযোগ প্রতিবেদন:', input_placeholder: 'আপনার বার্তা টাইপ করুন...', send: 'পাঠান', download_pdf: 'পিডিএফ ডাউনলোড করুন', report_ready: 'আপনার তথ্য সংগ্রহ করা হয়েছে। আপনি এখন রিপোর্ট তৈরি করতে পারেন।', generate_report: 'রিপোর্ট তৈরি করুন', start_over: 'নতুন করে শুরু করুন', report_error: 'দুঃখিত, আমি প্রতিবেদন তৈরি করতে পারিনি। দয়া করে আবার চেষ্টা করুন।', api_error: 'একটি ত্রুটি ঘটেছে। দয়া করে আবার চেষ্টা করুন।', download_success: 'অভিযোগ প্রতিবেদন পিডিএফ হিসেবে ডাউনলোড হয়েছে!'
-                },
-                te: { name: 'తెలుగు', questions: ["మీ పూర్తి పేరు ఏమిటి?", "మీ సంప్రదింపు సమాచారం మరియు చిరునామా ఏమిటి?", "మీరు ఎవరిపై ఫిర్యాదు చేస్తున్నారో వారి పూర్తి పేరు మరియు చిరునామా ఏమిటి? వారి పేరు మీకు తెలియకపోతే, దయచేసి ఒక వివరణను అందించండి.", "సంఘటన జరిగిన తేదీ మరియు సమయం ఏమిటి?", "సంఘటన ఎక్కడ జరిగింది?", "ఏమైనా సాక్షులు ఉన్నారా? ఉంటే, దయచేసి వారి పేర్లు మరియు సంప్రదింపు సమాచారాన్ని అందించండి.", "దయచేసి సంఘటన గురించి వివరంగా వివరించండి, ఏమి జరిగింది మరియు మీరు ఏ నిర్దిష్ట నేరం జరిగిందని నమ్ముతున్నారు (ఉదాహరణకు, దొంగతనం, వేధింపులు, దాడి, మోసం).", "మీరు చేర్చాలనుకుంటున్న ఇతర సమాచారం ఏదైనా ఉందా?"],
-                    app_title: 'చట్టపరమైన ఫిర్యాదు AI', tagline: 'పోలీసుల కోసం ఒక అధికారిక ఫిర్యాదును రూపొందించడానికి ఈ AIని ఉపయోగించండి. మేము వివరాలను సేకరించడానికి మీకు కొన్ని ప్రశ్నలు అడుగుతాము.', disclaimer: 'నిరాకరణ: ఇది ఒక ముసాయిదా సాధనం మరియు చట్టపరమైన సలహా కాదు. దయచేసి ఈ పత్రాన్ని ఒక టెంప్లేట్‌గా ఉపయోగించి చట్టపరమైన అధికారులతో సంప్రదించండి.',
-                    chat_language: 'చాట్ భాష', report_language: 'రిపోర్ట్ భాష', initial_message: 'నమస్కారం. మీకు సహాయం చేయడానికి నేను ఇక్కడ ఉన్నాను. మీ పూర్తి పేరు ఏమిటి?', generating_report: 'రిపోర్ట్ రూపొందించబడుతోంది...', generated_report_title: 'రచించిన ఫిర్యాదు నివేదిక:', input_placeholder: 'మీ సందేశాన్ని టైప్ చేయండి...', send: 'పంపండి', download_pdf: 'పీడీఎఫ్ డౌన్లోడ్ చేయండి', report_ready: 'మీ సమాచారం సేకరించబడింది. ఇప్పుడు మీరు నివేదికను రూపొందించవచ్చు.', generate_report: 'నివేదిక రూపొందించండి', start_over: 'మళ్లీ ప్రారంభించండి', report_error: 'క్షమించండి, నేను నివేదికను రూపొందించలేకపోయాను. దయచేసి మళ్ళీ ప్రయత్నించండి.', api_error: 'ఒక లోపం సంభవించింది. దయచేసి మళ్లీ ప్రయత్నించండి.', download_success: 'ఫిర్యాదు నివేదిక PDF గా డౌన్‌లోడ్ చేయబడింది!'
-                },
-                mr: { name: 'मराठी', questions: ["तुमचे पूर्ण नाव काय आहे?", "तुमची संपर्क माहिती आणि पत्ता काय आहे?", "ज्या व्यक्तीविरुद्ध तुम्ही तक्रार करत आहात त्याचे पूर्ण नाव आणि पत्ता काय आहे? जर तुम्हाला त्यांचे नाव माहित नसेल, तर कृपया एक वर्णन द्या.", "घटनेची तारीख आणि वेळ काय आहे?", "घटना कोठे घडली?", "घटनेचे साक्षीदार होते का? असल्यास, कृपया त्यांचे नाव आणि संपर्क माहिती द्या.", "कृपया घटनेचे सविस्तर वर्णन करा, काय घडले आणि तुमच्या मते कोणता विशिष्ट गुन्हा घडला (उदा. चोरी, छळ, हल्ला, फसवणूक).", "तुम्ही आणखी काही माहिती समाविष्ट करू इच्छिता?"],
-                    app_title: 'कायदेशीर तक्रार AI', tagline: 'पोलिसांसाठी एक औपचारिक तक्रार तयार करण्यासाठी या AI चा वापर करा. आम्ही तुम्हाला तपशील गोळा करण्यासाठी काही प्रश्न विचारू.', disclaimer: 'अस्वीकरण: हे एक मसुदा साधन आहे आणि कायदेशीर सल्ला नाही. कृपया या दस्तऐवजाचा एक टेम्पलेट म्हणून वापर करा आणि कायदेशीर अधिकाऱ्यांशी सल्लामसलत करा.',
-                    chat_language: 'चॅट भाषा', report_language: 'रिपोर्ट भाषा', initial_message: 'नमस्कार. मी तुमची मदत करण्यासाठी येथे आहे. तुमचे पूर्ण नाव काय आहे?', generating_report: 'अहवाल तयार होत आहे...', generated_report_title: 'तयार केलेला तक्रार अहवाल:', input_placeholder: 'तुमचा संदेश टाइप करा...', send: 'पाठवा', download_pdf: 'पीडीएफ डाउनलोड करा', report_ready: 'तुमची माहिती गोळा झाली आहे. आता तुम्ही अहवाल तयार करू शकता.', generate_report: 'अहवाल तयार करा', start_over: 'पुन्हा सुरू करा', report_error: 'माफ करा, मी अहवाल तयार करू शकलो नाही. कृपया पुन्हा प्रयत्न करा.', api_error: 'एक त्रुटी आली. कृपया पुन्हा प्रयत्न करा.', download_success: 'तक्रार अहवाल पीडीएफ म्हणून डाउनलोड झाला आहे!'
-                },
-                ta: { name: 'தமிழ்', questions: ["உங்கள் முழுப் பெயர் என்ன?", "உங்கள் தொடர்புத் தகவல் மற்றும் முகவரி என்ன?", "நீங்கள் யாருக்கு எதிராகப் புகார் அளிக்கிறீர்களோ, அவர்களின் முழுப் பெயர் மற்றும் முகவரி என்ன? அவர்களின் பெயர் உங்களுக்குத் தெரியாவிட்டால், தயவுசெய்து ஒரு விளக்கத்தை வழங்கவும்.", "சம்பவத்தின் தேதி மற்றும் நேரம் என்ன?", "சம்பவம் எங்கு நடந்தது?", "ஏதேனும் சாட்சிகள் இருந்தார்களா? அப்படியானால், தயவுசெய்து அவர்களின் பெயர்கள் மற்றும் தொடர்புத் தகவலை வழங்கவும்.", "சம்பவம் பற்றிய விரிவான விளக்கத்தை வழங்கவும், என்ன நடந்தது மற்றும் நீங்கள் என்ன குறிப்பிட்ட குற்றம் நடந்ததாக நம்புகிறீர்கள் (உதாரணமாக, திருட்டு, துன்புறுத்தல், தாக்குதல், மோசடி).", "நீங்கள் வேறு ஏதேனும் தகவலைச் சேர்க்க விரும்புகிறீர்களா?"],
-                    app_title: 'சட்டப் புகார் AI', tagline: 'காவல்துறைக்கு ஒரு முறையான புகாரை உருவாக்க இந்த AI-ஐப் பயன்படுத்தவும். விவரங்களைச் சேகரிக்க நாங்கள் உங்களிடம் சில கேள்விகளைக் கேட்போம்.', disclaimer: 'பொறுப்புத் துறப்பு: இது ஒரு வரைவு கருவி மற்றும் சட்ட ஆலோசனை அல்ல. தயவுசெய்து இந்த ஆவணத்தை ஒரு டெம்ப்ளேட்டாகப் பயன்படுத்தவும் மற்றும் சட்ட அதிகாரிகளுடன் கலந்தாலோசிக்கவும்.',
-                    chat_language: 'பேச்சு மொழி', report_language: 'அறிக்கை மொழி', initial_message: 'வணக்கம். நான் உங்களுக்கு உதவ இங்குள்ளேன். உங்கள் முழுப் பெயர் என்ன?', generating_report: 'அறிக்கை உருவாக்கப்படுகிறது...', generated_report_title: 'உருவாக்கப்பட்ட புகார் அறிக்கை:', input_placeholder: 'உங்கள் செய்தியை உள்ளிடவும்...', send: 'அனுப்பு', download_pdf: 'PDF பதிவிறக்கு', report_ready: 'உங்கள் தகவல் சேகரிக்கப்பட்டது. இப்போது நீங்கள் அறிக்கையை உருவாக்கலாம்.', generate_report: 'அறிக்கை உருவாக்கு', start_over: 'புதியதாக தொடங்கு', report_error: 'மன்னிக்கவும், நான் அறிக்கையை உருவாக்க முடியவில்லை. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.', api_error: 'ஒரு பிழை ஏற்பட்டது. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.', download_success: 'புகார் அறிக்கை PDF ஆக பதிவிறக்கப்பட்டது!'
-                }
             };
 
             const { jsPDF } = window.jspdf;
@@ -229,217 +374,296 @@
                     const isGenerating = ref(false);
                     const message = ref(null);
                     const chatWindow = ref(null);
+                    const inputBox = ref(null);
+                    const fileInput = ref(null);
                     const generatedReport = ref('');
                     const chatLanguage = ref('en');
                     const isInfoCollected = ref(false);
-
-                    // State to track conversation flow
                     const conversationState = ref(0);
                     const complaintData = ref({});
-                    
+                    const editingStep = ref(null);
+                    const incidentPhotos = ref([]);
+
                     const questions = computed(() => languages[chatLanguage.value]?.questions || languages['en'].questions);
+                    const photoStepIndex = computed(() => questions.value.findIndex(q => q.key === 'photoEvidence'));
+                    const isPhotoUploadStep = computed(() => conversationState.value === photoStepIndex.value);
+                    const initialMessage = computed(() => ({ text: translate('initial_message') }));
+
+                    const progressPercentage = computed(() => {
+                        if (isInfoCollected.value) return 100;
+                        return Math.min((conversationState.value / questions.value.length) * 100, 100);
+                    });
                     
-                    // API keys and URLs
-                    const apiKey = "AIzaSyAnNvD7X0VglyIvT9rvwQKXmth0s1I0ZLM";
-                    const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-                    
-                    const addMessage = (text, sender) => {
-                        chatHistory.value.push({ text, sender });
+                    const scrollToBottom = () => {
                         nextTick(() => {
-                            chatWindow.value.scrollTop = chatWindow.value.scrollHeight;
+                            if (chatWindow.value) {
+                                chatWindow.value.scrollTop = chatWindow.value.scrollHeight;
+                            }
                         });
                     };
 
-                    const translate = (key) => {
-                        return languages[chatLanguage.value]?.[key] || languages['en'][key];
+                    const addMessage = (text, sender, step = null) => {
+                        const message = { text, sender, step };
+                        if (sender === 'user') {
+                            chatHistory.value.push(message);
+                        } else {
+                            isLoading.value = true;
+                            setTimeout(() => {
+                                chatHistory.value.push(message);
+                                isLoading.value = false;
+                                scrollToBottom();
+                            }, 500);
+                        }
+                        scrollToBottom();
                     };
-
+                    
+                    const translate = (key) => languages[chatLanguage.value]?.[key] || languages['en'][key];
                     const showMessage = (text, type = 'info') => {
                         message.value = { text, type };
-                        setTimeout(() => {
-                            message.value = null;
-                        }, 3000);
-                    };
-
-                    const fetchWithBackoff = async (url, payload, retries = 5, delay = 1000) => {
-                        try {
-                            const response = await fetch(url, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(payload)
-                            });
-
-                            if (!response.ok) {
-                                if (response.status === 429 && retries > 0) {
-                                    await new Promise(res => setTimeout(res, delay));
-                                    return fetchWithBackoff(url, payload, retries - 1, delay * 2);
-                                } else {
-                                    throw new Error(`API error: ${response.statusText}`);
-                                }
-                            }
-
-                            return await response.json();
-                        } catch (error) {
-                            throw error;
-                        }
+                        setTimeout(() => { message.value = null; }, 3000);
                     };
 
                     const handleInput = async () => {
                         const userText = userMessage.value.trim();
-                        if (!userText || isLoading.value || isGenerating.value || isInfoCollected.value) return;
+                        if (isLoading.value || isGenerating.value) return;
 
-                        addMessage(userText, 'user');
-                        userMessage.value = '';
-                        
-                        if (conversationState.value < questions.value.length) {
-                            collectInfo(userText);
+                        if (editingStep.value !== null) {
+                            if (!userText) return;
+                            updateAnswer(userText);
+                            return;
                         }
+                        
+                        if (!userText) return;
+                        addMessage(userText, 'user', conversationState.value);
+                        userMessage.value = '';
+                        collectInfo(userText);
                     };
 
                     const collectInfo = (text) => {
-                        const step = conversationState.value;
-                        
-                        switch(step) {
-                            case 0:
-                                complaintData.value.name = text;
-                                break;
-                            case 1:
-                                complaintData.value.contact = text;
-                                break;
-                            case 2:
-                                complaintData.value.accused = text;
-                                break;
-                            case 3:
-                                complaintData.value.date = text;
-                                break;
-                            case 4:
-                                complaintData.value.place = text;
-                                break;
-                            case 5:
-                                complaintData.value.witnesses = text;
-                                break;
-                            case 6:
-                                complaintData.value.details = text;
-                                break;
-                            case 7:
-                                complaintData.value.additionalInfo = text;
-                                break;
-                        }
-                        
+                        const currentQuestion = questions.value[conversationState.value];
+                        complaintData.value[currentQuestion.key] = text;
+                        advanceConversation();
+                    };
+                    
+                    const advanceConversation = () => {
                         conversationState.value++;
                         if (conversationState.value < questions.value.length) {
-                            addMessage(questions.value[conversationState.value], 'ai');
+                            addMessage(questions.value[conversationState.value].text, 'ai');
                         } else {
                             isInfoCollected.value = true;
                             addMessage(translate('report_ready'), 'ai');
+                        }
+                    };
+                    
+                    const startEdit = (step) => {
+                        editingStep.value = step;
+                        userMessage.value = complaintData.value[questions.value[step].key];
+                        nextTick(() => inputBox.value.focus());
+                    };
+
+                    const updateAnswer = (newText) => {
+                        const step = editingStep.value;
+                        const questionKey = questions.value[step].key;
+                        complaintData.value[questionKey] = newText;
+                        
+                        const msgIndex = chatHistory.value.findIndex(m => m.step === step && m.sender === 'user');
+                        if (msgIndex > -1) {
+                            chatHistory.value[msgIndex].text = newText;
+                        }
+                        
+                        userMessage.value = '';
+                        editingStep.value = null;
+                        showMessage(translate('edit_success'), 'success');
+                    };
+                    
+                    const handleFileChange = (event) => {
+                        const files = event.target.files;
+                        if (!files) return;
+                        for (const file of files) {
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                const description = prompt(translate('photo_description_prompt'));
+                                incidentPhotos.value.push({ id: Date.now(), base64: e.target.result, description: description || "No description" });
+                                showMessage(translate('photo_upload_success'), 'success');
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                        fileInput.value.value = ''; // Reset for same file selection
+                    };
+
+                    const capturePhoto = async () => {
+                        try {
+                            const photo = await puter.camera.getPicture({ format: 'base64' });
+                            if (photo) {
+                                const description = prompt(translate('photo_description_prompt'));
+                                const base64Image = `data:image/jpeg;base64,${photo}`;
+                                incidentPhotos.value.push({ id: Date.now(), base64: base64Image, description: description || "Captured photo" });
+                                showMessage(translate('photo_upload_success'), 'success');
+                            }
+                        } catch(e) {
+                            console.error("Camera error:", e);
+                            showMessage("Could not access camera.", "error");
+                        }
+                    };
+                    
+                    const removePhoto = (id) => {
+                        incidentPhotos.value = incidentPhotos.value.filter(p => p.id !== id);
+                    };
+
+                    const speak = (text) => {
+                        if ('speechSynthesis' in window) {
+                            speechSynthesis.cancel(); // Stop any previous speech
+                            const utterance = new SpeechSynthesisUtterance(text);
+                            utterance.lang = chatLanguage.value === 'hi' ? 'hi-IN' : 'en-US';
+                            speechSynthesis.speak(utterance);
+                        } else {
+                            showMessage('Text-to-speech is not supported in your browser.', 'error');
                         }
                     };
 
                     const generateReport = async () => {
                         isGenerating.value = true;
                         
-                        const prompt = `Based on the following information, draft a formal and respectful complaint letter for a police station in English, following the format of an Indian police complaint (FIR) as shown in the provided visual example.
+                        const photoDescriptions = incidentPhotos.value.map((p, i) => `  - Photo ${i+1}: ${p.description}`).join('\n');
+                        const evidenceText = `${complaintData.value.evidenceDescription || 'N/A'}\n${photoDescriptions ? `Photographic Evidence:\n${photoDescriptions}` : ''}`;
+                        
+                        const prompt = `Based on the following information, draft a comprehensive, formal, and legally sound complaint letter.
 
-Ensure the report includes the following sections, using clear and professional language:
-1.  **To:** Start with "To," followed by "The Police Station" and the full address.
-2.  **Subject:** A concise, bolded subject line that states the purpose of the complaint.
-3.  **Salutation:** "Respected Sir/Madam,"
-4.  **Body:**
-    * **Introduction:** State your name and purpose for writing the letter.
-    * **Incident Details:** A detailed, chronological description of the incident, including date, time, location, and the individuals involved.
-    * **Constitutional Violation:** A single paragraph that explains how the incident violates a fundamental right guaranteed by the Constitution of India, referencing a relevant article such as Article 21 (Right to Life and Personal Liberty) or others as appropriate.
-    * **Legal Framework:** Based on the incident description, identify and mention the relevant sections of the Indian Penal Code (IPC) or other applicable Indian laws. Mention that these are potential sections and the police will determine the final charges.
-    * **Witnesses & Additional Information:** Include details about witnesses and any other information provided by the complainant.
-5.  **Request for Action:** A formal request to the police to register the complaint as an First Information Report (FIR) and take necessary action.
-6.  **Closing:** "Thanking You," followed by "Yours faithfully,".
-7.  **Complainant Details:** The complainant's name, contact, and address.
-8.  **Disclaimer:** A final sentence stating: "This document is for drafting purposes and does not constitute legal advice."
+**Data provided by user:**
+* Recipient: ${complaintData.value.recipient}
+* Subject: ${complaintData.value.subject}
+* Complainant: ${complaintData.value.name}
+* Contact: ${complaintData.value.contact}
+* Accused: ${complaintData.value.accused}
+* Date: ${complaintData.value.date}
+* Place: ${complaintData.value.place}
+* Witnesses: ${complaintData.value.witnesses}
+* Details: ${complaintData.value.details}
+* Evidence Description: ${evidenceText.trim()}
+* Relief Sought: ${complaintData.value.relief}
+* Additional: ${complaintData.value.additionalInfo}
 
-Incorporate all the details provided below. Do not include any placeholder text.
-
-**Complainant's Name:** ${complaintData.value.name}
-**Contact & Address:** ${complaintData.value.contact}
-**Accused:** ${complaintData.value.accused}
-**Date & Time of Incident:** ${complaintData.value.date}
-**Place of Incident:** ${complaintData.value.place}
-**Witnesses:** ${complaintData.value.witnesses}
-**Incident Details:** ${complaintData.value.details}
-**Additional Information:** ${complaintData.value.additionalInfo || 'None'}
-
-Ensure the response is a single block of text suitable for a formal document, with appropriate line breaks and spacing to make it readable. Do not format it as JSON or any other structured data format.`;
+**Instructions:**
+1. Structure the letter professionally with Recipient, Date, Subject, Salutation, Body paragraphs detailing the incident, a section for Prayer/Relief, and a closing with the complainant's details. Ensure the tone is formal.
+2. After the main body, add a new section titled "Suggested Legal Actions (as per Indian Law)".
+3. In this new section, based on the complaint's subject and details, suggest potential legal actions and cite relevant sections of the Indian Penal Code (IPC) or other applicable Indian laws (e.g., IT Act for cybercrime, etc.).
+4. Output strictly plain text formatted for a document.`;
                         
                         try {
-                            const payload = { contents: [{ parts: [{ text: prompt }] }] };
-                            const result = await fetchWithBackoff(geminiApiUrl, payload);
-                            const aiResponse = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-                            
-                            if (aiResponse) {
-                                generatedReport.value = aiResponse.trim();
-                            } else {
-                                addMessage(translate('report_error'), 'ai');
-                            }
+                            const response = await puter.ai.chat(prompt);
+                            const text = (response && response.message && response.message.content) ? response.message.content : String(response);
+                            generatedReport.value = text.trim();
                         } catch (error) {
-                            console.error(error);
+                            console.error("Puter AI Error:", error);
                             addMessage(translate('api_error'), 'ai');
                         } finally {
                             isGenerating.value = false;
                         }
                     };
                     
-                    const downloadPDF = () => {
-                        const doc = new jsPDF();
-                        const text = generatedReport.value;
-                        const lines = doc.splitTextToSize(text, 180);
-                        
-                        doc.setFont("helvetica", "normal");
+                    const downloadPDF = async () => {
+                        const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+                        doc.setFont("times", "roman");
                         doc.setFontSize(12);
                         
-                        let y = 20;
-                        
-                        lines.forEach(line => {
-                            if (y > 280) {
-                                doc.addPage();
-                                y = 20;
-                            }
-                            doc.text(line, 15, y);
-                            y += 7;
-                        });
+                        const margin = 20;
+                        const pageWidth = doc.internal.pageSize.getWidth();
+                        const pageHeight = doc.internal.pageSize.getHeight();
+                        const maxLineWidth = pageWidth - (margin * 2);
+                        let y = margin;
 
-                        doc.save("police_complaint_report.pdf");
-                        showMessage(translate('download_success'), 'info');
+                        const addText = (text) => {
+                            const lines = doc.splitTextToSize(text, maxLineWidth);
+                            lines.forEach(line => {
+                                if (y > pageHeight - margin) {
+                                    doc.addPage();
+                                    y = margin;
+                                }
+                                doc.text(line, margin, y);
+                                y += 7; // Line height
+                            });
+                        };
+                        
+                        addText(generatedReport.value);
+
+                        if (incidentPhotos.value.length > 0) {
+                            doc.addPage();
+                            y = margin;
+                            doc.setFont("helvetica", "bold");
+                            doc.text("Appendix: Photographic Evidence", margin, y);
+                            y += 10;
+                            doc.setFont("times", "roman");
+
+                            for (const photo of incidentPhotos.value) {
+                                const img = new Image();
+                                img.src = photo.base64;
+                                await new Promise(resolve => img.onload = resolve);
+                                
+                                let imgWidth = img.width;
+                                let imgHeight = img.height;
+                                const ratio = imgWidth / imgHeight;
+
+                                if (imgWidth > maxLineWidth) {
+                                    imgWidth = maxLineWidth;
+                                    imgHeight = imgWidth / ratio;
+                                }
+
+                                const textLines = doc.splitTextToSize(photo.description || 'No description.', maxLineWidth);
+                                const textHeight = textLines.length * 7;
+                                const requiredSpace = imgHeight + textHeight + 10;
+                                
+                                if (y + requiredSpace > pageHeight - margin) {
+                                    doc.addPage();
+                                    y = margin;
+                                }
+
+                                const imgData = photo.base64;
+                                // Extracts 'jpeg' or 'png' from 'data:image/jpeg;base64'
+                                const format = imgData.substring(imgData.indexOf('/') + 1, imgData.indexOf(';base64'));
+                                const imgFormat = format.toUpperCase();
+
+                                // For JPEG, we explicitly set compression to 'NONE' to avoid quality loss.
+                                // For other formats like PNG, this setting is ignored.
+                                doc.addImage(imgData, imgFormat, margin, y, imgWidth, imgHeight, undefined, 'NONE');
+                                y += imgHeight + 5;
+                                addText(photo.description || 'No description.');
+                                y += 5;
+                            }
+                        }
+
+                        doc.save("Formal_Complaint.pdf");
+                        showMessage(translate('download_success'), 'success');
                     };
 
                     const resetChat = () => {
+                        if ('speechSynthesis' in window) {
+                            speechSynthesis.cancel();
+                        }
                         chatHistory.value = [];
                         userMessage.value = '';
                         conversationState.value = 0;
                         complaintData.value = {};
                         isInfoCollected.value = false;
                         generatedReport.value = '';
-                        addMessage(questions.value[0], 'ai');
+                        editingStep.value = null;
+                        incidentPhotos.value = [];
+                        addMessage(questions.value[0].text, 'ai');
                     };
                     
-                    addMessage(questions.value[0], 'ai');
+                    onMounted(() => {
+                        resetChat();
+                    });
 
                     return {
-                        userMessage,
-                        chatHistory,
-                        isLoading,
-                        isGenerating,
-                        message,
-                        chatWindow,
-                        generatedReport,
-                        handleInput,
-                        downloadPDF,
-                        chatLanguage,
-                        languages,
-                        translate,
-                        isInfoCollected,
-                        generateReport,
-                        resetChat
+                        userMessage, chatHistory, handleInput, isLoading, isGenerating, isInfoCollected,
+                        chatWindow, generatedReport, generateReport, downloadPDF, resetChat, message,
+                        languages, chatLanguage, translate, progressPercentage, editingStep, startEdit,
+                        isPhotoUploadStep, incidentPhotos, handleFileChange, capturePhoto, removePhoto,
+                        fileInput, inputBox, initialMessage, advanceConversation, speak
                     };
                 }
             }).mount('#app');
         </script>
+    </div>
 </body>
 </html>
